@@ -50,6 +50,18 @@ export type IUser = {
   bio: string;
 };
 
+export type IPost = {
+  id: string;
+  userId: string;
+  caption: string;
+  body: string;
+  imageUrls: { url: string; type: string }[];
+  location?: string;
+  tags?: string;
+  createdAt: string;
+  likesCount: number;
+};
+
 export type INewUser = {
   name: string;
   email: string;

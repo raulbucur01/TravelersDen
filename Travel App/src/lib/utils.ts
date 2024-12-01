@@ -26,8 +26,7 @@ export function formatDateString(dateString: string) {
 }
 
 export const multiFormatDateString = (timestamp: string = ""): string => {
-  const timestampNum = Math.round(new Date(timestamp).getTime() / 1000);
-  const date: Date = new Date(timestampNum * 1000);
+  const date: Date = new Date(timestamp);
   const now: Date = new Date();
 
   const diff: number = now.getTime() - date.getTime();
@@ -38,7 +37,7 @@ export const multiFormatDateString = (timestamp: string = ""): string => {
 
   switch (true) {
     case Math.floor(diffInDays) >= 30:
-      return formatDateString(timestamp);
+      return formatDateString(timestamp); // Fall back to formatted date
     case Math.floor(diffInDays) === 1:
       return `${Math.floor(diffInDays)} day ago`;
     case Math.floor(diffInDays) > 1 && diffInDays < 30:

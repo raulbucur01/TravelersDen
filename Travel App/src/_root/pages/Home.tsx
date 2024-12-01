@@ -1,26 +1,36 @@
-import { ModeToggle } from "@/components/ModeToggle";
-import { Button } from "@/components/ui/button";
-import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
-import { useUserContext } from "@/context/AuthContext";
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import Loader from "@/components/shared/Loader";
+import PostCard from "@/components/shared/PostCard";
+import { useGetRecentPosts } from "@/lib/react-query/queriesAndMutations";
+import { IPost } from "@/types";
+import { Models } from "appwrite";
 
 const Home = () => {
-  const navigate = useNavigate();
-  const { mutate: signOut, isSuccess } = useSignOutAccount();
-  const { user } = useUserContext();
+  const {
+    data: posts,
+    isPending: isPostLoading,
+    isError: isErrorPosts,
+  } = useGetRecentPosts();
 
-  const name = user.name;
-
-  useEffect(() => {
-    if (isSuccess) navigate(0);
-  }, [isSuccess]);
+  if (isErrorPosts || !posts) {
+    return <div>Error loading posts.</div>;
+  }
 
   return (
-    <div>
-      <div>Hello, {name}!</div>
-      <Button onClick={() => signOut()}>Sign Out</Button>
-      <ModeToggle />
+    <div className="flex flex-1x">
+      <div className="home-container">
+        <div className="home-posts">
+          <h2 className="h3-bold md:h2-bold text-left w-full">Home Feed</h2>
+          {isPostLoading && !posts ? (
+            <Loader />
+          ) : (
+            <ul className="flex flex-col flex-1 gap-9 w-full">
+              {posts.map((post: IPost) => (
+                <PostCard post={post} key={post.id} />
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

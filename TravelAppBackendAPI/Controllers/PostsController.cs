@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Runtime.Intrinsics.Arm;
 using TravelAppBackendAPI.DTOs;
 using TravelAppBackendAPI.Models;
 
@@ -51,6 +53,172 @@ namespace TravelAppBackendAPI.Controllers
                 await _context.SaveChangesAsync();
 
                 return StatusCode(200, "Post Created");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("recentPosts")]
+        public async Task<IActionResult> GetRecentPosts()
+        {
+            try
+            {
+                // Fetch the most recent 20 posts, ordered by CreatedAt in descending order, without including User or Media
+                var recentPosts = await _context.Posts
+                    .OrderByDescending(p => p.CreatedAt) // Order by CreatedAt in descending order
+                    .Take(20) // Limit to the most recent 20 posts
+                    .Select(p => new
+                    {
+                        id = p.PostID,
+                        userId = p.UserID,
+                        caption = p.Caption,
+                        body = p.Body,
+                        imageUrls = p.Media.Select(m => new { url = m.AppwriteFileURL, type = m.MediaType }).ToList(),
+                        location = p.Location,
+                        tags = p.Tags,
+                        createdAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
+                        likesCount = p.LikesCount
+                    })
+                    .ToListAsync();
+
+                // Return the list of posts as a response
+                return Ok(recentPosts);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return a generic error response
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
+        [HttpGet("{id}/liked-by")]
+        public async Task<IActionResult> GetPostLikes(string id)
+        {
+            try
+            {
+                var likes = await _context.Likes
+                    .Where(like => like.PostID == id)
+                    .Select(like => like.UserID)
+                    .ToListAsync();
+
+                return Ok(likes);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id}/saved-by")]
+        public async Task<IActionResult> GetPostSaves(string id)
+        {
+            try
+            {
+                var saves = await _context.Saves
+                    .Where(save => save.PostID == id)
+                    .Select(save => save.UserID)
+                    .ToListAsync();
+
+                return Ok(saves);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("/like")]
+        public async Task<IActionResult> LikePost(LikeRequestDTO createLikeDTO)
+        {
+            try
+            {
+                var newLike = new Likes 
+                {
+                    UserID = createLikeDTO.UserID,
+                    PostID = createLikeDTO.PostID,
+                };
+
+                _context.Likes.Add(newLike);
+                await _context.SaveChangesAsync();
+
+                return Ok(newLike);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("/unlike/{userId}/{postId}")]
+        public async Task<IActionResult> UnlikePost(string userId, string postId)
+        {
+            try
+            {
+                // Find the like record to remove
+                var likeRecord = await _context.Likes
+                    .FirstOrDefaultAsync(l => l.PostID == postId && l.UserID == userId);
+
+                if (likeRecord == null)
+                {
+                    return NotFound("Like not found.");
+                }
+
+                // Remove the like from the database
+                _context.Likes.Remove(likeRecord);
+                await _context.SaveChangesAsync();
+
+                return Ok("Post unliked successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+        [HttpPost("/save")]
+        public async Task<IActionResult> SavePost(SaveRequestDTO createSaveDTO)
+        {
+            try
+            {
+                var newSave = new Saves
+                {
+                    UserID = createSaveDTO.UserID,
+                    PostID = createSaveDTO.PostID,
+                };
+
+                _context.Saves.Add(newSave);
+                await _context.SaveChangesAsync();
+
+                return Ok(newSave);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("/unsave/{userId}/{postId}")]
+        public async Task<IActionResult> UnsavePost(string userId, string postId)
+        {
+            try
+            {
+                // Find the save record to remove
+                var saveRecord = await _context.Saves
+                    .FirstOrDefaultAsync(s => s.PostID == postId && s.UserID == userId);
+
+                if (saveRecord == null)
+                {
+                    return NotFound("Save record not found.");
+                }
+
+                // Remove the save from the database
+                _context.Saves.Remove(saveRecord);
+                await _context.SaveChangesAsync();
+
+                return Ok("Post unsaved successfully.");
             }
             catch (Exception ex)
             {

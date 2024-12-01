@@ -19,7 +19,7 @@ import { PostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import {
   useCreatePost,
-  useUpdatePost,
+  // useUpdatePost,
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -32,8 +32,9 @@ type PostFormProps = {
 const PostForm = ({ post, action }: PostFormProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
     useCreatePost();
-  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
-    useUpdatePost();
+  // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+  //   useUpdatePost();
+  const isLoadingUpdate = false;
 
   const { user } = useUserContext();
   const { toast } = useToast();

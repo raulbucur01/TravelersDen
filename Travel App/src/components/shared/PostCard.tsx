@@ -1,80 +1,102 @@
-// import { Models } from "appwrite";
-// import { Link } from "react-router-dom";
-// import { multiFormatDateString } from "@/lib/utils";
-// import { useUserContext } from "@/context/AuthContext";
-// import PostStats from "./PostStats";
+import { Models } from "appwrite";
+import { Link } from "react-router-dom";
+import { multiFormatDateString } from "@/lib/utils";
+import { useUserContext } from "@/context/AuthContext";
+import PostStats from "./PostStats";
+import { IPost } from "@/types";
+import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
+import Loader from "./Loader";
 
-// type PostCardProps = {
-//   post: Models.Document;
-// };
+type PostCardProps = {
+  post: IPost;
+};
 
-// const PostCard = ({ post }: PostCardProps) => {
-//   const { user } = useUserContext();
+const PostCard = ({ post }: PostCardProps) => {
+  const { user: currentUser } = useUserContext();
+  const { data: postCreator, isPending: isPostCreatorLoading } = useGetUserById(
+    post.userId
+  );
 
-//   if (!post.creator) {
-//     return;
-//   }
+  console.log("Inside PostCard");
+  console.log("Post:", post);
+  console.log("PostCreator:", postCreator);
 
-//   return (
-//     <div className="post-card">
-//       <div className="flex-between">
-//         <div className="flex items-center gap-3">
-//           <Link to={`/profile/${post.creator.$id}`}>
-//             <img
-//               src={
-//                 post?.creator?.imageUrl ||
-//                 "/assets/icons/profile-placeholder.svg"
-//               }
-//               alt="creator"
-//               className="lg:h-12 w-12 rounded-full"
-//             />
-//           </Link>
-//           <div className="flex flex-col">
-//             <p className="base-medium lg:body-bold text-light-1">
-//               {post.creator.name}
-//             </p>
-//             <div className="flex-center gap-2 text-light-3">
-//               <p className="subtle-semibold lg:small-regular ">
-//                 {multiFormatDateString(post.$createdAt)}
-//               </p>
-//               •
-//               <p className="subtle-semibold lg:small-regular">
-//                 {post.location}
-//               </p>
-//             </div>
-//           </div>
-//         </div>
+  // Convert tags into an array
+  const separatedPostTags = post.tags?.replace(/ /g, "").split(",") || [];
 
-//         <Link
-//           to={`/update-post/${post.$id}`}
-//           className={`${user.id !== post.creator.$id && "hidden"}`}
-//         >
-//           <img src="/assets/icons/edit.svg" alt="edit" width={20} height={20} />
-//         </Link>
-//       </div>
+  if (!post.userId) {
+    return;
+  }
 
-//       <Link to={`/posts/${post.$id}`}>
-//         <div className="small-medium lg:base-medium py-5">
-//           <p>{post.caption}</p>
-//           <ul className="flex gap-1 mt-2">
-//             {post.tags.map((tag: string) => (
-//               <li key={tag} className="text-light-3">
-//                 #{tag}
-//               </li>
-//             ))}
-//           </ul>
-//         </div>
+  // Show a loader or placeholder while fetching the user
+  if (isPostCreatorLoading) {
+    return <Loader />;
+  }
 
-//         <img
-//           src={post.imageUrl || "/assets/icons/profile-placeholder.svg"}
-//           className="post-card_img"
-//           alt="post image"
-//         />
-//       </Link>
+  // If postCreator is still undefined after loading, handle gracefully
+  if (!postCreator) {
+    return <p>Failed to load post creator details.</p>;
+  }
 
-//       <PostStats post={post} userId={user.id} />
-//     </div>
-//   );
-// };
+  return (
+    <div className="post-card">
+      <div className="flex-between">
+        <div className="flex items-center gap-3">
+          <Link to={`/profile/${post.userId}`}>
+            <img
+              src={
+                postCreator.imageUrl || "/assets/icons/profile-placeholder.svg"
+              }
+              alt="creator"
+              className="lg:h-12 w-12 rounded-full"
+            />
+          </Link>
+          <div className="flex flex-col">
+            <p className="base-medium lg:body-bold text-light-1">
+              {postCreator.name}
+            </p>
+            <div className="flex-center gap-2 text-light-3">
+              <p className="subtle-semibold lg:small-regular ">
+                {multiFormatDateString(post.createdAt)}
+              </p>
+              •
+              <p className="subtle-semibold lg:small-regular">
+                {post.location}
+              </p>
+            </div>
+          </div>
+        </div>
 
-// export default PostCard;
+        <Link
+          to={`/update-post/${post.id}`}
+          className={`${currentUser.id !== postCreator.id && "hidden"}`}
+        >
+          <img src="/assets/icons/edit.svg" alt="edit" width={20} height={20} />
+        </Link>
+      </div>
+
+      <Link to={`/posts/${post.id}`}>
+        <div className="small-medium lg:base-medium py-5">
+          <p>{post.caption}</p>
+          <ul className="flex gap-1 mt-2">
+            {separatedPostTags.map((tag: string) => (
+              <li key={tag} className="text-light-3">
+                #{tag}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <img
+          src={post.imageUrls[0].url || "/assets/icons/profile-placeholder.svg"}
+          className="post-card_img"
+          alt="post image"
+        />
+      </Link>
+
+      <PostStats post={post} userId={currentUser.id} />
+    </div>
+  );
+};
+
+export default PostCard;
