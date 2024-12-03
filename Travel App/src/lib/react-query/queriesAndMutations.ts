@@ -82,19 +82,9 @@ export const useLikePost = () => {
   return useMutation({
     mutationFn: ({ userId, postId }: { userId: string; postId: string }) =>
       likePost(userId, postId),
-    // explained 4:07 data.id pt ca se invalideaza pt postarea respectiva doar
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.id],
-      });
+    onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_POSTS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_CURRENT_USER],
       });
     },
   });
@@ -110,12 +100,6 @@ export const useUnlikePost = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
       });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_POSTS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_CURRENT_USER],
-      });
     },
   });
 };
@@ -129,12 +113,6 @@ export const useSavePost = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_POSTS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_CURRENT_USER],
       });
     },
   });
@@ -150,12 +128,6 @@ export const useUnsavePost = () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
       });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_POSTS],
-      });
-      queryClient.invalidateQueries({
-        queryKey: [QUERY_KEYS.GET_CURRENT_USER],
-      });
     },
   });
 };
@@ -164,14 +136,6 @@ export const useGetRecentPosts = () => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
     queryFn: getRecentPosts,
-  });
-};
-
-export const useGetUserById = (id: string) => {
-  return useQuery({
-    queryKey: [QUERY_KEYS.GET_USER_BY_ID, id],
-    queryFn: () => getUserById(id),
-    // enabled: !!id,
   });
 };
 
@@ -186,5 +150,13 @@ export const useGetPostSavedBy = (postId: string) => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_POST_SAVED_BY, postId],
     queryFn: () => getPostSavedBy(postId),
+  });
+};
+
+export const useGetUserById = (id: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_USER_BY_ID, id],
+    queryFn: () => getUserById(id),
+    // enabled: !!id,
   });
 };

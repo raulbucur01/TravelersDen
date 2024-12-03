@@ -15,23 +15,23 @@ public class AppDbContext : DbContext
     {
         // Composite keys for Likes and Saves
         modelBuilder.Entity<Likes>()
-            .HasKey(l => new { l.UserID, l.PostID });
+            .HasKey(l => new { l.UserId, l.PostId });
 
         modelBuilder.Entity<Saves>()
-            .HasKey(s => new { s.UserID, s.PostID });
+            .HasKey(s => new { s.UserId, s.PostId });
 
         // Foreign keys for Likes
         modelBuilder.Entity<Likes>()
             .HasOne(l => l.User)
             .WithMany()
-            .HasForeignKey(l => l.UserID)
+            .HasForeignKey(l => l.UserId)
             .HasConstraintName("FK_Likes_UserID")
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Likes>()
             .HasOne(l => l.Post)
             .WithMany()
-            .HasForeignKey(l => l.PostID)
+            .HasForeignKey(l => l.PostId)
             .HasConstraintName("FK_Likes_PostID")
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -39,14 +39,14 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Saves>()
             .HasOne(s => s.User)
             .WithMany()
-            .HasForeignKey(s => s.UserID)
+            .HasForeignKey(s => s.UserId)
             .HasConstraintName("FK_Saves_UserID")
             .OnDelete(DeleteBehavior.Cascade);
 
         modelBuilder.Entity<Saves>()
             .HasOne(s => s.Post)
             .WithMany()
-            .HasForeignKey(s => s.PostID)
+            .HasForeignKey(s => s.PostId)
             .HasConstraintName("FK_Saves_PostID")
             .OnDelete(DeleteBehavior.Cascade);
 
@@ -54,17 +54,17 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Post>()
             .HasOne(p => p.User)
             .WithMany()
-            .HasForeignKey(p => p.UserID)
+            .HasForeignKey(p => p.UserId)
             .HasConstraintName("FK_Posts_UserID")
             .OnDelete(DeleteBehavior.Cascade);
 
         // Foreign key for PostMedia
         modelBuilder.Entity<PostMedia>()
-            .HasKey(pm => pm.MediaID); // Explicitly set MediaID as the primary key
+            .HasKey(pm => pm.MediaId); // Explicitly set MediaID as the primary key
         modelBuilder.Entity<PostMedia>()
             .HasOne(pm => pm.Post)
             .WithMany(p => p.Media)
-            .HasForeignKey(pm => pm.PostID)
+            .HasForeignKey(pm => pm.PostId)
             .HasConstraintName("FK_PostMedia_PostID")
             .OnDelete(DeleteBehavior.Cascade);
     }

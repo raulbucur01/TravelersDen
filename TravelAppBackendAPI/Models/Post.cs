@@ -2,8 +2,8 @@
 {
     public class Post
     {
-        public string PostID { get; set; } = Guid.NewGuid().ToString();
-        public string UserID { get; set; }
+        public string PostId { get; set; } = Guid.NewGuid().ToString();
+        public string UserId { get; set; }
         public string Caption { get; set; }
         public string Body { get; set; }
         public string Location { get; set; }

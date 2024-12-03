@@ -1,4 +1,3 @@
-import { Models } from "appwrite";
 import { Link } from "react-router-dom";
 import { multiFormatDateString } from "@/lib/utils";
 import { useUserContext } from "@/context/AuthContext";
@@ -17,13 +16,6 @@ const PostCard = ({ post }: PostCardProps) => {
     post.userId
   );
 
-  console.log("Inside PostCard");
-  console.log("Post:", post);
-  console.log("PostCreator:", postCreator);
-
-  // Convert tags into an array
-  const separatedPostTags = post.tags?.replace(/ /g, "").split(",") || [];
-
   if (!post.userId) {
     return;
   }
@@ -32,17 +24,14 @@ const PostCard = ({ post }: PostCardProps) => {
   if (isPostCreatorLoading) {
     return <Loader />;
   }
-
-  // If postCreator is still undefined after loading, handle gracefully
-  if (!postCreator) {
-    return <p>Failed to load post creator details.</p>;
-  }
+  // Convert tags into an array
+  const separatedPostTags = post.tags?.replace(/ /g, "").split(",") || [];
 
   return (
     <div className="post-card">
       <div className="flex-between">
         <div className="flex items-center gap-3">
-          <Link to={`/profile/${post.userId}`}>
+          <Link to={`/profile/${postCreator.userId}`}>
             <img
               src={
                 postCreator.imageUrl || "/assets/icons/profile-placeholder.svg"
@@ -68,14 +57,14 @@ const PostCard = ({ post }: PostCardProps) => {
         </div>
 
         <Link
-          to={`/update-post/${post.id}`}
-          className={`${currentUser.id !== postCreator.id && "hidden"}`}
+          to={`/update-post/${post.postId}`}
+          className={`${currentUser.id !== postCreator.userId && "hidden"}`}
         >
           <img src="/assets/icons/edit.svg" alt="edit" width={20} height={20} />
         </Link>
       </div>
 
-      <Link to={`/posts/${post.id}`}>
+      <Link to={`/posts/${post.postId}`}>
         <div className="small-medium lg:base-medium py-5">
           <p>{post.caption}</p>
           <ul className="flex gap-1 mt-2">

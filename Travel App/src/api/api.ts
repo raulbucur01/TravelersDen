@@ -5,6 +5,7 @@ import { appwriteConfig, account, avatars, storage } from "./config";
 import { userInfo } from "os";
 
 import axios, { AxiosResponse } from "axios";
+import { log } from "console";
 
 interface Post {
   content: string;
@@ -285,9 +286,10 @@ export async function getRecentPosts() {
 
 export async function likePost(userId: string, postId: string) {
   try {
+    console.log("Entered like post, got id: ", userId, postId);
     const response = await axios.post(API_BASE_URL + "/posts/like", {
-      userID: userId,
-      postID: postId,
+      userId: userId,
+      postId: postId,
     });
     return response.data;
   } catch (error) {
@@ -297,6 +299,7 @@ export async function likePost(userId: string, postId: string) {
 
 export async function unlikePost(userId: string, postId: string) {
   try {
+    console.log("Entered unlike post, got id: ", userId, postId);
     const response = await axios.delete(
       API_BASE_URL + `/posts/unlike/${userId}/${postId}`
     );
@@ -308,9 +311,10 @@ export async function unlikePost(userId: string, postId: string) {
 
 export async function savePost(postId: string, userId: string) {
   try {
+    console.log("Entered save post, got id: ", userId, postId);
     const response = await axios.post(API_BASE_URL + "/posts/save", {
-      userID: userId,
-      postID: postId,
+      userId: userId,
+      postId: postId,
     });
     return response.data;
   } catch (error) {
@@ -320,6 +324,7 @@ export async function savePost(postId: string, userId: string) {
 
 export async function unsavePost(postId: string, userId: string) {
   try {
+    console.log("Entered unsave post, got id: ", userId, postId);
     const response = await axios.delete(
       API_BASE_URL + `/posts/unsave/${userId}/${postId}`
     );
@@ -330,11 +335,11 @@ export async function unsavePost(postId: string, userId: string) {
 }
 
 export async function getPostLikedBy(postId: string) {
-  const response = await axios.get(`/api/posts/${postId}/liked-by`);
-  return response.data; // Array of user IDs who liked the post
+  const response = await axios.get(API_BASE_URL + `/posts/${postId}/liked-by`);
+  return response.data;
 }
 
 export async function getPostSavedBy(postId: string) {
-  const response = await axios.get(`/api/posts/${postId}/saved-by`);
-  return response.data; // Array of user IDs who liked the post
+  const response = await axios.get(API_BASE_URL + `/posts/${postId}/saved-by`);
+  return response.data;
 }

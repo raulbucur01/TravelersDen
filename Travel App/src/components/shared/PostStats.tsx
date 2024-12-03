@@ -18,94 +18,79 @@ type PostStatsProps = {
 };
 
 const PostStats = ({ post, userId }: PostStatsProps) => {
-  const { mutate: likePost } = useLikePost();
-  const { mutate: unlikePost } = useUnlikePost();
+  const { mutate: likePost, isPending: isLikingPost } = useLikePost();
+  const { mutate: unlikePost, isPending: isUnlikingPost } = useUnlikePost();
   const { mutate: savePost, isPending: isSavingPost } = useSavePost();
-  const { mutate: deleteSavedPost, isPending: isDeletingSaved } =
-    useUnsavePost();
-  const { data: currentUser, isLoading: isCurrentUserLoading } =
-    useGetCurrentUser();
-
-  // Ensure the component doesn't render anything if currentUser is still loading
-  if (isCurrentUserLoading) {
-    return <Loader />; // Or any placeholder UI to show while loading
-  }
-
-  if (!currentUser) {
-    return <p>Error: Current user not found.</p>; // Error state when currentUser is not available
-  }
-
-  console.log("Inside PostStats");
-  console.log(userId);
-  console.log(currentUser);
-
-  // Fetch likes and saves without conditional hook calls
-  const { data: likedBy, isPending: isLikesLoading } = useGetPostLikedBy(
-    post.id
+  const { mutate: unsavePost, isPending: isUnsavingPost } = useUnsavePost();
+  const { data: likedBy, isPending: isGettingLikedBy } = useGetPostLikedBy(
+    post.postId
   );
-  const { data: savedBy, isPending: isSavesLoading } = useGetPostSavedBy(
-    post.id
+  const { data: savedBy, isPending: isGettingSavedBy } = useGetPostSavedBy(
+    post.postId
   );
 
-  const [likes, setLikes] = useState(likedBy || []); // Safe state initialization
+  const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [likeCount, setLikeCount] = useState(post.likesCount);
 
-  // Update `isSaved` when `savedBy` changes or when the `currentUser` changes
   useEffect(() => {
-    if (savedBy && userId) {
-      setIsSaved(savedBy.includes(userId)); // Set `isSaved` to true if the user is in the savedBy list
+    if (likedBy) {
+      setIsLiked(likedBy.includes(userId));
+    }
+  }, [likedBy, userId]);
+
+  useEffect(() => {
+    if (savedBy) {
+      setIsSaved(savedBy.includes(userId));
     }
   }, [savedBy, userId]);
 
-  const handleLikePost = (e: React.MouseEvent) => {
-    e.stopPropagation(); // so it just works for the like button and no underlying post (if the whole post is clickable)
-
-    let newLikedBy = [...likes];
-    const hasLiked = newLikedBy.includes(userId);
-
-    if (hasLiked) {
-      newLikedBy = newLikedBy.filter((id) => id !== userId); // remove like if it is already liked
-      unlikePost({ userId: currentUser.id, postId: post.id });
+  const handleLike = () => {
+    if (isLiked) {
+      setLikeCount((prev) => prev - 1);
+      unlikePost({ userId: userId, postId: post.postId });
     } else {
-      newLikedBy.push(userId);
+      setLikeCount((prev) => prev + 1);
+      likePost({ userId: userId, postId: post.postId });
     }
-
-    setLikes(newLikedBy);
-    likePost({ userId: currentUser.id, postId: post.id });
+    setIsLiked((prev) => !prev);
   };
 
-  const handleSavePost = (e: React.MouseEvent) => {
-    e.stopPropagation(); // so it just works for the like button and no underlying post (if the whole post is clickable)
-
-    if (savedBy) {
-      setIsSaved(false);
-      deleteSavedPost({ userId: currentUser.id, postId: post.id });
+  const handleSave = () => {
+    if (isSaved) {
+      unsavePost({ userId: userId, postId: post.postId });
     } else {
-      setIsSaved(true);
-      savePost({ userId: currentUser.id, postId: post.id });
+      savePost({ userId: userId, postId: post.postId });
     }
+    setIsSaved((prev) => !prev);
   };
+
+  if (isGettingLikedBy || isGettingSavedBy) return <Loader />;
+
+  console.log("Entered post with:", post.caption);
+  console.log("likedBy", likedBy);
+  console.log("savedBy", savedBy);
 
   return (
     <div className="flex justify-between items-center z-20">
       <div className="flex gap-2 mr-5">
-        <img
-          src={
-            checkIsLiked(likes, currentUser!.id)
-              ? "/assets/icons/liked.svg"
-              : "/assets/icons/like.svg"
-          }
-          alt="like"
-          width={20}
-          height={20}
-          onClick={handleLikePost}
-          className="cursor-pointer"
-        />
-        <p className="small-medium lg:base-medium">{likes.length}</p>
+        {isLikingPost || isUnlikingPost ? (
+          <Loader />
+        ) : (
+          <img
+            src={isLiked ? "/assets/icons/liked.svg" : "/assets/icons/like.svg"}
+            alt="like"
+            width={20}
+            height={20}
+            onClick={handleLike}
+            className="cursor-pointer"
+          />
+        )}
+        <p className="small-medium lg:base-medium">{likeCount}</p>
       </div>
 
       <div className="flex gap-2">
-        {isSavingPost || isDeletingSaved ? (
+        {isSavingPost || isUnsavingPost ? (
           <Loader />
         ) : (
           <img
@@ -113,7 +98,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
             alt="like"
             width={20}
             height={20}
-            onClick={handleSavePost}
+            onClick={handleSave}
             className="cursor-pointer"
           />
         )}

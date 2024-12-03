@@ -2,7 +2,7 @@
 {
     public class SaveRequestDTO
     {
-        public string UserID { get; set; }
-        public string PostID { get; set; }
+        public string UserId{ get; set; }
+        public string PostId { get; set; }
     }
 }

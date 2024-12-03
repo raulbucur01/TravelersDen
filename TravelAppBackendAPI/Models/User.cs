@@ -5,7 +5,7 @@ namespace TravelAppBackendAPI.Models
     public class User
     {
         [Key]
-        public string UserID { get; set; } // Use the Appwrite user ID
+        public string UserId { get; set; } // Use the Appwrite user ID
         public string Name { get; set; }
         public string Username { get; set; }
         public string Email { get; set; }

@@ -25,7 +25,7 @@ namespace TravelAppBackendAPI.Controllers
             {
                 var user = new User
                 {
-                    UserID = userDto.UserID,
+                    UserId = userDto.UserId,
                     Name = userDto.Name,
                     Username = userDto.Username,
                     Email = userDto.Email,
@@ -54,10 +54,10 @@ namespace TravelAppBackendAPI.Controllers
             {
                 // Search for the user with the given email
                 var user = await _context.Users
-                    .Where(u => u.UserID == id)
+                    .Where(u => u.UserId == id)
                     .Select(u => new
                     {
-                        UserID = u.UserID,
+                        UserId = u.UserId,
                         Name = u.Name,
                         Username = u.Username,
                         Email = u.Email,

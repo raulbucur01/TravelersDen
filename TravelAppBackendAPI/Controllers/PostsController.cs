@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Core;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Runtime.Intrinsics.Arm;
 using TravelAppBackendAPI.DTOs;
@@ -24,7 +25,7 @@ namespace TravelAppBackendAPI.Controllers
             {
                 var post = new Post
                 {
-                    UserID = postDto.UserID,
+                    UserId = postDto.UserId,
                     Caption = postDto.Caption,
                     Body = postDto.Body,
                     Location = postDto.Location,
@@ -42,8 +43,8 @@ namespace TravelAppBackendAPI.Controllers
                 {
                     var postMedia = new PostMedia
                     {
-                        PostID = post.PostID,
-                        AppwriteFileURL = fileData.Url,
+                        PostId = post.PostId,
+                        AppwriteFileUrl = fileData.Url,
                         MediaType = fileData.Type,  // Get the media type directly from the object
                     };
 
@@ -71,15 +72,15 @@ namespace TravelAppBackendAPI.Controllers
                     .Take(20) // Limit to the most recent 20 posts
                     .Select(p => new
                     {
-                        id = p.PostID,
-                        userId = p.UserID,
-                        caption = p.Caption,
-                        body = p.Body,
-                        imageUrls = p.Media.Select(m => new { url = m.AppwriteFileURL, type = m.MediaType }).ToList(),
-                        location = p.Location,
-                        tags = p.Tags,
-                        createdAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                        likesCount = p.LikesCount
+                        PostId = p.PostId,
+                        UserId = p.UserId,
+                        Caption = p.Caption,
+                        Body = p.Body,
+                        ImageUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
+                        Location = p.Location,
+                        Tags = p.Tags,
+                        CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
+                        LikesCount = p.LikesCount
                     })
                     .ToListAsync();
 
@@ -99,8 +100,8 @@ namespace TravelAppBackendAPI.Controllers
             try
             {
                 var likes = await _context.Likes
-                    .Where(like => like.PostID == id)
-                    .Select(like => like.UserID)
+                    .Where(like => like.PostId == id)
+                    .Select(like => like.UserId)
                     .ToListAsync();
 
                 return Ok(likes);
@@ -117,8 +118,8 @@ namespace TravelAppBackendAPI.Controllers
             try
             {
                 var saves = await _context.Saves
-                    .Where(save => save.PostID == id)
-                    .Select(save => save.UserID)
+                    .Where(save => save.PostId == id)
+                    .Select(save => save.UserId)
                     .ToListAsync();
 
                 return Ok(saves);
@@ -129,18 +130,26 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
-        [HttpPost("/like")]
+        [HttpPost("like")]
         public async Task<IActionResult> LikePost(LikeRequestDTO createLikeDTO)
         {
             try
             {
                 var newLike = new Likes 
                 {
-                    UserID = createLikeDTO.UserID,
-                    PostID = createLikeDTO.PostID,
+                    UserId = createLikeDTO.UserId,
+                    PostId = createLikeDTO.PostId,
                 };
 
                 _context.Likes.Add(newLike);
+
+                var post = await _context.Posts.FindAsync(createLikeDTO.PostId);
+                if (post == null)
+                {
+                    return NotFound("Post not found.");
+                }
+
+                post.LikesCount++; // Increment the LikesCount
                 await _context.SaveChangesAsync();
 
                 return Ok(newLike);
@@ -151,14 +160,14 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
-        [HttpDelete("/unlike/{userId}/{postId}")]
+        [HttpDelete("unlike/{userId}/{postId}")]
         public async Task<IActionResult> UnlikePost(string userId, string postId)
         {
             try
             {
                 // Find the like record to remove
                 var likeRecord = await _context.Likes
-                    .FirstOrDefaultAsync(l => l.PostID == postId && l.UserID == userId);
+                    .FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
 
                 if (likeRecord == null)
                 {
@@ -167,6 +176,14 @@ namespace TravelAppBackendAPI.Controllers
 
                 // Remove the like from the database
                 _context.Likes.Remove(likeRecord);
+
+                var post = await _context.Posts.FindAsync(postId);
+                if (post == null)
+                {
+                    return NotFound("Post not found.");
+                }
+
+                post.LikesCount--; 
                 await _context.SaveChangesAsync();
 
                 return Ok("Post unliked successfully.");
@@ -178,15 +195,15 @@ namespace TravelAppBackendAPI.Controllers
         }
 
 
-        [HttpPost("/save")]
+        [HttpPost("save")]
         public async Task<IActionResult> SavePost(SaveRequestDTO createSaveDTO)
         {
             try
             {
                 var newSave = new Saves
                 {
-                    UserID = createSaveDTO.UserID,
-                    PostID = createSaveDTO.PostID,
+                    UserId = createSaveDTO.UserId,
+                    PostId = createSaveDTO.PostId,
                 };
 
                 _context.Saves.Add(newSave);
@@ -200,14 +217,14 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
-        [HttpDelete("/unsave/{userId}/{postId}")]
+        [HttpDelete("unsave/{userId}/{postId}")]
         public async Task<IActionResult> UnsavePost(string userId, string postId)
         {
             try
             {
                 // Find the save record to remove
                 var saveRecord = await _context.Saves
-                    .FirstOrDefaultAsync(s => s.PostID == postId && s.UserID == userId);
+                    .FirstOrDefaultAsync(s => s.PostId == postId && s.UserId == userId);
 
                 if (saveRecord == null)
                 {

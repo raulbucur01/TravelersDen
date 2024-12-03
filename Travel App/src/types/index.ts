@@ -51,7 +51,7 @@ export type IUser = {
 };
 
 export type IPost = {
-  id: string;
+  postId: string;
   userId: string;
   caption: string;
   body: string;
