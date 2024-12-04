@@ -13,5 +13,6 @@
 
         public User User { get; set; } // Navigation property
         public ICollection<PostMedia> Media { get; set; } = new List<PostMedia>(); // Navigation property
+        public ICollection<Comment> Comments { get; set; } = new List<Comment>(); // Navigation to comments
     }
 }

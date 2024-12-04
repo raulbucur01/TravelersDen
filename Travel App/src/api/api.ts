@@ -47,7 +47,7 @@ export async function saveUserToDB(user: {
 }) {
   try {
     const response = await axios.post(
-      API_BASE_URL + "/users/createUser",
+      API_BASE_URL + "/users",
       {
         userID: user.id,
         email: user.email,
@@ -97,7 +97,7 @@ export async function getCurrentUser() {
 
 export async function getUserById(id: string) {
   try {
-    const response = await axios.get(API_BASE_URL + `/users/getUserById/${id}`);
+    const response = await axios.get(API_BASE_URL + `/users/${id}`);
 
     return response.data;
   } catch (error) {
@@ -189,7 +189,7 @@ export async function createPost(post: INewPost) {
 
     console.log(sentData);
     const response = await axios.post(
-      API_BASE_URL + "/posts/createPost",
+      API_BASE_URL + "/posts",
       {
         userID: post.userId,
         caption: post.caption,
@@ -262,7 +262,7 @@ export async function updatePost(post: IUpdatePost) {
 
 export async function getRecentPosts() {
   try {
-    const response = await axios.get(API_BASE_URL + "/posts/recentPosts");
+    const response = await axios.get(API_BASE_URL + "/posts/recent-posts");
 
     if (!response) throw Error;
 
@@ -274,7 +274,6 @@ export async function getRecentPosts() {
 
 export async function likePost(userId: string, postId: string) {
   try {
-    console.log("Entered like post, got id: ", userId, postId);
     const response = await axios.post(API_BASE_URL + "/posts/like", {
       userId: userId,
       postId: postId,
@@ -287,7 +286,6 @@ export async function likePost(userId: string, postId: string) {
 
 export async function unlikePost(userId: string, postId: string) {
   try {
-    console.log("Entered unlike post, got id: ", userId, postId);
     const response = await axios.delete(
       API_BASE_URL + `/posts/unlike/${userId}/${postId}`
     );
@@ -299,7 +297,6 @@ export async function unlikePost(userId: string, postId: string) {
 
 export async function savePost(postId: string, userId: string) {
   try {
-    console.log("Entered save post, got id: ", userId, postId);
     const response = await axios.post(API_BASE_URL + "/posts/save", {
       userId: userId,
       postId: postId,
@@ -312,7 +309,6 @@ export async function savePost(postId: string, userId: string) {
 
 export async function unsavePost(postId: string, userId: string) {
   try {
-    console.log("Entered unsave post, got id: ", userId, postId);
     const response = await axios.delete(
       API_BASE_URL + `/posts/unsave/${userId}/${postId}`
     );

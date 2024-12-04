@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TravelAppBackendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241204165015_AddedComments")]
+    partial class AddedComments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,21 +58,6 @@ namespace TravelAppBackendAPI.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Comments");
-                });
-
-            modelBuilder.Entity("TravelAppBackendAPI.Models.CommentLike", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("CommentId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserId", "CommentId");
-
-                    b.HasIndex("CommentId");
-
-                    b.ToTable("CommentLikes");
                 });
 
             modelBuilder.Entity("TravelAppBackendAPI.Models.Likes", b =>
@@ -230,27 +218,6 @@ namespace TravelAppBackendAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TravelAppBackendAPI.Models.CommentLike", b =>
-                {
-                    b.HasOne("TravelAppBackendAPI.Models.Comment", "Comment")
-                        .WithMany()
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("FK_CommentLikes_CommentID");
-
-                    b.HasOne("TravelAppBackendAPI.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired()
-                        .HasConstraintName("FK_CommentLikes_UserID");
-
-                    b.Navigation("Comment");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TravelAppBackendAPI.Models.Likes", b =>
                 {
                     b.HasOne("TravelAppBackendAPI.Models.Post", "Post")
@@ -263,7 +230,7 @@ namespace TravelAppBackendAPI.Migrations
                     b.HasOne("TravelAppBackendAPI.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Likes_UserID");
 
@@ -308,7 +275,7 @@ namespace TravelAppBackendAPI.Migrations
                     b.HasOne("TravelAppBackendAPI.Models.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("FK_Saves_UserID");
 

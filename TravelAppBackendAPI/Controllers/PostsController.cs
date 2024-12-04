@@ -17,8 +17,9 @@ namespace TravelAppBackendAPI.Controllers
         {
             _context = context;
         }
+
         // POST: api/User
-        [HttpPost("createPost")]
+        [HttpPost]
         public async Task<IActionResult> CreatePost(CreatePostDTO postDto)
         {
             try
@@ -61,7 +62,7 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
-        [HttpGet("recentPosts")]
+        [HttpGet("recent-posts")]
         public async Task<IActionResult> GetRecentPosts()
         {
             try
@@ -242,6 +243,5 @@ namespace TravelAppBackendAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
     }
 }

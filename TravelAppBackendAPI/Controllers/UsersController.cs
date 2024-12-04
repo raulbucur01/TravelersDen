@@ -18,7 +18,7 @@ namespace TravelAppBackendAPI.Controllers
         }
 
         // POST: api/User
-        [HttpPost("createUser")]
+        [HttpPost]
         public async Task<IActionResult> CreateUser(CreateUserDTO userDto)
         {
             try
@@ -47,7 +47,7 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
-        [HttpGet("getUserById/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
             try
