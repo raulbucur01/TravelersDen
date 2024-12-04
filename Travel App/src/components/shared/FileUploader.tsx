@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import { Button } from "../ui/button";
 
@@ -12,6 +12,8 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
   const [fileUrls, setFileUrls] = useState<string[]>(
     mediaUrls.length ? mediaUrls : []
   );
+  const [mimeTypes, setMimeTypes] = useState<string[]>([]);
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const onDrop = useCallback(
@@ -22,9 +24,15 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
         ...acceptedFiles.map((file) => URL.createObjectURL(file)),
       ].slice(0, 6);
 
+      const newMimeTypes = [
+        ...fileUrls,
+        ...acceptedFiles.map((file) => file.type),
+      ];
+
       setFiles(newFiles);
       setFileUrls(newFileUrls);
       fieldChange(newFiles);
+      setMimeTypes(newMimeTypes);
     },
     [files, fileUrls, fieldChange]
   );
@@ -52,11 +60,15 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
     const updatedFileUrls = fileUrls.filter(
       (_, index) => index !== currentIndex
     );
+    const updatedMimeTypes = mimeTypes.filter(
+      (_, index) => index !== currentIndex
+    );
 
     // Update state and notify parent component
     setFiles(updatedFiles);
     setFileUrls(updatedFileUrls);
     fieldChange(updatedFiles);
+    setMimeTypes(updatedMimeTypes);
 
     // Adjust currentIndex if necessary
     if (updatedFileUrls.length > 0) {
@@ -73,16 +85,16 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
       {fileUrls.length > 0 ? (
         <div className="relative w-full">
           <div className="flex flex-1 justify-center w-full p-5 lg:p-10">
-            {fileUrls[currentIndex].endsWith(".mp4") ||
-            fileUrls[currentIndex].endsWith(".mov") ||
-            fileUrls[currentIndex].endsWith(".avi") ? (
+            {mimeTypes[currentIndex].startsWith("video") ? (
               <video
+                onClick={(e) => e.stopPropagation()}
                 src={fileUrls[currentIndex]}
                 controls
                 className="file_uploader-img"
               />
             ) : (
               <img
+                onClick={(e) => e.stopPropagation()}
                 src={fileUrls[currentIndex]}
                 alt={`file-${currentIndex}`}
                 className="file_uploader-img"
@@ -90,42 +102,46 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
             )}
           </div>
 
-          <div className="absolute inset-y-0 left-2 flex items-center">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering dropzone on click
-                navigateFiles("prev");
-              }}
-              className="bg-dm-dark hover:bg-dm-secondary text-dm-light p-2 rounded-full"
-            >
-              <img
-                src="/assets/icons/left-arrow.png"
-                alt="left-arrow"
-                className="w-10 h-auto"
-              />
-            </button>
-          </div>
+          {currentIndex != 0 && (
+            <div className="absolute inset-y-0 lg:left-10 left-2 flex items-center opacity-30 hover:opacity-70">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering dropzone on click
+                  navigateFiles("prev");
+                }}
+                className="bg-dm-dark hover:bg-dm-secondary text-dm-light p-2 rounded-full"
+              >
+                <img
+                  src="/assets/icons/left-arrow.png"
+                  alt="left-arrow"
+                  className="w-10 h-auto"
+                />
+              </button>
+            </div>
+          )}
 
-          <div className="absolute inset-y-0 right-2 flex items-center">
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent triggering dropzone on click
-                navigateFiles("next");
-              }}
-              className="bg-dm-dark hover:bg-dm-secondary text-dm-light p-2 rounded-full"
-            >
-              <img
-                src="/assets/icons/right-arrow.png"
-                alt="right-arrow"
-                className="w-10 h-auto"
-              />
-            </button>
-          </div>
+          {currentIndex != fileUrls.length - 1 && (
+            <div className="absolute inset-y-0 lg:right-10 right-2 flex items-center opacity-30 hover:opacity-70">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering dropzone on click
+                  navigateFiles("next");
+                }}
+                className="bg-dm-dark hover:bg-dm-secondary text-dm-light p-2 rounded-full"
+              >
+                <img
+                  src="/assets/icons/right-arrow.png"
+                  alt="right-arrow"
+                  className="w-10 h-auto"
+                />
+              </button>
+            </div>
+          )}
 
-          {/* Delete button */}
-          <div className="absolute bottom-10 left-1/2 transform -translate-x-1/2">
+          {/* Delete and reselect button */}
+          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
             <button
               type="button"
               onClick={(e) => {

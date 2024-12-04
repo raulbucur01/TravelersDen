@@ -76,7 +76,7 @@ namespace TravelAppBackendAPI.Controllers
                         UserId = p.UserId,
                         Caption = p.Caption,
                         Body = p.Body,
-                        ImageUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
+                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
                         Location = p.Location,
                         Tags = p.Tags,
                         CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)

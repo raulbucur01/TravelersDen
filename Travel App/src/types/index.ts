@@ -55,7 +55,7 @@ export type IPost = {
   userId: string;
   caption: string;
   body: string;
-  imageUrls: { url: string; type: string }[];
+  mediaUrls: { url: string; type: string }[];
   location?: string;
   tags?: string;
   createdAt: string;

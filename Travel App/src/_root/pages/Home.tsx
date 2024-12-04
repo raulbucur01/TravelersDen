@@ -11,8 +11,8 @@ const Home = () => {
     isError: isErrorPosts,
   } = useGetRecentPosts();
 
-  if (isErrorPosts || !posts) {
-    return <div>Error loading posts.</div>;
+  if (isPostLoading || !posts) {
+    return <Loader />;
   }
 
   return (

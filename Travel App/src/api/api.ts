@@ -1,23 +1,12 @@
-import { ID, ImageGravity, Query } from "appwrite";
+import { ID, ImageGravity } from "appwrite";
 
 import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { appwriteConfig, account, avatars, storage } from "./config";
-import { userInfo } from "os";
 
-import axios, { AxiosResponse } from "axios";
-import { log } from "console";
-
-interface Post {
-  content: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
+import axios from "axios";
 
 const API_BASE_URL = "https://localhost:7007";
+const AI_API_BASE_URL = "http://127.0.0.1:8000";
 
 export async function createUserAccount(user: INewUser) {
   try {
@@ -108,7 +97,6 @@ export async function getCurrentUser() {
 
 export async function getUserById(id: string) {
   try {
-    console.log("Entered get user by id, got id: ", id);
     const response = await axios.get(API_BASE_URL + `/users/getUserById/${id}`);
 
     return response.data;
@@ -342,4 +330,46 @@ export async function getPostLikedBy(postId: string) {
 export async function getPostSavedBy(postId: string) {
   const response = await axios.get(API_BASE_URL + `/posts/${postId}/saved-by`);
   return response.data;
+}
+
+export async function getPostById(postId: string) {
+  const response = await axios.get(API_BASE_URL + `/posts/${postId}`);
+  return response.data;
+}
+
+// AI
+
+export async function getPostRecommendations(userId: number) {
+  try {
+    const response = await axios.get(
+      AI_API_BASE_URL + `/getPostRecommendations/${userId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getSimilarUsers(userId: number) {
+  try {
+    const response = await axios.get(
+      AI_API_BASE_URL + `/getSimilarUsers/${userId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function evaluateHateSpeech(text: string) {
+  try {
+    const response = await axios.post(AI_API_BASE_URL + "/evaluateHateSpeech", {
+      text: text,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
 }

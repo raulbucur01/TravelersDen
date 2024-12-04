@@ -160,3 +160,11 @@ export const useGetUserById = (id: string) => {
     // enabled: !!id,
   });
 };
+
+export const useGetPostById = (postId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_POST_BY_ID, postId],
+    queryFn: () => getPostById(postId),
+    enabled: !!postId, // enable refetching only when fetching data for another id
+  });
+};
