@@ -98,7 +98,6 @@ export async function getCurrentUser() {
 export async function getUserById(id: string) {
   try {
     const response = await axios.get(API_BASE_URL + `/users/${id}`);
-
     return response.data;
   } catch (error) {
     console.log(error);
@@ -178,16 +177,6 @@ export async function createPost(post: INewPost) {
     // Wait for all the file operations to complete
     await Promise.all(filePromises);
 
-    const sentData = {
-      userID: post.userId,
-      caption: post.caption,
-      body: post.body,
-      location: post.location,
-      tags: post.tags,
-      files: fileData,
-    };
-
-    console.log(sentData);
     const response = await axios.post(
       API_BASE_URL + "/posts",
       {
@@ -295,7 +284,7 @@ export async function unlikePost(userId: string, postId: string) {
   }
 }
 
-export async function savePost(postId: string, userId: string) {
+export async function savePost(userId: string, postId: string) {
   try {
     const response = await axios.post(API_BASE_URL + "/posts/save", {
       userId: userId,
@@ -307,8 +296,9 @@ export async function savePost(postId: string, userId: string) {
   }
 }
 
-export async function unsavePost(postId: string, userId: string) {
+export async function unsavePost(userId: string, postId: string) {
   try {
+    console.log();
     const response = await axios.delete(
       API_BASE_URL + `/posts/unsave/${userId}/${postId}`
     );
@@ -319,22 +309,50 @@ export async function unsavePost(postId: string, userId: string) {
 }
 
 export async function getPostLikedBy(postId: string) {
-  const response = await axios.get(API_BASE_URL + `/posts/${postId}/liked-by`);
-  return response.data;
+  try {
+    const response = await axios.get(
+      API_BASE_URL + `/posts/${postId}/liked-by`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export async function getPostSavedBy(postId: string) {
-  const response = await axios.get(API_BASE_URL + `/posts/${postId}/saved-by`);
-  return response.data;
+  try {
+    const response = await axios.get(
+      API_BASE_URL + `/posts/${postId}/saved-by`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 export async function getPostById(postId: string) {
-  const response = await axios.get(API_BASE_URL + `/posts/${postId}`);
-  return response.data;
+  try {
+    const response = await axios.get(API_BASE_URL + `/posts/${postId}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getPostLikeCount(postId: string) {
+  try {
+    const response = await axios.get(
+      API_BASE_URL + `/posts/${postId}/like-count`
+    );
+    console.log("like count", response?.data?.likesCount);
+    return response?.data?.likesCount ?? 0;
+  } catch (error) {
+    console.log(error);
+    return 0;
+  }
 }
 
 // AI
-
 export async function getPostRecommendations(userId: number) {
   try {
     const response = await axios.get(

@@ -6,6 +6,7 @@ import { IPost } from "@/types";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
 import Loader from "./Loader";
 import { useState } from "react";
+import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 
 type PostCardProps = {
   post: IPost;
@@ -22,8 +23,6 @@ const PostCard = ({ post }: PostCardProps) => {
   if (!post.userId) {
     return;
   }
-
-  console.log(post.mediaUrls);
 
   // Show a loader or placeholder while fetching the user
   if (isPostCreatorLoading) {
@@ -111,7 +110,7 @@ const PostCard = ({ post }: PostCardProps) => {
           </Link> */}
 
           {/* Edit Button */}
-          {currentUser.id === postCreator.userId && (
+          {currentUser.userId === postCreator.userId && (
             <Link to={`/update-post/${post.postId}`}>
               <img
                 src="/assets/icons/edit.svg"
@@ -188,7 +187,7 @@ const PostCard = ({ post }: PostCardProps) => {
         )}
       </Link>
 
-      <PostStats post={post} userId={currentUser.id} />
+      <PostStats post={post} userId={currentUser.userId} />
     </div>
   );
 };

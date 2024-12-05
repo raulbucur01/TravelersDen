@@ -62,6 +62,41 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
+        [HttpGet("{id}")]   
+        public async Task<IActionResult> GetPostById(string id)
+        {
+            try
+            {
+                var post = await _context.Posts
+                    .Where(p => p.PostId == id)
+                    .Select(p => new
+                    {
+                        PostId = p.PostId,
+                        UserId = p.UserId,
+                        Caption = p.Caption,
+                        Body = p.Body,
+                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
+                        Location = p.Location,
+                        Tags = p.Tags,
+                        CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
+                        LikesCount = p.LikesCount
+                    })
+                    .FirstOrDefaultAsync();
+
+                if (post == null)
+                {
+                    return NotFound(new { Message = "Post not found." });
+                }
+
+                return Ok(post);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return a generic error response
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
         [HttpGet("recent-posts")]
         public async Task<IActionResult> GetRecentPosts()
         {
@@ -243,5 +278,28 @@ namespace TravelAppBackendAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
+        [HttpGet("{id}/like-count")]
+        public async Task<IActionResult> GetLikeCount(string id)
+        {
+            try
+            {
+                var post = await _context.Posts
+                    .Where(p => p.PostId == id)
+                    .FirstOrDefaultAsync();
+
+                if (post == null)
+                {
+                    return NotFound(new { Message = "Post not found." });
+                }
+
+                return Ok(new { LikeCount = post.LikesCount });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
     }
 }

@@ -2,14 +2,69 @@ import Loader from "@/components/shared/Loader";
 import PostStats from "@/components/shared/PostStats";
 import { Button } from "@/components/ui/button";
 import { useUserContext } from "@/context/AuthContext";
-import { useGetPostById } from "@/lib/react-query/queriesAndMutations";
+import {
+  useGetPostById,
+  useGetUserById,
+} from "@/lib/react-query/queriesAndMutations";
 import { multiFormatDateString } from "@/lib/utils";
+import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 
 const PostDetails = () => {
   const { id } = useParams();
+  const { user: currentUser } = useUserContext();
   const { data: post, isPending } = useGetPostById(id || "");
-  const { user } = useUserContext();
+
+  const { data: postCreator, isPending: isPostCreatorLoading } = useGetUserById(
+    post?.userId
+  );
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  if (isPending || isPostCreatorLoading) {
+    return <Loader />;
+  }
+
+  // Convert tags into an array
+  const separatedPostTags = post.tags?.replace(/ /g, "").split(",") || [];
+
+  const navigateFiles = (direction: "prev" | "next") => {
+    if (direction === "prev") {
+      setCurrentIndex(
+        (prev) => (prev - 1 + post.mediaUrls.length) % post.mediaUrls.length
+      );
+    } else {
+      setCurrentIndex((prev) => (prev + 1) % post.mediaUrls.length);
+    }
+  };
+
+  const renderMedia = () => {
+    const currentMedia = post.mediaUrls[currentIndex];
+    if (currentMedia) {
+      if (currentMedia.type === "Photo") {
+        return (
+          <img
+            src={currentMedia.url}
+            alt="post image"
+            className="post-card_img"
+          />
+        );
+      } else if (currentMedia.type === "Video") {
+        return (
+          <video
+            controls
+            className="post-card_img"
+            src={currentMedia.url}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }} // Prevent the default behavior (following the link)
+          />
+        );
+      }
+    }
+    return null;
+  };
 
   const handleDeletePost = () => {};
 
@@ -19,16 +74,20 @@ const PostDetails = () => {
         <Loader />
       ) : (
         <div className="post_details-card">
-          <img src={post?.imageUrl} alt="post" className="post_details-img" />
+          <img
+            src={post.mediaUrls[currentIndex].url}
+            alt="post"
+            className="post_details-img"
+          />
           <div className="post_details-info">
             <div className="flex-between w-full">
               <Link
-                to={`/profile/${post?.creator.$id}`}
+                to={`/profile/${postCreator.userId}`}
                 className="flex items-center gap-3"
               >
                 <img
                   src={
-                    post?.creator?.imageUrl ||
+                    postCreator.imageUrl ||
                     "/assets/icons/profile-placeholder.svg"
                   }
                   alt="creator"
@@ -37,15 +96,15 @@ const PostDetails = () => {
 
                 <div className="flex flex-col">
                   <p className="base-medium lg:body-bold text-light-1">
-                    {post?.creator.name}
+                    {postCreator.name}
                   </p>
                   <div className="flex-center gap-2 text-light-3">
                     <p className="subtle-semibold lg:small-regular ">
-                      {multiFormatDateString(post?.$createdAt)}
+                      {multiFormatDateString(post.createdAt)}
                     </p>
                     •
                     <p className="subtle-semibold lg:small-regular">
-                      {post?.location}
+                      {post.location}
                     </p>
                   </div>
                 </div>
@@ -54,7 +113,9 @@ const PostDetails = () => {
               <div className="flex-center">
                 <Link
                   to={`/update-post/${post?.$id}`}
-                  className={`${user.id !== post?.creator.$id && "hidden"}`}
+                  className={`${
+                    currentUser.userId !== postCreator.userId && "hidden"
+                  }`}
                 >
                   <img
                     src="/assets/icons/edit.svg"
@@ -68,7 +129,7 @@ const PostDetails = () => {
                   onClick={handleDeletePost}
                   variant="ghost"
                   className={`ghost_details-delete_btn ${
-                    user.id !== post?.creator.$id && "hidden"
+                    currentUser.userId !== postCreator.userId && "hidden"
                   }`}
                 >
                   <img
@@ -84,9 +145,9 @@ const PostDetails = () => {
             <hr className="border w-full border-dark-4/80" />
 
             <div className="flex flex-col flex-1 w-full small-medium lg:base-regular">
-              <p>{post?.caption}</p>
+              <p>{post.caption}</p>
               <ul className="flex gap-1 mt-2">
-                {post?.tags.map((tag: string) => (
+                {separatedPostTags.map((tag: string) => (
                   <li key={tag} className="text-light-3">
                     #{tag}
                   </li>
@@ -95,7 +156,7 @@ const PostDetails = () => {
             </div>
 
             <div className="w-full">
-              <PostStats post={post} userId={user.id} />
+              <PostStats post={post} userId={currentUser.userId} />
             </div>
           </div>
         </div>

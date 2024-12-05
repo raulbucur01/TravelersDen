@@ -19,6 +19,8 @@ import {
   getPostLikedBy,
   unlikePost,
   getPostSavedBy,
+  getPostById,
+  getPostLikeCount,
 } from "../../api/api";
 import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
@@ -82,9 +84,18 @@ export const useLikePost = () => {
   return useMutation({
     mutationFn: ({ userId, postId }: { userId: string; postId: string }) =>
       likePost(userId, postId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: (data) => {
+      queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_LIKED_BY, data.postId],
+      });
+      // queryClient.refetchQueries({
+      //   queryKey: [QUERY_KEYS.GET_POST_SAVED_BY, data.postId],
+      // });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
       });
     },
   });
@@ -96,9 +107,18 @@ export const useUnlikePost = () => {
   return useMutation({
     mutationFn: ({ userId, postId }: { userId: string; postId: string }) =>
       unlikePost(userId, postId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
+    onSuccess: (data) => {
+      queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_LIKED_BY, data.postId],
+      });
+      // queryClient.refetchQueries({
+      //   queryKey: [QUERY_KEYS.GET_POST_SAVED_BY, data.postId],
+      // });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
       });
     },
   });
@@ -108,11 +128,20 @@ export const useSavePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ postId, userId }: { postId: string; userId: string }) =>
-      savePost(postId, userId),
-    onSuccess: () => {
+    mutationFn: ({ userId, postId }: { userId: string; postId: string }) =>
+      savePost(userId, postId),
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
+      // queryClient.refetchQueries({
+      //   queryKey: [QUERY_KEYS.GET_POST_LIKED_BY, data.postId],
+      // });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_SAVED_BY, data.postId],
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
       });
     },
   });
@@ -124,9 +153,18 @@ export const useUnsavePost = () => {
   return useMutation({
     mutationFn: ({ userId, postId }: { userId: string; postId: string }) =>
       unsavePost(userId, postId),
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
+      // queryClient.refetchQueries({
+      //   queryKey: [QUERY_KEYS.GET_POST_LIKED_BY, data.postId],
+      // });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_SAVED_BY, data.postId],
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
       });
     },
   });
@@ -153,11 +191,11 @@ export const useGetPostSavedBy = (postId: string) => {
   });
 };
 
-export const useGetUserById = (id: string) => {
+export const useGetUserById = (userId: string) => {
   return useQuery({
-    queryKey: [QUERY_KEYS.GET_USER_BY_ID, id],
-    queryFn: () => getUserById(id),
-    // enabled: !!id,
+    queryKey: [QUERY_KEYS.GET_USER_BY_ID, userId],
+    queryFn: () => getUserById(userId),
+    enabled: !!userId,
   });
 };
 
@@ -165,6 +203,14 @@ export const useGetPostById = (postId: string) => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_POST_BY_ID, postId],
     queryFn: () => getPostById(postId),
-    enabled: !!postId, // enable refetching only when fetching data for another id
+    enabled: !!postId,
+  });
+};
+
+export const useGetPostLikeCount = (postId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_LIKE_COUNT, postId],
+    queryFn: () => getPostLikeCount(postId),
+    enabled: !!postId,
   });
 };

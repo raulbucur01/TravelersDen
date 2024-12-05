@@ -73,7 +73,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
 
     const newPost = await createPost({
       ...values,
-      userId: user.id,
+      userId: user.userId,
     });
 
     if (!newPost) {

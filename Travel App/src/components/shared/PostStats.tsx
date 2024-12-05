@@ -6,6 +6,7 @@ import {
   useLikePost,
   useUnlikePost,
   useSavePost,
+  useGetPostLikeCount,
 } from "@/lib/react-query/queriesAndMutations";
 import { checkIsLiked } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -29,6 +30,8 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   const { data: savedBy, isPending: isGettingSavedBy } = useGetPostSavedBy(
     post.postId
   );
+  const { data: likeCountData, refetch: refetchLikeCount } =
+    useGetPostLikeCount(post.postId);
 
   const navigate = useNavigate();
 
@@ -37,16 +40,21 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
   const [likeCount, setLikeCount] = useState(post.likesCount);
 
   useEffect(() => {
+    if (likeCountData) {
+      setLikeCount(likeCountData);
+    }
     if (likedBy) {
       setIsLiked(likedBy.includes(userId));
     }
-  }, [likedBy, userId]);
+  }, [likeCountData, likedBy, userId]);
 
   useEffect(() => {
     if (savedBy) {
       setIsSaved(savedBy.includes(userId));
     }
   }, [savedBy, userId]);
+
+  if (isGettingLikedBy || isGettingSavedBy) return <Loader />;
 
   const handleLike = () => {
     if (isLiked) {
@@ -57,6 +65,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
       likePost({ userId: userId, postId: post.postId });
     }
     setIsLiked((prev) => !prev);
+    refetchLikeCount();
   };
 
   const handleSave = () => {
@@ -68,16 +77,10 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
     setIsSaved((prev) => !prev);
   };
 
-  if (isGettingLikedBy || isGettingSavedBy) return <Loader />;
-
-  // console.log("Entered post with:", post.caption);
-  // console.log("likedBy", likedBy);
-  // console.log("savedBy", savedBy);
-
   return (
     <div
       className="flex justify-between items-center z-20 cursor-pointer"
-      onClick={() => navigate(`/post/${post.postId}`)}
+      onClick={() => navigate(`/posts/${post.postId}`)}
     >
       <div className="flex gap-2 items-center">
         {isLikingPost || isUnlikingPost ? (
@@ -105,10 +108,10 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
           alt="comments"
           width={25}
           height={25}
-          onClick={() => navigate(`/post/${post.postId}`)}
+          onClick={() => navigate(`/posts/${post.postId}`)}
           className="cursor-pointer"
         />
-        <p className="small-medium lg:base-medium">{post.likesCount}</p>
+        <p className="small-medium lg:base-medium">{likeCount}</p>
       </div>
 
       <div className="flex gap-2">

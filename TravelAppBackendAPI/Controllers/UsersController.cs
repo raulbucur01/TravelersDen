@@ -52,7 +52,7 @@ namespace TravelAppBackendAPI.Controllers
         {
             try
             {
-                // Search for the user with the given email
+                // Search for the user with the given id
                 var user = await _context.Users
                     .Where(u => u.UserId == id)
                     .Select(u => new
