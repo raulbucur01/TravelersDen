@@ -17,6 +17,7 @@ export enum QUERY_KEYS {
   GET_POST_LIKED_BY = "getPostLikedBy",
   GET_POST_SAVED_BY = "getPostSavedBy",
   GET_LIKE_COUNT = "getLikeCount",
+  GET_POST_COMMENTS = "getPostComments",
 
   //  SEARCH KEYS
   SEARCH_POSTS = "getSearchPosts",

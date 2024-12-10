@@ -21,6 +21,7 @@ import {
   getPostSavedBy,
   getPostById,
   getPostLikeCount,
+  getCommentsForPost,
 } from "../../api/api";
 import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
@@ -211,6 +212,14 @@ export const useGetPostLikeCount = (postId: string) => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_LIKE_COUNT, postId],
     queryFn: () => getPostLikeCount(postId),
+    enabled: !!postId,
+  });
+};
+
+export const useGetCommentsForPost = (postId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_POST_COMMENTS, postId],
+    queryFn: () => getCommentsForPost(postId),
     enabled: !!postId,
   });
 };

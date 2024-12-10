@@ -52,19 +52,32 @@ namespace TravelAppBackendAPI.Controllers
                     .Select(c => new
                     {
                         c.CommentId,
-                        c.UserId,
                         c.Body,
                         c.CreatedAt,
                         c.LikesCount,
+                        User = new
+                        {
+                            c.User.UserId,
+                            c.User.Username,
+                            c.User.ImageUrl,
+                            c.User.Name
+                        },
                         Replies = _context.Comments
                             .Where(reply => reply.ParentCommentId == c.CommentId)  // Get replies to the current comment
+                            .OrderBy(reply => reply.CreatedAt)
                             .Select(reply => new
                             {
                                 reply.CommentId,
-                                reply.UserId,
                                 reply.Body,
                                 reply.CreatedAt,
-                                reply.LikesCount
+                                reply.LikesCount,
+                                User = new
+                                {
+                                    reply.User.UserId,
+                                    reply.User.Username,
+                                    reply.User.ImageUrl,
+                                    reply.User.Name
+                                }
                             })
                             .ToList()
                     })
@@ -77,6 +90,7 @@ namespace TravelAppBackendAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [HttpDelete("{commentId}")]
         public async Task<IActionResult> DeleteComment(string commentId)

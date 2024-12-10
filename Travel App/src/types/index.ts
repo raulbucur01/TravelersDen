@@ -68,3 +68,27 @@ export type INewUser = {
   username: string;
   password: string;
 };
+
+export interface ICommentCreator {
+  userId: string;
+  username: string;
+  imageUrl: string;
+  name: string;
+}
+
+export interface ICommentReply {
+  commentId: string;
+  body: string;
+  createdAt: string;
+  likesCount: number;
+  user: ICommentCreator;
+}
+
+export interface IComment {
+  commentId: string;
+  body: string;
+  createdAt: string;
+  likesCount: number;
+  user: ICommentCreator;
+  replies: ICommentReply[];
+}

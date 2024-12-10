@@ -1,12 +1,12 @@
 import { ID, ImageGravity } from "appwrite";
 
-import { INewPost, INewUser, IUpdatePost } from "@/types";
-import { appwriteConfig, account, avatars, storage } from "./config";
+import { IComment, INewPost, INewUser, IUpdatePost } from "@/types";
+import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
 import axios from "axios";
 
-const API_BASE_URL = "https://localhost:7007";
-const AI_API_BASE_URL = "http://127.0.0.1:8000";
+const API_BASE_URL = apiConfig.backendApiUrl;
+const AI_API_BASE_URL = apiConfig.recommApiUrl;
 
 export async function createUserAccount(user: INewUser) {
   try {
@@ -344,11 +344,26 @@ export async function getPostLikeCount(postId: string) {
     const response = await axios.get(
       API_BASE_URL + `/posts/${postId}/like-count`
     );
-    console.log("like count", response?.data?.likesCount);
+
     return response?.data?.likesCount ?? 0;
   } catch (error) {
     console.log(error);
     return 0;
+  }
+}
+
+export async function getCommentsForPost(
+  postId: string
+): Promise<IComment[] | []> {
+  try {
+    const response = await axios.get<IComment[]>(
+      API_BASE_URL + `/comments/${postId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    return [];
   }
 }
 

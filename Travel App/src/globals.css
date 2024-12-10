@@ -146,6 +146,8 @@
     width: 3px;
     height: 3px;
     border-radius: 2px;
+    overflow-y: auto;
+    height: 100%; /* Ensure the content's height is set appropriately */
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
@@ -153,12 +155,13 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: #5c5c7b;
-    border-radius: 50px;
+    background: #355b6e;
+    border-radius: 2px; /* Adjust this value to match the width of the thumb */
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #7878a3;
+    background: #91eddf;
+    padding-bottom: 5px;
   }
 
   .common-container {

@@ -6,7 +6,6 @@ import { IPost } from "@/types";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
 import Loader from "./Loader";
 import { useState } from "react";
-import { AspectRatio } from "@radix-ui/react-aspect-ratio";
 
 type PostCardProps = {
   post: IPost;

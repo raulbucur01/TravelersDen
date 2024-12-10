@@ -10,6 +10,11 @@ export const appwriteConfig = {
   // savesCollectionId: import.meta.env.VITE_APPWRITE_SAVES_COLLECTION_ID,
 };
 
+export const apiConfig = {
+  backendApiUrl: import.meta.env.VITE_BACKEND_API_URL,
+  recommApiUrl: import.meta.env.VITE_RECOMMENDATION_API_URL,
+};
+
 export const client = new Client();
 
 client.setEndpoint(appwriteConfig.url);
