@@ -52,6 +52,7 @@ namespace TravelAppBackendAPI.Controllers
                     .Select(c => new
                     {
                         c.CommentId,
+                        c.PostId,
                         c.Body,
                         c.CreatedAt,
                         c.LikesCount,
@@ -68,6 +69,8 @@ namespace TravelAppBackendAPI.Controllers
                             .Select(reply => new
                             {
                                 reply.CommentId,
+                                reply.PostId,
+                                reply.ParentCommentId,
                                 reply.Body,
                                 reply.CreatedAt,
                                 reply.LikesCount,

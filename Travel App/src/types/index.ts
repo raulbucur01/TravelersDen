@@ -78,6 +78,8 @@ export interface ICommentCreator {
 
 export interface ICommentReply {
   commentId: string;
+  postId: string;
+  parentCommentId: string;
   body: string;
   createdAt: string;
   likesCount: number;
@@ -86,6 +88,7 @@ export interface ICommentReply {
 
 export interface IComment {
   commentId: string;
+  postId: string;
   body: string;
   createdAt: string;
   likesCount: number;

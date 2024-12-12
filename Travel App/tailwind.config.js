@@ -27,11 +27,16 @@ module.exports = {
         "lm-accent": "#136F63",
         // Dark mode colors
         "dm-light": "#F1F9F7",
+        "dm-light-2": "#C5E7DE",
+        "dm-light-3": "#9AD5C5",
         "dm-dark": "#0E181B",
         "dm-dark-2": "#070C0D",
+        "dm-dark-3": "#2A4850",
+        "dm-dark-4": "#659D8E",
         "dm-primary": "#8C8FE3",
         "dm-secondary": "#355B6E",
         "dm-accent": "#91EDDF",
+        "dm-red": "#AE1E33",
 
         // alt
         "primary-500": "#877EFF",

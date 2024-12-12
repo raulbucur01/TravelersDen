@@ -49,27 +49,30 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
       } space-y-3 py-4`}
     >
       {/* Top Section: User Info */}
-      <div className="flex items-start gap-3">
-        <Link to={`/profile/${data.user.userId}`}>
-          <img
-            src={data.user.imageUrl || "/assets/icons/profile-placeholder.svg"}
-            alt={`${data.user.username}'s profile`}
-            className="w-10 h-10 rounded-full object-cover cursor-pointer" // Add cursor-pointer for visual indication
-          />
-        </Link>
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
+      <div className="flex justify-between items-start">
+        <div className="flex items-start gap-3">
+          <Link to={`/profile/${data.user.userId}`}>
+            <img
+              src={
+                data.user.imageUrl || "/assets/icons/profile-placeholder.svg"
+              }
+              alt={`${data.user.username}'s profile`}
+              className="w-10 h-10 rounded-full object-cover cursor-pointer"
+            />
+          </Link>
+          <div>
             <Link to={`/profile/${data.user.userId}`}>
               <span className="text-dm-light font-bold cursor-pointer">
                 {data.user.name}
               </span>
             </Link>
-            <span className="text-dm-secondary text-sm">
-              {new Date(data.createdAt).toLocaleString()}
-            </span>
+            <p className="text-dm-light text-sm mt-1">{data.body}</p>
           </div>
-          <p className="text-dm-light text-sm mt-1">{data.body}</p>
         </div>
+        {/* Date Section */}
+        <span className="text-dm-dark-4 text-sm mr-10">
+          {new Date(data.createdAt).toLocaleString()}
+        </span>
       </div>
 
       {/* Bottom Section: Actions */}
@@ -80,11 +83,14 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
           onClick={handleLike}
         >
           <img src="/assets/icons/like.svg" alt="like" className="w-4 h-4" />
-          <span>{data.likesCount}</span>
+          <span className="text-dm-light">{data.likesCount}</span>
         </button>
 
         {/* Reply Button */}
-        <button className="hover:text-dm-light" onClick={handleReply}>
+        <button
+          className="hover:text-dm-light text-dm-dark-4"
+          onClick={handleReply}
+        >
           Reply
         </button>
 
@@ -104,8 +110,9 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
       {isBeingRepliedTo && (
         <div className="mt-4">
           <CommentForm
-            currentUser={currentUser.userId}
-            commentCreator={data.user}
+            currentUserId={currentUser.userId}
+            postId={data.postId}
+            parentCommentId={reply?.parentCommentId}
             onCancel={handleCancelReply}
           />
         </div>

@@ -2,6 +2,7 @@ import { useUserContext } from "@/context/AuthContext";
 import { useGetCommentsForPost } from "@/lib/react-query/queriesAndMutations";
 import Loader from "./Loader";
 import Comment from "./Comment";
+import CommentForm from "./CommentForm";
 
 type CommentSectionProps = {
   postId: string;
@@ -17,6 +18,14 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
   return (
     <div className="comment-section space-y-4 p-4">
       <p className="text-light-1">Comments</p>
+
+      <p className="text-light-1">Join the discussion!</p>
+
+      <CommentForm
+        currentUserId={currentUser.userId}
+        postId={postId}
+        onCancel={() => {}}
+      />
 
       {comments?.length ? (
         comments.map((comment) => (
