@@ -359,11 +359,55 @@ export async function getCommentsForPost(
     const response = await axios.get<IComment[]>(
       API_BASE_URL + `/comments/${postId}`
     );
-
+    console.log(response.data);
     return response.data;
   } catch (error) {
     console.log(error);
     return [];
+  }
+}
+
+export async function createComment({
+  userId,
+  postId,
+  body,
+  parentCommentId,
+  mention,
+  mentionedUserId,
+}: {
+  userId: string;
+  postId: string;
+  body: string;
+  parentCommentId?: string | null;
+  mention?: string | null;
+  mentionedUserId?: string | null;
+}) {
+  try {
+    const commentData = {
+      userId: userId,
+      postId: postId,
+      body: body,
+      parentCommentId: parentCommentId || null,
+      mention: mention || null, // Default to null if mention is not provided
+      mentionedUserId: mentionedUserId || null,
+    };
+
+    const response = await axios.post(API_BASE_URL + "/comments", commentData);
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function deleteComment(commentId: string) {
+  try {
+    const response = await axios.delete(
+      API_BASE_URL + `/comments/${commentId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
   }
 }
 

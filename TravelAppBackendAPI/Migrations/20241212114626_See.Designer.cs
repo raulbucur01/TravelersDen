@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TravelAppBackendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241212114626_See")]
+    partial class See
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -39,9 +42,6 @@ namespace TravelAppBackendAPI.Migrations
                     b.Property<string>("Mention")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MentionedUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("ParentCommentId")
                         .HasColumnType("nvarchar(450)");
 
@@ -53,8 +53,6 @@ namespace TravelAppBackendAPI.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("CommentId");
-
-                    b.HasIndex("MentionedUserId");
 
                     b.HasIndex("ParentCommentId");
 
@@ -215,11 +213,6 @@ namespace TravelAppBackendAPI.Migrations
 
             modelBuilder.Entity("TravelAppBackendAPI.Models.Comment", b =>
                 {
-                    b.HasOne("TravelAppBackendAPI.Models.User", "MentionedUser")
-                        .WithMany()
-                        .HasForeignKey("MentionedUserId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
                     b.HasOne("TravelAppBackendAPI.Models.Comment", "ParentComment")
                         .WithMany("Replies")
                         .HasForeignKey("ParentCommentId")
@@ -235,8 +228,6 @@ namespace TravelAppBackendAPI.Migrations
                         .WithMany("Comments")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.NoAction);
-
-                    b.Navigation("MentionedUser");
 
                     b.Navigation("ParentComment");
 

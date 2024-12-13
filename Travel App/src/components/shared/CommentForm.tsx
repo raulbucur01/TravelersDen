@@ -1,12 +1,14 @@
 import React, { useState } from "react";
-import { ICommentCreator, IUser } from "@/types";
 import { Textarea } from "../ui/textarea";
 import { Button } from "../ui/button";
+import { useCreateComment } from "@/lib/react-query/queriesAndMutations";
 
 type CommentFormProps = {
-  currentUserId?: string;
-  postId?: string;
+  currentUserId: string;
+  postId: string;
   parentCommentId?: string;
+  mention?: string;
+  mentionedUserId?: string;
   onCancel: () => void;
 };
 
@@ -14,35 +16,38 @@ const CommentForm = ({
   currentUserId,
   postId,
   parentCommentId,
+  mention,
+  mentionedUserId,
   onCancel,
 }: CommentFormProps) => {
-  const [body, setBody] = useState("");
+  const { mutate: createComment, isPending: isCreatingComment } =
+    useCreateComment();
+
+  const [body, setBody] = useState(mention ? `@${mention}` : "");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (parentCommentId) {
-      console.log(
-        "Submitted info for a reply: \nuserId:",
-        currentUserId,
-        "\npostId:",
-        postId,
-        "\nparentCommentId:",
-        parentCommentId,
-        "\nbody:",
-        body
-      );
-    } else {
-      console.log(
-        "Submitted info for a main comment: \nuserId:",
-        currentUserId,
-        "\npostId:",
-        postId,
-        "\nparentCommentId:",
-        null,
-        "\nbody:",
-        body
-      );
+
+    const newBody = body.replace(`@${mention}`, "").trim(); // Remove mention and trim
+
+    // Check if there's a body left after removing the mention
+    if (newBody === "") {
+      return;
     }
+
+    const finalMention = body.startsWith(`@${mention}`) ? "@" + mention : null;
+
+    const commentData = {
+      userId: currentUserId,
+      postId: postId,
+      body: newBody,
+      parentCommentId: parentCommentId || null, // Parent is null if it's a top-level comment
+      mention: finalMention,
+      mentionedUserId: mentionedUserId || null,
+    };
+
+    createComment(commentData); // Pass the data directly to the API call
+
     setBody(""); // Clear the input after submission
     onCancel();
   };
@@ -84,7 +89,7 @@ const CommentForm = ({
                 : "cursor-default bg-dm-dark-3 text-dm-dark-4 hover:bg-dm-dark-3"
             }`}
           >
-            Reply
+            {isCreatingComment ? "Replying..." : "Reply"}
           </Button>
           <Button
             type="button"

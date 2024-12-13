@@ -22,6 +22,8 @@ import {
   getPostById,
   getPostLikeCount,
   getCommentsForPost,
+  createComment,
+  deleteComment,
 } from "../../api/api";
 import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
@@ -221,5 +223,38 @@ export const useGetCommentsForPost = (postId: string) => {
     queryKey: [QUERY_KEYS.GET_POST_COMMENTS, postId],
     queryFn: () => getCommentsForPost(postId),
     enabled: !!postId,
+  });
+};
+
+export const useCreateComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (commentData: {
+      userId: string;
+      postId: string;
+      body: string;
+      parentCommentId?: string | null;
+      mention?: string | null;
+      mentionedUserId?: string | null;
+    }) => createComment(commentData),
+    onSuccess: (data) => {
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_COMMENTS, data.postId],
+      });
+    },
+  });
+};
+
+export const useDeleteComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (commentId: string) => deleteComment(commentId),
+    onSuccess: (data) => {
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_COMMENTS, data.postId],
+      });
+    },
   });
 };

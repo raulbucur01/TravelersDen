@@ -1,15 +1,27 @@
-import { IComment, ICommentCreator, ICommentReply, IUser } from "@/types";
-import React, { useState } from "react";
+import { IComment, ICommentReply, IUser } from "@/types";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import CommentForm from "./CommentForm";
+import { multiFormatDateString } from "@/lib/utils";
+import { useDeleteComment } from "@/lib/react-query/queriesAndMutations";
+import Loader from "./Loader";
 
 type CommentProps = {
   comment?: IComment;
   reply?: ICommentReply;
   currentUser: IUser;
+  headCommentId: string;
 };
 
-const Comment = ({ comment, reply, currentUser }: CommentProps) => {
+const Comment = ({
+  comment,
+  reply,
+  currentUser,
+  headCommentId,
+}: CommentProps) => {
+  const { mutate: deleteComment, isPending: isDeletingComment } =
+    useDeleteComment();
+
   const data = comment || reply;
 
   if (!data) {
@@ -29,7 +41,7 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
   };
 
   const handleDelete = () => {
-    // Add your delete functionality here
+    deleteComment(data.commentId);
   };
 
   const handleEdit = () => {
@@ -39,7 +51,6 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
   const handleCancelReply = () => {
     setIsBeingRepliedTo(false); // Hide the reply form when cancel is clicked
   };
-
   return (
     <div
       className={`comment-container rounded-md flex flex-col ${
@@ -65,13 +76,24 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
               <span className="text-dm-light font-bold cursor-pointer">
                 {data.user.name}
               </span>
+              <span className="text-dm-dark-4 text-sm">
+                &nbsp; &nbsp; @{data.user.username}
+              </span>
             </Link>
-            <p className="text-dm-light text-sm mt-1">{data.body}</p>
+
+            <p className="text-dm-light text-sm mt-1">
+              {reply?.mention && (
+                <Link to={`/profile/${reply.mentionedUserId}`}>
+                  <span className="text-dm-dark-4">{reply.mention} </span>
+                </Link>
+              )}
+              {data.body}
+            </p>
           </div>
         </div>
         {/* Date Section */}
         <span className="text-dm-dark-4 text-sm mr-10">
-          {new Date(data.createdAt).toLocaleString()}
+          {multiFormatDateString(data.createdAt)}
         </span>
       </div>
 
@@ -96,12 +118,16 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
 
         {/* Delete Button (if owner) */}
         {isOwner && (
-          <button className="hover:text-dm-light">
-            <img
-              src="/assets/icons/delete.svg"
-              alt="delete"
-              className="w-4 h-4"
-            />
+          <button className="hover:text-dm-light" onClick={handleDelete}>
+            {isDeletingComment ? (
+              <Loader />
+            ) : (
+              <img
+                src="/assets/icons/delete.svg"
+                alt="delete"
+                className="w-4 h-4"
+              />
+            )}
           </button>
         )}
       </div>
@@ -109,10 +135,19 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
       {/* Show Reply Form if `isBeingRepliedTo` is true */}
       {isBeingRepliedTo && (
         <div className="mt-4">
+          {/* Extracted common properties */}
           <CommentForm
             currentUserId={currentUser.userId}
             postId={data.postId}
-            parentCommentId={reply?.parentCommentId}
+            parentCommentId={headCommentId}
+            mention={
+              data?.user.userId !== currentUser.userId
+                ? data?.user.username
+                : "" // Mention only if it's not the current user's own comment/reply
+            }
+            mentionedUserId={
+              data?.user.userId !== currentUser.userId ? data?.user.userId : "" // Mentioned userId only if it's not the current user's own comment/reply
+            }
             onCancel={handleCancelReply}
           />
         </div>
@@ -126,6 +161,7 @@ const Comment = ({ comment, reply, currentUser }: CommentProps) => {
               key={reply.commentId}
               reply={reply}
               currentUser={currentUser}
+              headCommentId={headCommentId}
             />
           ))}
         </div>

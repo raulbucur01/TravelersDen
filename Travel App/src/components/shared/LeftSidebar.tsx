@@ -6,12 +6,17 @@ import { useUserContext } from "@/context/AuthContext";
 import { sidebarLinks } from "@/constants";
 import { INavLink } from "@/types";
 import { ModeToggle } from "../ModeToggle";
+import Loader from "./Loader";
 
 const LeftSidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const { user } = useUserContext();
-  const { mutate: signOut, isSuccess } = useSignOutAccount();
+  const {
+    mutateAsync: signOut,
+    isSuccess,
+    isPending: isSigningOut,
+  } = useSignOutAccount();
 
   useEffect(() => {
     if (isSuccess) navigate(0);
@@ -83,7 +88,11 @@ const LeftSidebar = () => {
         onClick={() => signOut()}
       >
         <img src="/assets/icons/logout.svg" alt="logout" />
-        <p className="small-medium lg:base-medium">Logout</p>
+        {isSigningOut ? (
+          <p className="small-medium lg:base-medium">Signing out...</p>
+        ) : (
+          <p className="small-medium lg:base-medium">Sign out</p>
+        )}
       </Button>
     </nav>
   );

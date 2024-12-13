@@ -33,10 +33,11 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
             key={comment.commentId}
             comment={comment}
             currentUser={currentUser}
+            headCommentId={comment.commentId}
           />
         ))
       ) : (
-        <p className="text-center text-light-3">
+        <p className="text-center text-dm-dark-4">
           No comments yet. Be the first to comment!
         </p>
       )}

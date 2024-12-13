@@ -25,6 +25,8 @@ namespace TravelAppBackendAPI.Controllers
                 {
                     UserId = commentDto.UserId,
                     PostId = commentDto.PostId,
+                    Mention = commentDto.Mention,
+                    MentionedUserId = commentDto.MentionedUserId,
                     Body = commentDto.Body,
                     ParentCommentId = commentDto.ParentCommentId,  // Can be null for top-level comments
                     CreatedAt = DateTime.UtcNow
@@ -33,7 +35,7 @@ namespace TravelAppBackendAPI.Controllers
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
 
-                return StatusCode(201, "Comment Created");
+                return StatusCode(201, new { CommentId = comment.PostId });
             }
             catch (Exception ex)
             {
@@ -54,7 +56,7 @@ namespace TravelAppBackendAPI.Controllers
                         c.CommentId,
                         c.PostId,
                         c.Body,
-                        c.CreatedAt,
+                        CreatedAt = c.CreatedAt.ToLocalTime().ToString("o"),
                         c.LikesCount,
                         User = new
                         {
@@ -71,8 +73,10 @@ namespace TravelAppBackendAPI.Controllers
                                 reply.CommentId,
                                 reply.PostId,
                                 reply.ParentCommentId,
+                                reply.Mention,
+                                reply.MentionedUserId,
                                 reply.Body,
-                                reply.CreatedAt,
+                                CreatedAt = reply.CreatedAt.ToLocalTime().ToString("o"),
                                 reply.LikesCount,
                                 User = new
                                 {
@@ -104,6 +108,8 @@ namespace TravelAppBackendAPI.Controllers
                     .Include(c => c.Replies) // Include replies for cascading delete
                     .FirstOrDefaultAsync(c => c.CommentId == commentId);
 
+                string postId = comment.PostId;
+
                 if (comment == null)
                 {
                     return NotFound("Comment not found.");
@@ -119,7 +125,7 @@ namespace TravelAppBackendAPI.Controllers
                 _context.Comments.Remove(comment);
                 await _context.SaveChangesAsync();
 
-                return Ok("Comment deleted successfully.");
+                return Ok(postId);
             }
             catch (Exception ex)
             {

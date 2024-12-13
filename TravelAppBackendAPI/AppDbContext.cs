@@ -113,6 +113,11 @@ public class AppDbContext : DbContext
                 .WithMany(c => c.Replies)
                 .HasForeignKey(c => c.ParentCommentId)
                 .OnDelete(DeleteBehavior.Restrict); // Delete replies when parent comment is deleted
+
+            entity.HasOne(c => c.MentionedUser)
+                .WithMany()  // A mentioned user doesn't necessarily need a collection of comments mentioning them
+                .HasForeignKey(c => c.MentionedUserId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
     }
 }
