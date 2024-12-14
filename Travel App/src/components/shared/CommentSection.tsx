@@ -16,7 +16,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
   if (isGettingComments) return <Loader />;
 
   return (
-    <div className="comment-section space-y-4 p-4">
+    <div className="w-full max-w-4xl mx-auto p-4 space-y-4">
       <p className="text-light-1">Comments</p>
 
       <p className="text-light-1">Join the discussion!</p>

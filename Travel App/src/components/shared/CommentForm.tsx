@@ -24,11 +24,12 @@ const CommentForm = ({
     useCreateComment();
 
   const [body, setBody] = useState(mention ? `@${mention}` : "");
+  const bodyContainsOnlyMention = body.trim() === `@${mention}`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const newBody = body.replace(`@${mention}`, "").trim(); // Remove mention and trim
+    const newBody = body.replace(`@${mention}`, ""); // remove mention from body
 
     // Check if there's a body left after removing the mention
     if (newBody === "") {
@@ -66,24 +67,23 @@ const CommentForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="comment-form">
+    <form onSubmit={handleSubmit} className="comment-form mr-5">
       {/* Wrapper div for Textarea and Buttons */}
       <div className="bg-dm-dark-2 flex flex-col rounded-[30px] p-4 space-y-1 border border-dm-secondary">
         {/* Textarea */}
         <Textarea
-          className="custom-scrollbar bg-dm-dark-2 text-dm-light placeholder:text-dm-dark-4 flex-grow border-none focus:outline-none focus:ring-0 resize-none overflow-hidden"
+          className="bg-dm-dark-2 text-dm-light placeholder:text-dm-dark-4 flex-grow border-none focus:outline-none focus:ring-0 resize-none overflow-hidden"
           value={body}
           onChange={handleInputChange} // Use handleInputChange to adjust height
           placeholder={"Add a reply..."}
-          rows={0} // Initial height
         />
 
         {/* Buttons */}
         <div className="flex justify-end gap-2">
           <Button
             type="submit"
-            disabled={!body} // Disable when body is empty
-            className={`px-4 py-2 rounded-[50px] transition ${
+            disabled={!body || bodyContainsOnlyMention} // Disable when body is empty
+            className={`px-4 py-2 w-20 rounded-[50px] transition ${
               body
                 ? "cursor-pointer bg-dm-dark-3 text-dm-light hover:bg-dm-secondary"
                 : "cursor-default bg-dm-dark-3 text-dm-dark-4 hover:bg-dm-dark-3"
@@ -94,7 +94,7 @@ const CommentForm = ({
           <Button
             type="button"
             onClick={handleCancel}
-            className="px-4 py-2 bg-dm-dark-3 text-dm-light hover:bg-dm-red rounded-[50px]"
+            className="px-4 py-2 w-20 bg-dm-dark-3 text-dm-light hover:bg-dm-red rounded-[50px]"
           >
             Cancel
           </Button>

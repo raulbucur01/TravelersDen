@@ -19,7 +19,7 @@ const Comment = ({
   currentUser,
   headCommentId,
 }: CommentProps) => {
-  const { mutate: deleteComment, isPending: isDeletingComment } =
+  const { mutateAsync: deleteComment, isPending: isDeletingComment } =
     useDeleteComment();
 
   const data = comment || reply;
@@ -57,44 +57,49 @@ const Comment = ({
         reply
           ? "pl-6 border-l-2 border-t-2 border-dm-secondary bg-dm-dark"
           : "bg-dm-dark-2 pl-6 border-l-2 border-t-2 border-dm-secondary"
-      } space-y-3 py-4`}
+      } space-y-3 py-4 mx-auto`}
     >
-      {/* Top Section: User Info */}
-      <div className="flex justify-between items-start">
-        <div className="flex items-start gap-3">
+      {/* Top Section: User Info and Date */}
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-3">
+          {/* User Profile Picture */}
           <Link to={`/profile/${data.user.userId}`}>
             <img
               src={
                 data.user.imageUrl || "/assets/icons/profile-placeholder.svg"
               }
               alt={`${data.user.username}'s profile`}
-              className="w-10 h-10 rounded-full object-cover cursor-pointer"
+              className="w-10 h-10 rounded-full object-cover shrink-0"
             />
           </Link>
+
+          {/* User Name and Username */}
           <div>
             <Link to={`/profile/${data.user.userId}`}>
-              <span className="text-dm-light font-bold cursor-pointer">
-                {data.user.name}
-              </span>
-              <span className="text-dm-dark-4 text-sm">
-                &nbsp; &nbsp; @{data.user.username}
+              <span className="text-dm-light font-bold">{data.user.name}</span>
+              <span className="text-dm-dark-4 text-sm ml-2">
+                @{data.user.username}
               </span>
             </Link>
-
-            <p className="text-dm-light text-sm mt-1">
-              {reply?.mention && (
-                <Link to={`/profile/${reply.mentionedUserId}`}>
-                  <span className="text-dm-dark-4">{reply.mention} </span>
-                </Link>
-              )}
-              {data.body}
-            </p>
           </div>
         </div>
+
         {/* Date Section */}
-        <span className="text-dm-dark-4 text-sm mr-10">
+        <span className="text-dm-dark-4 text-sm mr-5">
           {multiFormatDateString(data.createdAt)}
         </span>
+      </div>
+
+      {/* Comment Body */}
+      <div className="mt-2 mr-5">
+        <p className="text-dm-light text-sm whitespace-pre-wrap break-words leading-relaxed">
+          {reply?.mention && (
+            <Link to={`/profile/${reply.mentionedUserId}`}>
+              <span className="text-dm-dark-4">{reply.mention} </span>
+            </Link>
+          )}
+          {data.body}
+        </p>
       </div>
 
       {/* Bottom Section: Actions */}
