@@ -1,6 +1,5 @@
 import {
   useUnsavePost,
-  useGetCurrentUser,
   useGetPostLikedBy,
   useGetPostSavedBy,
   useLikePost,
@@ -8,11 +7,11 @@ import {
   useSavePost,
   useGetPostLikeCount,
 } from "@/lib/react-query/queriesAndMutations";
-import { checkIsLiked } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { IPost } from "@/types";
 import { useNavigate } from "react-router-dom";
+import { formatCommentCount, formatLikeCount } from "@/lib/utils";
 
 type PostStatsProps = {
   post: IPost;
@@ -20,10 +19,12 @@ type PostStatsProps = {
 };
 
 const PostStats = ({ post, userId }: PostStatsProps) => {
-  const { mutate: likePost, isPending: isLikingPost } = useLikePost();
-  const { mutate: unlikePost, isPending: isUnlikingPost } = useUnlikePost();
-  const { mutate: savePost, isPending: isSavingPost } = useSavePost();
-  const { mutate: unsavePost, isPending: isUnsavingPost } = useUnsavePost();
+  const { mutateAsync: likePost, isPending: isLikingPost } = useLikePost();
+  const { mutateAsync: unlikePost, isPending: isUnlikingPost } =
+    useUnlikePost();
+  const { mutateAsync: savePost, isPending: isSavingPost } = useSavePost();
+  const { mutateAsync: unsavePost, isPending: isUnsavingPost } =
+    useUnsavePost();
   const { data: likedBy, isPending: isGettingLikedBy } = useGetPostLikedBy(
     post.postId
   );
@@ -77,12 +78,15 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
     setIsSaved((prev) => !prev);
   };
 
+  console.log(likeCount);
+
   return (
     <div
-      className="flex justify-between items-center z-20 cursor-pointer"
+      className="relative flex justify-between items-center z-20 cursor-pointer px-4 py-2"
       onClick={() => navigate(`/posts/${post.postId}`)}
     >
-      <div className="flex gap-2 items-center">
+      {/* Like Section - Left-aligned */}
+      <div className="flex items-center gap-1">
         {isLikingPost || isUnlikingPost ? (
           <Loader />
         ) : (
@@ -98,23 +102,31 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
             className="cursor-pointer"
           />
         )}
-        <p className="small-medium lg:base-medium">{likeCount}</p>
+        <p className="text-xs sm:text-sm lg:base-medium">
+          {formatLikeCount(likeCount)}
+        </p>
       </div>
 
-      <div className="flex gap-2 items-center">
-        {/* to be changed to comments count */}
+      {/* Comment Section - Centered */}
+      <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-1">
         <img
           src="/assets/icons/chat.svg"
           alt="comments"
           width={25}
           height={25}
-          onClick={() => navigate(`/posts/${post.postId}`)}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/posts/${post.postId}`);
+          }}
           className="cursor-pointer"
         />
-        <p className="small-medium lg:base-medium">{likeCount}</p>
+        <p className="text-xs sm:text-sm lg:base-medium">
+          {formatCommentCount(likeCount)}
+        </p>
       </div>
 
-      <div className="flex gap-2">
+      {/* Save Section - Right-aligned */}
+      <div className="flex items-center gap-1">
         {isSavingPost || isUnsavingPost ? (
           <Loader />
         ) : (

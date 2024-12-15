@@ -5,6 +5,7 @@ import CommentForm from "./CommentForm";
 import { multiFormatDateString } from "@/lib/utils";
 import { useDeleteComment } from "@/lib/react-query/queriesAndMutations";
 import Loader from "./Loader";
+import CommentStats from "./CommentStats";
 
 type CommentProps = {
   comment?: IComment;
@@ -29,27 +30,29 @@ const Comment = ({
   }
 
   const isOwner = currentUser.userId === data.user.userId;
-
   const [isBeingRepliedTo, setIsBeingRepliedTo] = useState(false);
+  const [isBeingEdited, setIsBeingEdited] = useState(false);
 
-  const handleLike = () => {
-    // Add your like functionality here
+  const handleReplyView = () => {
+    setIsBeingRepliedTo((prevState) => !prevState);
+    setIsBeingEdited(false);
   };
 
-  const handleReply = () => {
-    setIsBeingRepliedTo((prevState) => !prevState);
+  const handleEditView = () => {
+    setIsBeingEdited((prevState) => !prevState);
+    setIsBeingRepliedTo(false);
   };
 
   const handleDelete = () => {
     deleteComment(data.commentId);
   };
 
-  const handleEdit = () => {
-    // Add your edit functionality here
-  };
-
   const handleCancelReply = () => {
     setIsBeingRepliedTo(false); // Hide the reply form when cancel is clicked
+  };
+
+  const handleCancelEdit = () => {
+    setIsBeingEdited(false); // Hide the edit form when cancel is clicked
   };
   return (
     <div
@@ -104,22 +107,25 @@ const Comment = ({
 
       {/* Bottom Section: Actions */}
       <div className="flex items-center justify-start text-dm-secondary gap-6 text-sm mt-2">
-        {/* Like Button */}
-        <button
-          className="flex items-center gap-1 hover:text-dm-light"
-          onClick={handleLike}
-        >
-          <img src="/assets/icons/like.svg" alt="like" className="w-4 h-4" />
-          <span className="text-dm-light">{data.likesCount}</span>
-        </button>
+        <CommentStats comment={data} userId={currentUser.userId} />
 
         {/* Reply Button */}
         <button
-          className="hover:text-dm-light text-dm-dark-4"
-          onClick={handleReply}
+          className="hover:text-dm-dark-4 text-dm-light"
+          onClick={handleReplyView}
         >
           Reply
         </button>
+
+        {/* Edit Button (if owner) */}
+        {isOwner && (
+          <button
+            className="hover:text-dm-light text-dm-dark-4"
+            onClick={handleEditView}
+          >
+            <img src="/assets/icons/edit.svg" alt="edit" className="w-4 h-4" />
+          </button>
+        )}
 
         {/* Delete Button (if owner) */}
         {isOwner && (
@@ -140,7 +146,6 @@ const Comment = ({
       {/* Show Reply Form if `isBeingRepliedTo` is true */}
       {isBeingRepliedTo && (
         <div className="mt-4">
-          {/* Extracted common properties */}
           <CommentForm
             currentUserId={currentUser.userId}
             postId={data.postId}
@@ -154,6 +159,24 @@ const Comment = ({
               data?.user.userId !== currentUser.userId ? data?.user.userId : "" // Mentioned userId only if it's not the current user's own comment/reply
             }
             onCancel={handleCancelReply}
+          />
+        </div>
+      )}
+
+      {isBeingEdited && (
+        <div className="mt-4">
+          <CommentForm
+            currentUserId={currentUser.userId}
+            postId={data.postId}
+            parentCommentId={headCommentId}
+            mention={reply?.mention ? reply.mention : ""}
+            mentionedUserId={
+              reply?.mentionedUserId ? reply.mentionedUserId : ""
+            }
+            editMode={true}
+            previousBody={data.body}
+            editedCommentId={data.commentId}
+            onCancel={handleCancelEdit}
           />
         </div>
       )}

@@ -7,7 +7,7 @@ import { useUserContext } from "@/context/AuthContext";
 const Topbar = () => {
   const navigate = useNavigate();
   const { user } = useUserContext();
-  const { mutate: signOut, isSuccess } = useSignOutAccount();
+  const { mutateAsync: signOut, isSuccess } = useSignOutAccount();
 
   useEffect(() => {
     if (isSuccess) navigate(0);

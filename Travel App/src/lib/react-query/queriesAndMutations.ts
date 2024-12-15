@@ -10,7 +10,6 @@ import {
   signInAccount,
   signOutAccount,
   createPost,
-  updatePost,
   likePost,
   unsavePost,
   savePost,
@@ -24,6 +23,11 @@ import {
   getCommentsForPost,
   createComment,
   deleteComment,
+  editComment,
+  getCommentLikedBy,
+  likeComment,
+  unlikeComment,
+  getCommentLikeCount,
 } from "../../api/api";
 import { INewPost, INewUser, IUpdatePost } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
@@ -246,15 +250,95 @@ export const useCreateComment = () => {
   });
 };
 
+export const useEditComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (editedCommentData: {
+      commentId: string;
+      body: string;
+      mention?: string | null;
+      mentionedUserId?: string | null;
+    }) => editComment(editedCommentData),
+    onSuccess: (data) => {
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_COMMENTS, data.postId],
+      });
+    },
+  });
+};
+
 export const useDeleteComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (commentId: string) => deleteComment(commentId),
     onSuccess: (data) => {
+      console.log(data);
       queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_POST_COMMENTS, data.postId],
       });
     },
+  });
+};
+
+export const useLikeComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      commentId,
+    }: {
+      userId: string;
+      commentId: string;
+    }) => likeComment(userId, commentId),
+    onSuccess: (data) => {
+      console.log(data);
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_COMMENT_LIKED_BY, data.commentId],
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_COMMENT_LIKE_COUNT, data.commentId],
+      });
+    },
+  });
+};
+
+export const useUnlikeComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userId,
+      commentId,
+    }: {
+      userId: string;
+      commentId: string;
+    }) => unlikeComment(userId, commentId),
+    onSuccess: (data) => {
+      console.log(data);
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_COMMENT_LIKED_BY, data.commentId],
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_COMMENT_LIKE_COUNT, data.commentId],
+      });
+    },
+  });
+};
+
+export const useGetCommentLikedBy = (commentId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_COMMENT_LIKED_BY, commentId],
+    queryFn: () => getCommentLikedBy(commentId),
+  });
+};
+
+export const useGetCommentLikeCount = (commentId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_COMMENT_LIKE_COUNT, commentId],
+    queryFn: () => getCommentLikeCount(commentId),
+    enabled: !!commentId,
   });
 };

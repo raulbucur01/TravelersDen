@@ -344,7 +344,7 @@ export async function getPostLikeCount(postId: string) {
     const response = await axios.get(
       API_BASE_URL + `/posts/${postId}/like-count`
     );
-
+    console.log(response.data);
     return response?.data?.likesCount ?? 0;
   } catch (error) {
     console.log(error);
@@ -399,6 +399,35 @@ export async function createComment({
   }
 }
 
+export async function editComment({
+  commentId,
+  body,
+  mention,
+  mentionedUserId,
+}: {
+  commentId: string;
+  body: string;
+  mention?: string | null;
+  mentionedUserId?: string | null;
+}) {
+  try {
+    const editedCommentData = {
+      body: body,
+      mention: mention || null,
+      mentionedUserId: mentionedUserId || null,
+    };
+
+    const response = await axios.put(
+      API_BASE_URL + `/comments/${commentId}`,
+      editedCommentData
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 export async function deleteComment(commentId: string) {
   try {
     const response = await axios.delete(
@@ -408,6 +437,55 @@ export async function deleteComment(commentId: string) {
     return response.data;
   } catch (error) {
     console.error(error);
+  }
+}
+
+export async function getCommentLikedBy(commentId: string) {
+  try {
+    const response = await axios.get(
+      API_BASE_URL + `/comments/${commentId}/liked-by`
+    );
+
+    console.log("for comment", commentId, response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function likeComment(userId: string, commentId: string) {
+  try {
+    const response = await axios.post(API_BASE_URL + "/comments/like", {
+      userId: userId,
+      commentId: commentId,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function unlikeComment(userId: string, commentId: string) {
+  try {
+    const response = await axios.delete(
+      API_BASE_URL + `/comments/unlike/${userId}/${commentId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getCommentLikeCount(commentId: string) {
+  try {
+    const response = await axios.get(
+      API_BASE_URL + `/comments/${commentId}/like-count`
+    );
+    console.log(response.data);
+    return response?.data?.likesCount ?? 0;
+  } catch (error) {
+    console.log(error);
+    return 0;
   }
 }
 

@@ -53,6 +53,54 @@ export const multiFormatDateString = (timestamp: string = ""): string => {
   }
 };
 
-export const checkIsLiked = (likeList: string[], userId: string) => {
-  return likeList.includes(userId);
+/**
+ * Utility function to format like counts into user-friendly strings.
+ * Handles counts up to billions with K (thousand), M (million), and B (billion).
+ * @param count - The number of likes.
+ * @returns Formatted string for like counts.
+ */
+export const formatLikeCount = (count: number): string => {
+  if (count < 0) return "0 Likes";
+
+  if (count === 1) return "1 Like";
+  if (count < 1000) return `${count} Likes`;
+
+  if (count < 1_000_000) {
+    // For counts between 1,000 and 999,999 (thousands)
+    const formattedCount = (count / 1000).toFixed(1).replace(/\.0$/, "");
+    return `${formattedCount}k Likes`;
+  }
+
+  if (count < 1_000_000_000) {
+    // For counts between 1 million and 999,999,999
+    const formattedCount = (count / 1_000_000).toFixed(1).replace(/\.0$/, "");
+    return `${formattedCount}m Likes`;
+  }
+
+  // For counts over 1 billion
+  const formattedCount = (count / 1_000_000_000).toFixed(1).replace(/\.0$/, "");
+  return `${formattedCount}b Likes`;
+};
+
+export const formatCommentCount = (count: number): string => {
+  if (count < 0) return "0 Comments";
+
+  if (count === 1) return "1 Comment";
+  if (count < 1000) return `${count} Comments`;
+
+  if (count < 1_000_000) {
+    // For counts between 1,000 and 999,999 (thousands)
+    const formattedCount = (count / 1000).toFixed(1).replace(/\.0$/, "");
+    return `${formattedCount}k Comments`;
+  }
+
+  if (count < 1_000_000_000) {
+    // For counts between 1 million and 999,999,999
+    const formattedCount = (count / 1_000_000).toFixed(1).replace(/\.0$/, "");
+    return `${formattedCount}m Comments`;
+  }
+
+  // For counts over 1 billion
+  const formattedCount = (count / 1_000_000_000).toFixed(1).replace(/\.0$/, "");
+  return `${formattedCount}b Comments`;
 };

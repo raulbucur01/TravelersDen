@@ -35,7 +35,7 @@ namespace TravelAppBackendAPI.Controllers
                 _context.Comments.Add(comment);
                 await _context.SaveChangesAsync();
 
-                return StatusCode(201, new { CommentId = comment.PostId });
+                return StatusCode(201, new { comment.PostId });
             }
             catch (Exception ex)
             {
@@ -125,7 +125,7 @@ namespace TravelAppBackendAPI.Controllers
                 _context.Comments.Remove(comment);
                 await _context.SaveChangesAsync();
 
-                return Ok(postId);
+                return StatusCode(201, new { comment.PostId });
             }
             catch (Exception ex)
             {
@@ -147,9 +147,12 @@ namespace TravelAppBackendAPI.Controllers
                 }
 
                 comment.Body = editCommentDto.Body;
+                comment.Mention = editCommentDto?.Mention;
+                comment.MentionedUserId = editCommentDto?.MentionedUserId;
+                comment.CreatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
 
-                return Ok("Comment updated successfully.");
+                return StatusCode(201, new { comment.PostId });
             }
             catch (Exception ex)
             {
@@ -205,7 +208,7 @@ namespace TravelAppBackendAPI.Controllers
                 comment.LikesCount++; // Increment the LikesCount
                 await _context.SaveChangesAsync();
 
-                return Ok(newLike);
+                return StatusCode(201, new { createLikeDTO.CommentId });
             }
             catch (Exception ex)
             {
@@ -239,11 +242,33 @@ namespace TravelAppBackendAPI.Controllers
                 comment.LikesCount--; // Decrement the LikesCount
                 await _context.SaveChangesAsync();
 
-                return Ok("Comment unliked successfully.");
+                return StatusCode(201, new { commentId });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id}/like-count")]
+        public async Task<IActionResult> GetLikeCount(string id)
+        {
+            try
+            {
+                var comment = await _context.Comments
+                    .Where(p => p.CommentId == id)
+                    .FirstOrDefaultAsync();
+
+                if (comment == null)
+                {
+                    return NotFound(new { Message = "Comment not found." });
+                }
+
+                return Ok(new { LikeCount = comment.LikesCount });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
     }
