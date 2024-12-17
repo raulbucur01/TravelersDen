@@ -98,16 +98,6 @@ const PostCard = ({ post }: PostCardProps) => {
         </div>
 
         <div className="flex items-center gap-5">
-          {/* View Details Button
-          <Link to={`/posts/${post.postId}`} className="">
-            <img
-              src="/assets/icons/more.png"
-              width={25}
-              height={25}
-              alt="more"
-            />
-          </Link> */}
-
           {/* Edit Button */}
           {currentUser.userId === postCreator.userId && (
             <Link to={`/update-post/${post.postId}`}>

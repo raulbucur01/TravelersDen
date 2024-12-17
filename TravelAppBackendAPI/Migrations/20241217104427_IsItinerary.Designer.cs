@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TravelAppBackendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241217104427_IsItinerary")]
+    partial class IsItinerary
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -20,50 +23,6 @@ namespace TravelAppBackendAPI.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("TravelAppBackendAPI.Models.Accommodation", b =>
-                {
-                    b.Property<string>("AccommodationId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double>("Latitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Longitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PostId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal?>("PricePerNight")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<decimal?>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("AccommodationId");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("Accommodations");
-                });
 
             modelBuilder.Entity("TravelAppBackendAPI.Models.Comment", b =>
                 {
@@ -219,61 +178,6 @@ namespace TravelAppBackendAPI.Migrations
                     b.ToTable("Saves");
                 });
 
-            modelBuilder.Entity("TravelAppBackendAPI.Models.TripStep", b =>
-                {
-                    b.Property<string>("TripStepId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<double?>("Latitude")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("Longitude")
-                        .HasColumnType("float");
-
-                    b.Property<string>("PostId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<decimal?>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("StepNumber")
-                        .HasColumnType("int");
-
-                    b.HasKey("TripStepId");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("TripSteps");
-                });
-
-            modelBuilder.Entity("TravelAppBackendAPI.Models.TripStepMedia", b =>
-                {
-                    b.Property<string>("MediaId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("AppwriteFileUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("MediaType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("TripStepId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("MediaId");
-
-                    b.HasIndex("TripStepId");
-
-                    b.ToTable("TripStepMedia");
-                });
-
             modelBuilder.Entity("TravelAppBackendAPI.Models.User", b =>
                 {
                     b.Property<string>("UserId")
@@ -313,17 +217,6 @@ namespace TravelAppBackendAPI.Migrations
                     b.HasKey("UserId");
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("TravelAppBackendAPI.Models.Accommodation", b =>
-                {
-                    b.HasOne("TravelAppBackendAPI.Models.Post", "Post")
-                        .WithMany("Accommodations")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("TravelAppBackendAPI.Models.Comment", b =>
@@ -445,28 +338,6 @@ namespace TravelAppBackendAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TravelAppBackendAPI.Models.TripStep", b =>
-                {
-                    b.HasOne("TravelAppBackendAPI.Models.Post", "Post")
-                        .WithMany("TripSteps")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
-                });
-
-            modelBuilder.Entity("TravelAppBackendAPI.Models.TripStepMedia", b =>
-                {
-                    b.HasOne("TravelAppBackendAPI.Models.TripStep", "TripStep")
-                        .WithMany("Media")
-                        .HasForeignKey("TripStepId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("TripStep");
-                });
-
             modelBuilder.Entity("TravelAppBackendAPI.Models.Comment", b =>
                 {
                     b.Navigation("Replies");
@@ -474,17 +345,8 @@ namespace TravelAppBackendAPI.Migrations
 
             modelBuilder.Entity("TravelAppBackendAPI.Models.Post", b =>
                 {
-                    b.Navigation("Accommodations");
-
                     b.Navigation("Comments");
 
-                    b.Navigation("Media");
-
-                    b.Navigation("TripSteps");
-                });
-
-            modelBuilder.Entity("TravelAppBackendAPI.Models.TripStep", b =>
-                {
                     b.Navigation("Media");
                 });
 

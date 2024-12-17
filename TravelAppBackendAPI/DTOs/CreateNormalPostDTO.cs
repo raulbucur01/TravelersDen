@@ -1,7 +1,7 @@
 ﻿namespace TravelAppBackendAPI.DTOs
 {
-    public class CreatePostDTO
-    {
+    public class CreateNormalPostDTO
+    {                                           
         public string UserId { get; set; }  // The ID of the user creating the post
         public string Caption { get; set; } // The post's caption
         public string Body { get; set; }    // The post's body content

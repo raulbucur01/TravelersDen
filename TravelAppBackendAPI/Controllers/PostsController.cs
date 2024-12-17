@@ -19,8 +19,8 @@ namespace TravelAppBackendAPI.Controllers
         }
 
         // POST: api/User
-        [HttpPost]
-        public async Task<IActionResult> CreatePost(CreatePostDTO postDto)
+        [HttpPost("normal")]
+        public async Task<IActionResult> CreateNormalPost(CreateNormalPostDTO postDto)
         {
             try
             {
@@ -34,6 +34,53 @@ namespace TravelAppBackendAPI.Controllers
                     CreatedAt = DateTime.UtcNow,
                     LikesCount = 0,
                 };
+
+                post.IsItinerary = false;
+
+                // Add post to the database
+                _context.Posts.Add(post);
+                await _context.SaveChangesAsync();
+
+                // Add media files to the post (photo/video URLs and types)
+                foreach (var fileData in postDto.Files)
+                {
+                    var postMedia = new PostMedia
+                    {
+                        PostId = post.PostId,
+                        AppwriteFileUrl = fileData.Url,
+                        MediaType = fileData.Type,  // Get the media type directly from the object
+                    };
+
+                    _context.PostMedia.Add(postMedia);
+                }
+
+                await _context.SaveChangesAsync();
+
+                return StatusCode(200, "Post Created");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpPost("itinerary")]
+        public async Task<IActionResult> CreateItineraryPost(CreateItineraryPostDTO postDto)
+        {
+            try
+            {
+                var post = new Post
+                {
+                    UserId = postDto.UserId,
+                    Caption = postDto.Caption,
+                    Body = postDto.Body,
+                    Location = postDto.Location,
+                    Tags = postDto.Tags,
+                    CreatedAt = DateTime.UtcNow,
+                    LikesCount = 0,
+                };
+
+                post.IsItinerary = true;
 
                 // Add post to the database
                 _context.Posts.Add(post);
@@ -79,7 +126,8 @@ namespace TravelAppBackendAPI.Controllers
                         Location = p.Location,
                         Tags = p.Tags,
                         CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                        LikesCount = p.LikesCount
+                        LikesCount = p.LikesCount,
+                        IsItinerary = p.IsItinerary
                     })
                     .FirstOrDefaultAsync();
 
@@ -116,7 +164,8 @@ namespace TravelAppBackendAPI.Controllers
                         Location = p.Location,
                         Tags = p.Tags,
                         CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                        LikesCount = p.LikesCount
+                        LikesCount = p.LikesCount,
+                        IsItinerary = p.IsItinerary,
                     })
                     .ToListAsync();
 

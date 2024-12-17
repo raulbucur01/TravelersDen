@@ -10,9 +10,12 @@
         public string Tags { get; set; }
         public DateTime CreatedAt { get; set; } // Timestamp for post creation
         public int LikesCount { get; set; } // Keeps track of likes
+        public bool IsItinerary { get; set; }
 
         public User User { get; set; } // Navigation property
         public ICollection<PostMedia> Media { get; set; } = new List<PostMedia>(); // Navigation property
         public ICollection<Comment> Comments { get; set; } = new List<Comment>(); // Navigation to comments
+        public ICollection<Accommodation> Accommodations { get; set; } = new List<Accommodation>();
+        public ICollection<TripStep> TripSteps { get; set; } = new List<TripStep>();
     }
 }

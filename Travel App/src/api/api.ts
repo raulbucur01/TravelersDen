@@ -1,6 +1,6 @@
 import { ID, ImageGravity } from "appwrite";
 
-import { IComment, INewPost, INewUser, IUpdatePost } from "@/types";
+import { IComment, INewPost, INewUser, IPost, IUpdatePost } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
 import axios from "axios";

@@ -12,6 +12,9 @@ public class AppDbContext : DbContext
     public DbSet<Saves> Saves { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentLike> CommentLikes { get; set; }
+    public DbSet<Accommodation> Accommodations { get; set; }
+    public DbSet<TripStep> TripSteps { get; set; }
+    public DbSet<TripStepMedia> TripStepMedia { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -118,6 +121,42 @@ public class AppDbContext : DbContext
                 .WithMany()  // A mentioned user doesn't necessarily need a collection of comments mentioning them
                 .HasForeignKey(c => c.MentionedUserId)
                 .OnDelete(DeleteBehavior.NoAction);
+        });
+
+        // Define Accommodation entity
+        modelBuilder.Entity<Accommodation>(entity =>
+        {
+            entity.HasKey(a => a.AccommodationId); // Primary key
+
+            // Relationship: Accommodation -> Post (Many-to-One)
+            entity.HasOne(a => a.Post)
+                .WithMany(p => p.Accommodations)
+                .HasForeignKey(a => a.PostId)
+                .OnDelete(DeleteBehavior.Cascade); // Delete accommodation when post is deleted
+        });
+
+        // Define TripStep entity
+        modelBuilder.Entity<TripStep>(entity =>
+        {
+            entity.HasKey(ts => ts.TripStepId); // Primary key
+
+            // Relationship: TripStep -> Post (Many-to-One)
+            entity.HasOne(ts => ts.Post)
+                .WithMany(p => p.TripSteps)
+                .HasForeignKey(ts => ts.PostId)
+                .OnDelete(DeleteBehavior.Cascade); // Delete trip step when post is deleted
+        });
+
+        // Define TripStepMedia entity
+        modelBuilder.Entity<TripStepMedia>(entity =>
+        {
+            entity.HasKey(tsm => tsm.MediaId); // Primary key
+
+            // Relationship: TripStepMedia -> TripStep (Many-to-One)
+            entity.HasOne(tsm => tsm.TripStep)
+                .WithMany(ts => ts.Media)
+                .HasForeignKey(tsm => tsm.TripStepId)
+                .OnDelete(DeleteBehavior.Cascade); // Delete media when trip step is deleted
         });
     }
 }

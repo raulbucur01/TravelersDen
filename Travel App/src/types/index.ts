@@ -60,6 +60,7 @@ export type IPost = {
   tags?: string;
   createdAt: string;
   likesCount: number;
+  isItinerary: boolean;
 };
 
 export type INewUser = {
