@@ -274,7 +274,6 @@ export const useDeleteComment = () => {
   return useMutation({
     mutationFn: (commentId: string) => deleteComment(commentId),
     onSuccess: (data) => {
-      console.log(data);
       queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_POST_COMMENTS, data.postId],
       });
@@ -294,7 +293,6 @@ export const useLikeComment = () => {
       commentId: string;
     }) => likeComment(userId, commentId),
     onSuccess: (data) => {
-      console.log(data);
       queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_COMMENT_LIKED_BY, data.commentId],
       });
@@ -317,7 +315,6 @@ export const useUnlikeComment = () => {
       commentId: string;
     }) => unlikeComment(userId, commentId),
     onSuccess: (data) => {
-      console.log(data);
       queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_COMMENT_LIKED_BY, data.commentId],
       });

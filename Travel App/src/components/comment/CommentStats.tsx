@@ -6,7 +6,7 @@ import {
 } from "@/lib/react-query/queriesAndMutations";
 import { IComment, ICommentReply } from "@/types";
 import { useEffect, useState } from "react";
-import Loader from "./Loader";
+import Loader from "../shared/Loader";
 import { formatLikeCount } from "@/lib/utils";
 
 type CommentStatsProps = {

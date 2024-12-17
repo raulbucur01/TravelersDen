@@ -1,6 +1,6 @@
 import { useUserContext } from "@/context/AuthContext";
 import { useGetCommentsForPost } from "@/lib/react-query/queriesAndMutations";
-import Loader from "./Loader";
+import Loader from "../shared/Loader";
 import Comment from "./Comment";
 import CommentForm from "./CommentForm";
 

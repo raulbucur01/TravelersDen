@@ -1,6 +1,6 @@
-import ItineraryPostDetails from "@/components/shared/ItineraryPostDetails";
+import ItineraryPostDetails from "@/components/post/ItineraryPostDetails";
 import Loader from "@/components/shared/Loader";
-import NormalPostDetails from "@/components/shared/NormalPostDetails";
+import NormalPostDetails from "@/components/post/NormalPostDetails";
 import { useUserContext } from "@/context/AuthContext";
 import { useGetPostById } from "@/lib/react-query/queriesAndMutations";
 import { useParams } from "react-router-dom";

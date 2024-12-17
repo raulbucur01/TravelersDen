@@ -24,12 +24,15 @@ import {
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-type PostFormProps = {
+type ItineraryPostCreationProps = {
   post?: Models.Document;
   action: "Create" | "Update";
 };
 
-const PostForm = ({ post, action }: PostFormProps) => {
+const ItineraryPostCreation = ({
+  post,
+  action,
+}: ItineraryPostCreationProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
     useCreatePost();
   // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
@@ -112,7 +115,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
           name="body"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Body</FormLabel>
+              <FormLabel className="shad-form_label">Trip Summary</FormLabel>
               <FormControl>
                 <Textarea
                   className="shad-textarea custom-scrollbar"
@@ -128,7 +131,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
           name="files"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Photos</FormLabel>
+              <FormLabel className="shad-form_label">Cover Media</FormLabel>
               <FormControl>
                 <FileUploader
                   fieldChange={field.onChange}
@@ -144,7 +147,7 @@ const PostForm = ({ post, action }: PostFormProps) => {
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Add Location</FormLabel>
+              <FormLabel className="shad-form_label">Trip Location</FormLabel>
               <FormControl>
                 <Input type="text" className="shad-input" {...field} />
               </FormControl>
@@ -195,4 +198,4 @@ const PostForm = ({ post, action }: PostFormProps) => {
   );
 };
 
-export default PostForm;
+export default ItineraryPostCreation;

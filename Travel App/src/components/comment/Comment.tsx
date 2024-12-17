@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import CommentForm from "./CommentForm";
 import { multiFormatDateString } from "@/lib/utils";
 import { useDeleteComment } from "@/lib/react-query/queriesAndMutations";
-import Loader from "./Loader";
+import Loader from "../shared/Loader";
 import CommentStats from "./CommentStats";
 
 type CommentProps = {

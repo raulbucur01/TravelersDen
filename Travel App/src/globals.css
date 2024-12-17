@@ -4,6 +4,14 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* Disable body scrollbar */
+}
+
 @layer base {
   * {
     @apply box-border list-none p-0 m-0 scroll-smooth;

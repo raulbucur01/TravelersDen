@@ -78,8 +78,6 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
     setIsSaved((prev) => !prev);
   };
 
-  console.log(likeCount);
-
   return (
     <div
       className="relative flex justify-between items-center z-20 cursor-pointer px-4 py-2"

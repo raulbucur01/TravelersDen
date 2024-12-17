@@ -1,4 +1,4 @@
-import CommentSection from "@/components/shared/CommentSection";
+import CommentSection from "@/components/comment/CommentSection";
 import Loader from "@/components/shared/Loader";
 import PostStats from "@/components/shared/PostStats";
 import { Button } from "@/components/ui/button";

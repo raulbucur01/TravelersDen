@@ -67,47 +67,94 @@ namespace TravelAppBackendAPI.Controllers
         [HttpPost("itinerary")]
         public async Task<IActionResult> CreateItineraryPost(CreateItineraryPostDTO postDto)
         {
-            try
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                var post = new Post
+                try
                 {
-                    UserId = postDto.UserId,
-                    Caption = postDto.Caption,
-                    Body = postDto.Body,
-                    Location = postDto.Location,
-                    Tags = postDto.Tags,
-                    CreatedAt = DateTime.UtcNow,
-                    LikesCount = 0,
-                };
-
-                post.IsItinerary = true;
-
-                // Add post to the database
-                _context.Posts.Add(post);
-                await _context.SaveChangesAsync();
-
-                // Add media files to the post (photo/video URLs and types)
-                foreach (var fileData in postDto.Files)
-                {
-                    var postMedia = new PostMedia
+                    // Create post
+                    var post = new Post
                     {
-                        PostId = post.PostId,
-                        AppwriteFileUrl = fileData.Url,
-                        MediaType = fileData.Type,  // Get the media type directly from the object
+                        UserId = postDto.UserId,
+                        Caption = postDto.Caption,
+                        Body = postDto.Body,
+                        Location = postDto.Location,
+                        Tags = postDto.Tags,
+                        CreatedAt = DateTime.UtcNow,
+                        LikesCount = 0,
+                        IsItinerary = true
                     };
 
-                    _context.PostMedia.Add(postMedia);
+                    _context.Posts.Add(post);
+                    await _context.SaveChangesAsync();
+
+                    // Collect related entities
+                    var postMediaList = postDto.Files.Select(file => new PostMedia
+                    {
+                        PostId = post.PostId,
+                        AppwriteFileUrl = file.Url,
+                        MediaType = file.Type
+                    }).ToList();
+
+                    var tripStepList = new List<TripStep>();
+                    var tripStepMediaList = new List<TripStepMedia>();
+
+                    foreach (var step in postDto.TripSteps)
+                    {
+                        var tripStep = new TripStep
+                        {
+                            PostId = post.PostId,
+                            StepNumber = step.StepNumber,
+                            Latitude = step.Latitude,
+                            Longitude = step.Longitude,
+                            Price = step.Price,
+                            Description = step.Description
+                        };
+                        tripStepList.Add(tripStep);
+
+                        if (step.Files != null)
+                        {
+                            tripStepMediaList.AddRange(step.Files.Select(file => new TripStepMedia
+                            {
+                                TripStepId = tripStep.TripStepId, // Updated later during save
+                                AppwriteFileUrl = file.Url,
+                                MediaType = file.Type
+                            }));
+                        }
+                    }
+
+                    var accommodationList = postDto.Accommodations.Select(acc => new Accommodation
+                    {
+                        PostId = post.PostId,
+                        Name = acc.Name,
+                        Description = acc.Description,
+                        Latitude = acc.Latitude,
+                        Longitude = acc.Longitude,
+                        StartDate = acc.StartDate,
+                        EndDate = acc.EndDate,
+                        PricePerNight = acc.PricePerNight,
+                        TotalPrice = acc.TotalPrice,
+                        Link = acc.Link
+                    }).ToList();
+
+                    // Add all entities in batch
+                    _context.PostMedia.AddRange(postMediaList);
+                    _context.TripSteps.AddRange(tripStepList);
+                    _context.TripStepMedia.AddRange(tripStepMediaList);
+                    _context.Accommodations.AddRange(accommodationList);
+
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return StatusCode(201, new { post.PostId });
                 }
-
-                await _context.SaveChangesAsync();
-
-                return StatusCode(200, "Post Created");
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                }
             }
         }
+
 
         [HttpGet("{id}")]   
         public async Task<IActionResult> GetPostById(string id)
@@ -346,6 +393,64 @@ namespace TravelAppBackendAPI.Controllers
             }
             catch (Exception ex)
             {
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
+        [HttpGet("{id}/itinerary-details")]
+        public async Task<IActionResult> GetItineraryDetails(string id)
+        {
+            try
+            {
+                // Fetch the itinerary steps and accommodations for the given post ID
+                var itineraryDetails = new
+                {
+                    Steps = await _context.TripSteps
+                        .Where(ts => ts.PostId == id)
+                        .OrderBy(ts => ts.StepNumber) // Ensure steps are ordered
+                        .Select(ts => new
+                        {
+                            StepNumber = ts.StepNumber,
+                            Latitude = ts.Latitude,
+                            Longitude = ts.Longitude,
+                            Price = ts.Price,
+                            Description = ts.Description,
+                            Media = ts.Media.Select(m => new
+                            {
+                                Url = m.AppwriteFileUrl,
+                                Type = m.MediaType
+                            }).ToList()
+                        })
+                        .ToListAsync(),
+                    Accommodations = await _context.Accommodations
+                        .Where(a => a.PostId == id)
+                        .Select(a => new
+                        {
+                            Name = a.Name,
+                            Description = a.Description,
+                            Latitude = a.Latitude,
+                            Longitude = a.Longitude,
+                            StartDate = a.StartDate,
+                            EndDate = a.EndDate,
+                            PricePerNight = a.PricePerNight,
+                            TotalPrice = a.TotalPrice,
+                            Link = a.Link
+                        })
+                        .ToListAsync()
+                };
+
+                // Check if any data is available
+                if (itineraryDetails.Steps.Count == 0 && itineraryDetails.Accommodations.Count == 0)
+                {
+                    return NotFound(new { Message = "No itinerary details found for this post." });
+                }
+
+                // Return the itinerary details
+                return Ok(itineraryDetails);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return a generic error response
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }

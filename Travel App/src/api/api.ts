@@ -298,7 +298,6 @@ export async function savePost(userId: string, postId: string) {
 
 export async function unsavePost(userId: string, postId: string) {
   try {
-    console.log();
     const response = await axios.delete(
       API_BASE_URL + `/posts/unsave/${userId}/${postId}`
     );
@@ -344,7 +343,6 @@ export async function getPostLikeCount(postId: string) {
     const response = await axios.get(
       API_BASE_URL + `/posts/${postId}/like-count`
     );
-    console.log(response.data);
     return response?.data?.likesCount ?? 0;
   } catch (error) {
     console.log(error);
@@ -359,7 +357,6 @@ export async function getCommentsForPost(
     const response = await axios.get<IComment[]>(
       API_BASE_URL + `/comments/${postId}`
     );
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -446,7 +443,6 @@ export async function getCommentLikedBy(commentId: string) {
       API_BASE_URL + `/comments/${commentId}/liked-by`
     );
 
-    console.log("for comment", commentId, response.data);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -481,7 +477,6 @@ export async function getCommentLikeCount(commentId: string) {
     const response = await axios.get(
       API_BASE_URL + `/comments/${commentId}/like-count`
     );
-    console.log(response.data);
     return response?.data?.likesCount ?? 0;
   } catch (error) {
     console.log(error);
