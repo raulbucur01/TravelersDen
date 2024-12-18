@@ -1,4 +1,5 @@
 import { type ClassValue, clsx } from "clsx";
+import { Area } from "react-easy-crop";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -103,4 +104,35 @@ export const formatCommentCount = (count: number): string => {
   // For counts over 1 billion
   const formattedCount = (count / 1_000_000_000).toFixed(1).replace(/\.0$/, "");
   return `${formattedCount}b Comments`;
+};
+
+export const getCroppedImg = async (imageSrc: string, crop: Area) => {
+  const image = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const img = new Image();
+    img.src = imageSrc;
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+  });
+
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d")!;
+
+  canvas.width = crop.width;
+  canvas.height = crop.height;
+
+  ctx.drawImage(
+    image,
+    crop.x,
+    crop.y,
+    crop.width,
+    crop.height,
+    0,
+    0,
+    crop.width,
+    crop.height
+  );
+
+  return new Promise<Blob>((resolve) => {
+    canvas.toBlob((blob) => resolve(blob!), "image/jpeg", 1);
+  });
 };

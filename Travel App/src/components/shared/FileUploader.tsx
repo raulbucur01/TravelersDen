@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from "react";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import { Button } from "../ui/button";
+import { getCroppedImg } from "@/lib/utils";
+import Cropper from "react-easy-crop";
 
 type FileUploaderProps = {
   fieldChange: (FILES: File[]) => void;
@@ -16,8 +18,42 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // crop
+  const [croppedFiles, setCroppedFiles] = useState<File[]>([]);
+
+  const processFiles = async (newFiles: FileWithPath[]) => {
+    const croppedResults: File[] = [];
+
+    for (const file of newFiles) {
+      if (file.type.startsWith("image")) {
+        // Define crop area (you can adjust these values as needed)
+        const crop = {
+          x: 0, // Top-left corner x-coordinate
+          y: 0, // Top-left corner y-coordinate
+          width: 300, // Width of the cropped area
+          height: 300, // Height of the cropped area
+        };
+
+        // Crop the image
+        const croppedBlob = await getCroppedImg(
+          URL.createObjectURL(file),
+          crop
+        );
+        const croppedFile = new File([croppedBlob], file.name, {
+          type: file.type,
+        });
+        croppedResults.push(croppedFile);
+      } else {
+        // For non-images, use the original file
+        croppedResults.push(file);
+      }
+    }
+
+    return croppedResults;
+  };
+
   const onDrop = useCallback(
-    (acceptedFiles: FileWithPath[]) => {
+    async (acceptedFiles: FileWithPath[]) => {
       const newFiles = [...files, ...acceptedFiles].slice(0, 6); // Limit to 6 files
       const newFileUrls = [
         ...fileUrls,
@@ -25,16 +61,19 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
       ].slice(0, 6);
 
       const newMimeTypes = [
-        ...fileUrls,
+        ...mimeTypes,
         ...acceptedFiles.map((file) => file.type),
       ];
 
+      const croppedResults = await processFiles(acceptedFiles);
+
       setFiles(newFiles);
       setFileUrls(newFileUrls);
-      fieldChange(newFiles);
       setMimeTypes(newMimeTypes);
+      setCroppedFiles((prev) => [...prev, ...croppedResults].slice(0, 6));
+      fieldChange(croppedResults);
     },
-    [files, fileUrls, fieldChange]
+    [files, fileUrls, mimeTypes, fieldChange]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -79,7 +118,7 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
   return (
     <div
       {...getRootProps()}
-      className="flex flex-center flex-col bg-dm-dark rounded-xl cursor-pointer"
+      className="flex flex-center flex-col bg-dm-dark rounded-xl cursor-pointer w-full h-[400px]"
     >
       <input {...getInputProps()} className="cursor-pointer" />
       {fileUrls.length > 0 ? (
@@ -90,14 +129,14 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
                 onClick={(e) => e.stopPropagation()}
                 src={fileUrls[currentIndex]}
                 controls
-                className="file_uploader-img"
+                className="w-full h-[400px] object-contain "
               />
             ) : (
               <img
                 onClick={(e) => e.stopPropagation()}
                 src={fileUrls[currentIndex]}
                 alt={`file-${currentIndex}`}
-                className="file_uploader-img"
+                className="w-[500px] h-[400px] object-contain"
               />
             )}
           </div>
@@ -155,7 +194,7 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
           </div>
         </div>
       ) : (
-        <div className="file_uploader-box">
+        <div className="flex-center flex-col">
           <img
             src="/assets/icons/file-upload.svg"
             width={96}

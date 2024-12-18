@@ -257,7 +257,7 @@ body {
 
   /* File uploader */
   .file_uploader-img {
-    @apply lg:h-[480px] h-[350px] w-full rounded-[24px] object-cover object-top;
+    @apply lg:h-[300px]  lg:w-full h-[200px] w-[300px] rounded-[16px] object-cover object-top;
   }
 
   .file_uploader-label {
@@ -265,7 +265,7 @@ body {
   }
 
   .file_uploader-box {
-    @apply flex-center flex-col p-7 h-80 lg:h-[612px];
+    @apply flex-center flex-col p-5 h-60 lg:h-[300px] lg:w-full;
   }
 
   /* Grid Post List */
@@ -327,6 +327,14 @@ body {
 
   .shad-textarea {
     @apply h-36 bg-dm-dark rounded-xl border-none focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-dm-secondary !important;
+  }
+
+  .itinerary-input {
+    @apply h-12 bg-dm-dark border-none placeholder:text-dm-secondary focus-visible:ring-1 focus-visible:ring-offset-1 ring-dm-secondary !important;
+  }
+
+  .itinerary-textarea {
+    @apply h-20 bg-dm-dark rounded-xl border-none focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-dm-secondary !important;
   }
 
   /* Button */

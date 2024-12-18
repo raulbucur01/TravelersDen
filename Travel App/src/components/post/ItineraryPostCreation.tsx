@@ -102,7 +102,7 @@ const ItineraryPostCreation = ({
               <FormLabel className="shad-form_label">Caption</FormLabel>
               <FormControl>
                 <Textarea
-                  className="shad-textarea custom-scrollbar"
+                  className="itinerary-textarea custom-scrollbar"
                   {...field}
                 />
               </FormControl>
@@ -118,7 +118,7 @@ const ItineraryPostCreation = ({
               <FormLabel className="shad-form_label">Trip Summary</FormLabel>
               <FormControl>
                 <Textarea
-                  className="shad-textarea custom-scrollbar"
+                  className="itinerary-textarea custom-scrollbar"
                   {...field}
                 />
               </FormControl>
