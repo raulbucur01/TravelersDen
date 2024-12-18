@@ -178,7 +178,7 @@ export async function createPost(post: INewPost) {
     await Promise.all(filePromises);
 
     const response = await axios.post(
-      API_BASE_URL + "/posts",
+      API_BASE_URL + "/posts/normal",
       {
         userID: post.userId,
         caption: post.caption,
