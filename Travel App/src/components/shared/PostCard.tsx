@@ -55,7 +55,7 @@ const PostCard = ({ post }: PostCardProps) => {
         return (
           <video
             controls
-            className="post-card_img"
+            className="post-card_img bg-black"
             src={currentMedia.url}
             onClick={(e) => {
               e.stopPropagation();
@@ -66,6 +66,34 @@ const PostCard = ({ post }: PostCardProps) => {
       }
     }
     return null;
+  };
+
+  const renderDots = () => {
+    if (post.mediaUrls.length <= 1) {
+      return null; // No dots if there is only one media file
+    }
+
+    return (
+      <div className="flex justify-center mt-2 gap-2">
+        {post.mediaUrls.map((_, index) => (
+          <span
+            key={index}
+            className={`w-3 h-3 rounded-full ${
+              index === currentIndex ? "bg-primary scale-125" : "bg-gray-400"
+            } transition-transform duration-200`}
+            style={{
+              display: "inline-block",
+              cursor: "pointer",
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault(); // Prevent the default behavior (following the link)
+              setCurrentIndex(index);
+            }}
+          ></span>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -125,7 +153,7 @@ const PostCard = ({ post }: PostCardProps) => {
         </div>
 
         {post.mediaUrls.length > 0 && (
-          <div className="relative">
+          <div className="relative mb-5">
             {renderMedia()}
 
             {/* Show navigation arrows if there are multiple media files */}
@@ -172,6 +200,8 @@ const PostCard = ({ post }: PostCardProps) => {
                 )}
               </>
             )}
+
+            {renderDots()}
           </div>
         )}
       </Link>

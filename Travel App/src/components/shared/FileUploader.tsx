@@ -90,14 +90,14 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
                 onClick={(e) => e.stopPropagation()}
                 src={fileUrls[currentIndex]}
                 controls
-                className="w-full h-[400px] object-contain "
+                className="w-[500px] h-[400px] object-cover"
               />
             ) : (
               <img
                 onClick={(e) => e.stopPropagation()}
                 src={fileUrls[currentIndex]}
                 alt={`file-${currentIndex}`}
-                className="w-[500px] h-[400px] object-contain"
+                className="w-[500px] h-[400px] object-cover"
               />
             )}
           </div>
