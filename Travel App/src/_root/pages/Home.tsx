@@ -23,7 +23,7 @@ const Home = () => {
           {isPostLoading && !posts ? (
             <Loader />
           ) : (
-            <ul className="flex flex-col flex-1 gap-9 w-full">
+            <ul className="flex flex-col flex-1 gap-5 w-full">
               {posts.map((post: IPost) => (
                 <PostCard post={post} key={post.postId} />
               ))}

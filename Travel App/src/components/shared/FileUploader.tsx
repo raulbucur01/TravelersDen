@@ -140,15 +140,33 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
             </div>
           )}
 
-          {/* Delete and reselect button */}
-          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2">
+          {/* Dots */}
+          <div className="absolute bottom-11 right-0 left-0">
+            <div className="flex items-center justify-center gap-2">
+              {fileUrls.map((_, i) => (
+                <div
+                  key={i}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentIndex(i);
+                  }}
+                  className={`w-2 h-2 bg-white rounded-full cursor-pointer ${
+                    currentIndex === i ? "p-1 bg-opacity-100" : "bg-opacity-50"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Delete button */}
+          <div className="absolute bottom-14 left-1/2 transform -translate-x-1/2">
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation(); // Prevent triggering dropzone on click
                 handleDelete();
               }}
-              className="bg-dm-dark hover:bg-dm-secondary text-dm-light py-2 px-4 rounded-md shadow-lg"
+              className="bg-dm-dark hover:bg-dm-secondary text-dm-light py-1 px-1 rounded-md shadow-lg"
             >
               <img src="/assets/icons/delete.svg" alt="delete" />
             </button>

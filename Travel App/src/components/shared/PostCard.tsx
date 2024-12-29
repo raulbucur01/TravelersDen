@@ -6,6 +6,7 @@ import { IPost } from "@/types";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
 import Loader from "./Loader";
 import { useState } from "react";
+import MediaCarousel from "./MediaCarousel";
 
 type PostCardProps = {
   post: IPost;
@@ -17,8 +18,6 @@ const PostCard = ({ post }: PostCardProps) => {
     post.userId
   );
 
-  const [currentIndex, setCurrentIndex] = useState(0);
-
   if (!post.userId) {
     return;
   }
@@ -29,72 +28,6 @@ const PostCard = ({ post }: PostCardProps) => {
   }
   // Convert tags into an array
   const separatedPostTags = post.tags?.replace(/ /g, "").split(",") || [];
-
-  const navigateFiles = (direction: "prev" | "next") => {
-    if (direction === "prev") {
-      setCurrentIndex(
-        (prev) => (prev - 1 + post.mediaUrls.length) % post.mediaUrls.length
-      );
-    } else {
-      setCurrentIndex((prev) => (prev + 1) % post.mediaUrls.length);
-    }
-  };
-
-  const renderMedia = () => {
-    const currentMedia = post.mediaUrls[currentIndex];
-    if (currentMedia) {
-      if (currentMedia.type === "Photo") {
-        return (
-          <img
-            src={currentMedia.url}
-            alt="post image"
-            className="post-card_img"
-          />
-        );
-      } else if (currentMedia.type === "Video") {
-        return (
-          <video
-            controls
-            className="post-card_img bg-black"
-            src={currentMedia.url}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }} // Prevent the default behavior (following the link)
-          />
-        );
-      }
-    }
-    return null;
-  };
-
-  const renderDots = () => {
-    if (post.mediaUrls.length <= 1) {
-      return null; // No dots if there is only one media file
-    }
-
-    return (
-      <div className="flex justify-center mt-2 gap-2">
-        {post.mediaUrls.map((_, index) => (
-          <span
-            key={index}
-            className={`w-3 h-3 rounded-full ${
-              index === currentIndex ? "bg-primary scale-125" : "bg-gray-400"
-            } transition-transform duration-200`}
-            style={{
-              display: "inline-block",
-              cursor: "pointer",
-            }}
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault(); // Prevent the default behavior (following the link)
-              setCurrentIndex(index);
-            }}
-          ></span>
-        ))}
-      </div>
-    );
-  };
 
   return (
     <div className="post-card">
@@ -151,60 +84,9 @@ const PostCard = ({ post }: PostCardProps) => {
             ))}
           </ul>
         </div>
-
-        {post.mediaUrls.length > 0 && (
-          <div className="relative mb-5">
-            {renderMedia()}
-
-            {/* Show navigation arrows if there are multiple media files */}
-            {post.mediaUrls.length > 1 && (
-              <>
-                {currentIndex !== 0 && (
-                  <div className="absolute top-1/2 left-2 -translate-y-1/2 flex items-center opacity-30 hover:opacity-70">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault(); // Prevent the default behavior (following the link)
-                        navigateFiles("prev");
-                      }}
-                      className="bg-dm-dark hover:bg-dm-secondary text-dm-light p-2 rounded-full pointer-events-auto"
-                    >
-                      <img
-                        src="/assets/icons/left-arrow.png"
-                        alt="left-arrow"
-                        className="w-5 h-auto"
-                      />
-                    </button>
-                  </div>
-                )}
-
-                {currentIndex !== post.mediaUrls.length - 1 && (
-                  <div className="absolute top-1/2 right-2 -translate-y-1/2 flex items-center opacity-30 hover:opacity-70">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        e.preventDefault(); // Prevent the default behavior (following the link)
-                        navigateFiles("next");
-                      }}
-                      className="bg-dm-dark hover:bg-dm-secondary text-dm-light p-2 rounded-full pointer-events-auto"
-                    >
-                      <img
-                        src="/assets/icons/right-arrow.png"
-                        alt="right-arrow"
-                        className="w-5 h-auto"
-                      />
-                    </button>
-                  </div>
-                )}
-              </>
-            )}
-
-            {renderDots()}
-          </div>
-        )}
       </Link>
+
+      <MediaCarousel mediaUrls={post.mediaUrls} />
 
       <PostStats post={post} userId={currentUser.userId} />
     </div>
