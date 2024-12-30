@@ -1,9 +1,64 @@
 import { ID, ImageGravity } from "appwrite";
 
-import { IComment, INewPost, INewUser, IPost, IUpdatePost } from "@/types";
+import {
+  IComment,
+  INewItineraryPost,
+  INewNormalPost,
+  INewUser,
+  IUpdatePost,
+} from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
 import axios from "axios";
+
+// utility
+export const processFiles = async (files: File[]) => {
+  const results: { url: string; type: string }[] = [];
+  const uploaded: any[] = [];
+
+  // Use map instead of forEach for async operations
+  const filePromises = files.map(async (file) => {
+    const uploadedFile = await uploadFile(file);
+
+    if (!uploadedFile) throw new Error("File upload failed");
+
+    uploaded.push(uploadedFile);
+
+    // Get the preview URL if the file is an image
+    let fileUrl = null;
+    if (file.type.startsWith("image/")) {
+      fileUrl = getFilePreview(uploadedFile.$id);
+    } else if (file.type.startsWith("video/")) {
+      // For videos, just use the file URL directly
+      fileUrl = storage.getFileView(appwriteConfig.storageId, uploadedFile.$id);
+    }
+
+    if (!fileUrl) {
+      // Clean up previously uploaded files if one fails
+      await Promise.all(
+        uploaded.map(async (uploaded) => {
+          await deleteFile(uploaded.$id);
+        })
+      );
+      throw new Error("Failed to get file preview URL");
+    }
+
+    // Determine file type based on MIME type (photo or video)
+    const fileType = file.type.startsWith("image/")
+      ? "Photo"
+      : file.type.startsWith("video/")
+      ? "Video"
+      : "Unknown";
+
+    // Store both URL and type in a single object
+    results.push({ url: fileUrl.href, type: fileType });
+  });
+
+  // Wait for all the file operations to complete
+  await Promise.all(filePromises);
+  return results;
+};
+// utility
 
 const API_BASE_URL = apiConfig.backendApiUrl;
 const AI_API_BASE_URL = apiConfig.recommApiUrl;
@@ -128,54 +183,9 @@ export async function signOutAccount() {
   }
 }
 
-export async function createPost(post: INewPost) {
+export async function createNormalPost(post: INewNormalPost) {
   try {
-    const uploadedFiles: any[] = [];
-    const fileData: { url: string; type: string }[] = [];
-
-    // Use map instead of forEach for async operations
-    const filePromises = post.files.map(async (file) => {
-      const uploadedFile = await uploadFile(file);
-
-      if (!uploadedFile) throw new Error("File upload failed");
-
-      uploadedFiles.push(uploadedFile);
-
-      // Get the preview URL if the file is an image
-      let fileUrl = null;
-      if (file.type.startsWith("image/")) {
-        fileUrl = getFilePreview(uploadedFile.$id);
-      } else if (file.type.startsWith("video/")) {
-        // For videos, just use the file URL directly
-        fileUrl = storage.getFileView(
-          appwriteConfig.storageId,
-          uploadedFile.$id
-        );
-      }
-
-      if (!fileUrl) {
-        // Clean up previously uploaded files if one fails
-        await Promise.all(
-          uploadedFiles.map(async (uploaded) => {
-            await deleteFile(uploaded.$id);
-          })
-        );
-        throw new Error("Failed to get file preview URL");
-      }
-
-      // Determine file type based on MIME type (photo or video)
-      const fileType = file.type.startsWith("image/")
-        ? "Photo"
-        : file.type.startsWith("video/")
-        ? "Video"
-        : "Unknown";
-
-      // Store both URL and type in a single object
-      fileData.push({ url: fileUrl.href, type: fileType });
-    });
-
-    // Wait for all the file operations to complete
-    await Promise.all(filePromises);
+    const mainFiles = await processFiles(post.files);
 
     const response = await axios.post(
       API_BASE_URL + "/posts/normal",
@@ -185,7 +195,46 @@ export async function createPost(post: INewPost) {
         body: post.body,
         location: post.location,
         tags: post.tags,
-        files: fileData,
+        files: mainFiles,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function createItineraryPost(post: INewItineraryPost) {
+  try {
+    const mainFiles = await processFiles(post.files);
+
+    const tripSteps = await Promise.all(
+      post.tripSteps.map(async (step) => {
+        const stepFiles = await processFiles(step.files);
+        return {
+          ...step,
+          files: stepFiles,
+        };
+      })
+    );
+
+    const response = await axios.post(
+      API_BASE_URL + "/posts/itinerary",
+      {
+        userID: post.userId,
+        caption: post.caption,
+        body: post.body,
+        location: post.location,
+        tags: post.tags,
+        files: mainFiles,
+        tripSteps: tripSteps,
+        accommodations: post.accommodations,
       },
       {
         headers: {

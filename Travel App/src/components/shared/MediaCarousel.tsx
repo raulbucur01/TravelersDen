@@ -48,9 +48,17 @@ const MediaCarousel = ({
                 controls
                 className="post-card_img bg-black z-10"
                 src={media.url}
+                autoPlay
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
+
+                  const videoElement = e.currentTarget;
+                  if (videoElement.paused) {
+                    videoElement.play();
+                  } else {
+                    videoElement.pause();
+                  }
                 }}
               />
             ) : null}
@@ -58,7 +66,7 @@ const MediaCarousel = ({
         ))}
       </div>
 
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 pointer-events-none">
         {mediaUrls.length > 1 && (
           <>
             {currentIndex > 0 && (

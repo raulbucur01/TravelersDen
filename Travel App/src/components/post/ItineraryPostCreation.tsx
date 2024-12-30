@@ -18,7 +18,7 @@ import FileUploader from "../shared/FileUploader";
 import { PostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import {
-  useCreatePost,
+  useCreateItineraryPost,
   // useUpdatePost,
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
@@ -34,7 +34,7 @@ const ItineraryPostCreation = ({
   action,
 }: ItineraryPostCreationProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
-    useCreatePost();
+    useCreateItineraryPost();
   // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
   //   useUpdatePost();
   const isLoadingUpdate = false;

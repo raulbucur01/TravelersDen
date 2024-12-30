@@ -9,7 +9,7 @@ import {
   getCurrentUser,
   signInAccount,
   signOutAccount,
-  createPost,
+  createNormalPost,
   likePost,
   unsavePost,
   savePost,
@@ -29,7 +29,12 @@ import {
   unlikeComment,
   getCommentLikeCount,
 } from "../../api/api";
-import { INewPost, INewUser, IUpdatePost } from "@/types";
+import {
+  INewItineraryPost,
+  INewNormalPost,
+  INewUser,
+  IUpdatePost,
+} from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
 
 export const useCreateUserAccount = () => {
@@ -58,11 +63,24 @@ export const useGetCurrentUser = () => {
   });
 };
 
-export const useCreatePost = () => {
+export const useCreateNormalPost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (post: INewPost) => createPost(post),
+    mutationFn: (post: INewNormalPost) => createNormalPost(post),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
+    },
+  });
+};
+
+export const useCreateItineraryPost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (post: INewItineraryPost) => createNormalPost(post),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],

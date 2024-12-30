@@ -18,7 +18,7 @@ import FileUploader from "../shared/FileUploader";
 import { PostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import {
-  useCreatePost,
+  useCreateNormalPost,
   // useUpdatePost,
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
@@ -31,7 +31,7 @@ type NormalPostFormProps = {
 
 const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
-    useCreatePost();
+    useCreateNormalPost();
   // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
   //   useUpdatePost();
   const isLoadingUpdate = false;

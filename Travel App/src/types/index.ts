@@ -22,13 +22,45 @@ export type IUpdateUser = {
   file: File[];
 };
 
-export type INewPost = {
+export type INewNormalPost = {
   userId: string;
   caption: string;
   body: string;
   files: File[];
   location?: string;
   tags?: string;
+};
+
+export type INewItineraryPost = {
+  userId: string;
+  caption: string;
+  body: string;
+  files: File[];
+  location?: string;
+  tags?: string;
+  tripSteps: ITripStep[];
+  accommodations: IAccommodation[];
+};
+
+export type ITripStep = {
+  stepNumber: number;
+  latitude: number;
+  longitude: number;
+  price: number;
+  description: string;
+  files: File[];
+};
+
+export type IAccommodation = {
+  name: string;
+  description: string;
+  latitude: number;
+  longitude: number;
+  startDate: string;
+  endDate: string;
+  pricePerNight: number;
+  totalPrice: number;
+  link: string;
 };
 
 export type IUpdatePost = {
