@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
-import { PostValidation } from "@/lib/validation";
+import { NormalPostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import {
   useCreateNormalPost,
@@ -24,12 +24,12 @@ import {
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-type NormalPostFormProps = {
+type NormalPostCreationProps = {
   post?: Models.Document;
   action: "Create" | "Update";
 };
 
-const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
+const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
     useCreateNormalPost();
   // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
@@ -41,8 +41,8 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
   const navigate = useNavigate();
 
   // 1. Define your form.
-  const form = useForm<z.infer<typeof PostValidation>>({
-    resolver: zodResolver(PostValidation),
+  const form = useForm<z.infer<typeof NormalPostValidation>>({
+    resolver: zodResolver(NormalPostValidation),
     defaultValues: {
       caption: post ? post?.caption : "",
       body: post ? post?.body : "",
@@ -53,7 +53,7 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof PostValidation>) {
+  async function onSubmit(values: z.infer<typeof NormalPostValidation>) {
     // if (post && action === "Update") {
     //   const updatedPost = await updatePost({
     //     ...values,
@@ -195,4 +195,4 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
   );
 };
 
-export default NormalPostForm;
+export default NormalPostCreation;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import NormalPostForm from "@/components/post/NormalPostForm";
+import NormalPostCreation from "@/components/post/NormalPostCreation";
 import ItineraryPostCreation from "@/components/post/ItineraryPostCreation";
 
 const CreatePost = () => {
@@ -54,7 +54,7 @@ const CreatePost = () => {
 
         {/* Conditional Rendering Based on Active Tab */}
         <div className="flex justify-center items-center w-full bg-dm-dark-2 p-4 rounded-b-lg">
-          {activeTab === "normal" && <NormalPostForm action="Create" />}
+          {activeTab === "normal" && <NormalPostCreation action="Create" />}
           {activeTab === "itinerary" && (
             <ItineraryPostCreation action="Create" />
           )}

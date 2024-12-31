@@ -107,6 +107,7 @@ const MediaCarousel = ({
           {mediaUrls.length > 1 &&
             mediaUrls.map((_, i) => (
               <div
+                key={i}
                 className={`
               w-2 h-2 bg-white rounded-full
               ${currentIndex === i ? "p-1" : "bg-opacity-50"}

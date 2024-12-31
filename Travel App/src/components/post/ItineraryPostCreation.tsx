@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
-import { PostValidation } from "@/lib/validation";
+import { ItineraryPostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import {
   useCreateItineraryPost,
@@ -23,6 +23,9 @@ import {
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { IAccommodation } from "@/types";
+import AccommodationForm from "./AccommodationForm";
 
 type ItineraryPostCreationProps = {
   post?: Models.Document;
@@ -44,19 +47,20 @@ const ItineraryPostCreation = ({
   const navigate = useNavigate();
 
   // 1. Define your form.
-  const form = useForm<z.infer<typeof PostValidation>>({
-    resolver: zodResolver(PostValidation),
+  const form = useForm<z.infer<typeof ItineraryPostValidation>>({
+    resolver: zodResolver(ItineraryPostValidation),
     defaultValues: {
       caption: post ? post?.caption : "",
       body: post ? post?.body : "",
       files: [],
       location: post ? post?.location : "",
       tags: post ? post?.tags.join(",") : "",
+      accommodations: post?.accommodations || [],
     },
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof PostValidation>) {
+  async function onSubmit(values: z.infer<typeof ItineraryPostValidation>) {
     // if (post && action === "Update") {
     //   const updatedPost = await updatePost({
     //     ...values,
@@ -74,18 +78,34 @@ const ItineraryPostCreation = ({
     //   return navigate(`/posts/${post.$id}`);
     // }
 
-    const newPost = await createPost({
+    // const newPost = await createPost({
+    //   ...values,
+    //   userId: user.userId,
+    // });
+
+    // if (!newPost) {
+    //   return toast({
+    //     title: "Please try again",
+    //   });
+    // }
+
+    // navigate("/");
+
+    const formattedValues = {
       ...values,
-      userId: user.userId,
-    });
+      accommodations: values.accommodations.map((accommodation) => ({
+        ...accommodation,
+        startDate: accommodation.startDate
+          ? accommodation.startDate.toISOString()
+          : null,
+        endDate: accommodation.endDate
+          ? accommodation.endDate.toISOString()
+          : null,
+      })),
+    };
 
-    if (!newPost) {
-      return toast({
-        title: "Please try again",
-      });
-    }
-
-    navigate("/");
+    // Log the formatted values
+    console.log("Formatted values:", formattedValues);
   }
 
   return (
@@ -175,6 +195,9 @@ const ItineraryPostCreation = ({
             </FormItem>
           )}
         />
+
+        <AccommodationForm fieldName="accommodations" />
+
         <div className="flex gap-4 items-center justify-end">
           <Button
             type="button"
