@@ -23,9 +23,8 @@ import {
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
-import { IAccommodation } from "@/types";
 import AccommodationForm from "./AccommodationForm";
+import TripStepForm from "./TripStepForm";
 
 type ItineraryPostCreationProps = {
   post?: Models.Document;
@@ -56,6 +55,7 @@ const ItineraryPostCreation = ({
       location: post ? post?.location : "",
       tags: post ? post?.tags.join(",") : "",
       accommodations: post?.accommodations || [],
+      tripSteps: post?.tripSteps || [],
     },
   });
 
@@ -101,6 +101,11 @@ const ItineraryPostCreation = ({
         endDate: accommodation.endDate
           ? accommodation.endDate.toISOString()
           : null,
+      })),
+
+      tripSteps: values.tripSteps.map((tripStep, index) => ({
+        ...tripStep,
+        stepNumber: index + 1,
       })),
     };
 
@@ -167,7 +172,9 @@ const ItineraryPostCreation = ({
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Trip Location</FormLabel>
+              <FormLabel className="shad-form_label">
+                Trip Location(s)
+              </FormLabel>
               <FormControl>
                 <Input type="text" className="shad-input" {...field} />
               </FormControl>
@@ -197,6 +204,8 @@ const ItineraryPostCreation = ({
         />
 
         <AccommodationForm fieldName="accommodations" />
+
+        <TripStepForm fieldName="tripSteps" />
 
         <div className="flex gap-4 items-center justify-end">
           <Button

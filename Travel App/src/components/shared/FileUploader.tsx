@@ -143,18 +143,22 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
           {/* Dots */}
           <div className="absolute bottom-11 right-0 left-0">
             <div className="flex items-center justify-center gap-2">
-              {fileUrls.map((_, i) => (
-                <div
-                  key={i}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setCurrentIndex(i);
-                  }}
-                  className={`w-2 h-2 bg-white rounded-full cursor-pointer ${
-                    currentIndex === i ? "p-1 bg-opacity-100" : "bg-opacity-50"
-                  }`}
-                />
-              ))}
+              {fileUrls &&
+                fileUrls.length > 1 &&
+                fileUrls.map((_, i) => (
+                  <div
+                    key={i}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCurrentIndex(i);
+                    }}
+                    className={`w-2 h-2 bg-white rounded-full cursor-pointer ${
+                      currentIndex === i
+                        ? "p-1 bg-opacity-100"
+                        : "bg-opacity-50"
+                    }`}
+                  />
+                ))}
             </div>
           </div>
 

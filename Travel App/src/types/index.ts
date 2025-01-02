@@ -44,8 +44,8 @@ export type INewItineraryPost = {
 
 export type ITripStep = {
   stepNumber: number;
-  latitude: number;
-  longitude: number;
+  // latitude: number;
+  // longitude: number;
   price: number;
   description: string;
   files: File[];

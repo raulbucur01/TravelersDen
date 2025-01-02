@@ -107,4 +107,31 @@ export const ItineraryPostValidation = z.object({
       })
     )
     .min(1, { message: "At least one accommodation is required" }),
+  tripSteps: z
+    .array(
+      z.object({
+        stepNumber: z.number(),
+        description: z
+          .string()
+          .min(2, { message: "Description must be at least 2 characters" })
+          .max(100, { message: "Description must be at most 100 characters" }),
+        price: z
+          .string()
+          .transform((val) =>
+            val ? parseFloat(parseFloat(val).toFixed(2)) : 0
+          )
+          .refine((val) => !isNaN(val) && val >= 0, {
+            message: "Price must be a valid number and at least 0",
+          }),
+        files: z
+          .array(
+            z.any({
+              description: "File must be valid",
+            })
+          )
+          .min(1, { message: "At least one file is required" })
+          .max(6, { message: "You can upload up to 6 files only" }),
+      })
+    )
+    .min(1, { message: "At least one trip step is required" }),
 });

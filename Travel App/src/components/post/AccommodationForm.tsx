@@ -28,7 +28,10 @@ const AccommodationForm = ({ fieldName }: AccommodationFormProps) => {
     <div className="flex flex-col gap-4">
       <h3 className="text-lg font-semibold">Accommodations</h3>
       {fields.map((field, index) => (
-        <div key={field.id} className="flex flex-col gap-2 border border-dm-secondary p-4 rounded">
+        <div
+          key={field.id}
+          className="flex flex-col gap-2 border border-dm-secondary p-4 rounded"
+        >
           <FormField
             control={control}
             name={`${fieldName}.${index}.name`}
@@ -100,7 +103,11 @@ const AccommodationForm = ({ fieldName }: AccommodationFormProps) => {
               <FormItem>
                 <FormLabel>Price per night</FormLabel>
                 <FormControl>
-                  <Input type="number" className="shad-input" {...field} />
+                  <Input
+                    type="number"
+                    className="shad-input appearance-none [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -114,7 +121,11 @@ const AccommodationForm = ({ fieldName }: AccommodationFormProps) => {
               <FormItem>
                 <FormLabel>Total Price</FormLabel>
                 <FormControl>
-                  <Input type="number" className="shad-input" {...field} />
+                  <Input
+                    type="number"
+                    className="shad-input appearance-none [&::-webkit-inner-spin-button]:hidden [&::-webkit-outer-spin-button]:hidden"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -128,7 +139,7 @@ const AccommodationForm = ({ fieldName }: AccommodationFormProps) => {
               <FormItem>
                 <FormLabel>Link</FormLabel>
                 <FormControl>
-                  <Input className="shad-input" {...field} />
+                  <Input type="text" className="shad-input" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -154,6 +165,9 @@ const AccommodationForm = ({ fieldName }: AccommodationFormProps) => {
             description: "",
             startDate: null,
             endDate: null,
+            pricePerNight: 0,
+            totalPrice: 0,
+            link: "",
           })
         }
       >
