@@ -38,7 +38,7 @@ export type INewItineraryPost = {
   files: File[];
   location?: string;
   tags?: string;
-  // tripSteps: ITripStep[];
+  tripSteps: ITripStep[];
   accommodations: IAccommodation[];
 };
 
