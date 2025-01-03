@@ -132,3 +132,9 @@ export interface IComment {
   user: ICommentCreator;
   replies: ICommentReply[];
 }
+
+export interface ISuggestionInfo {
+  poiName: string;
+  category: string;
+  address: string;
+}

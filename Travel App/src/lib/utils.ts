@@ -1,5 +1,6 @@
 import { deleteFile, getFilePreview, uploadFile } from "@/api/api";
 import { appwriteConfig, storage } from "@/api/config";
+import { ISuggestionInfo } from "@/types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
@@ -105,4 +106,79 @@ export const formatCommentCount = (count: number): string => {
   // For counts over 1 billion
   const formattedCount = (count / 1_000_000_000).toFixed(1).replace(/\.0$/, "");
   return `${formattedCount}b Comments`;
+};
+
+export const formatSuggestions = (results: any[]): ISuggestionInfo[] => {
+  return results.map((item: any) => {
+    const addressParts = [
+      item.address?.streetName,
+      item.address?.streetNumber,
+      item.address?.municipality,
+      item.address?.country,
+    ];
+    const address = addressParts.filter(Boolean).join(", ");
+
+    switch (item.type) {
+      case "POI":
+        return {
+          poiName: item.poi?.name || "Unknown POI",
+          category: item.poi?.categories?.join(", ") || "Uncategorized",
+          address:
+            address || item.address?.freeformAddress || "Unknown Address",
+        };
+
+      case "Geography":
+        if (item.entityType === "Municipality") {
+          return {
+            poiName: item.address?.municipality || "Unknown Municipality",
+            category: "Locality",
+            address: item.address?.country || "Unknown Address",
+          };
+        }
+
+        if (item.entityType === "MunicipalitySubdivision") {
+          return {
+            poiName: item.address?.municipality || "Unknown Municipality",
+            category: "Locality",
+            address: item.address?.country || "Unknown Address",
+          };
+        }
+
+        if (item.entityType === "Country") {
+          return {
+            poiName: item.address?.country || "Unknown Country",
+            category: "Country",
+            address: "",
+          };
+        }
+
+        if (item.entityType === "Neighbourhood") {
+          return {
+            poiName: item.address?.neighbourhood || "Unknown Neighbourhood",
+            category: "Neighbourhood",
+            address: item.address?.freeformAddress || "Unknown Address",
+          };
+        }
+
+        return {
+          poiName: item.address?.country || "Unknown Geography",
+          category: "",
+          address: item.address?.freeformAddress || "Unknown Address",
+        };
+
+      case "Street":
+        return {
+          poiName: item.address?.streetName || "Unknown Street",
+          category: "Street",
+          address: item.address?.freeformAddress || "Unknown Address",
+        };
+
+      default:
+        return {
+          poiName: "Unknown",
+          category: "Unknown",
+          address: "Unknown Address",
+        };
+    }
+  });
 };

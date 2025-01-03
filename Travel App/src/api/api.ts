@@ -62,6 +62,7 @@ export const processFiles = async (files: File[]) => {
 
 const API_BASE_URL = apiConfig.backendApiUrl;
 const AI_API_BASE_URL = apiConfig.recommApiUrl;
+const TOMTOM_API_KEY = import.meta.env.VITE_TOMTOM_API_KEY;
 
 export async function createUserAccount(user: INewUser) {
   try {
@@ -530,6 +531,18 @@ export async function getCommentLikeCount(commentId: string) {
   } catch (error) {
     console.log(error);
     return 0;
+  }
+}
+
+export async function getMapSearchResults(query: string) {
+  try {
+    const response = await axios.get(
+      `https://api.tomtom.com/search/2/search/${query}.json?key=${TOMTOM_API_KEY}&limit=${5}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
   }
 }
 

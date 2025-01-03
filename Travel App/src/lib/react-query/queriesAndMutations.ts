@@ -28,6 +28,7 @@ import {
   likeComment,
   unlikeComment,
   getCommentLikeCount,
+  getMapSearchResults,
 } from "../../api/api";
 import {
   INewItineraryPost,
@@ -355,5 +356,13 @@ export const useGetCommentLikeCount = (commentId: string) => {
     queryKey: [QUERY_KEYS.GET_COMMENT_LIKE_COUNT, commentId],
     queryFn: () => getCommentLikeCount(commentId),
     enabled: !!commentId,
+  });
+};
+
+export const useGetMapSearchResults = (query: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_MAP_SEARCH_RESULTS, query],
+    queryFn: () => getMapSearchResults(query),
+    enabled: false,
   });
 };
