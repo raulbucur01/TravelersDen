@@ -54,6 +54,7 @@ const Comment = ({
   const handleCancelEdit = () => {
     setIsBeingEdited(false); // Hide the edit form when cancel is clicked
   };
+
   return (
     <div
       className={`comment-container rounded-md flex flex-col ${

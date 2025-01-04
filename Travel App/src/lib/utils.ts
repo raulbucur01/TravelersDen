@@ -124,63 +124,78 @@ export const formatSuggestions = (results: any[]): ISuggestionInfo[] => {
       switch (item.type) {
         case "POI":
           return {
-            poiName: item.poi?.name || "Unknown POI",
-            category: item.poi?.categories?.join(", ") || "Uncategorized",
-            address:
-              address || item.address?.freeformAddress || "Unknown Address",
+            poiName: item.poi?.name,
+            category: item.poi?.categories?.join(", "),
+            address: address || item.address?.freeformAddress,
+            latitude: item.position?.lat,
+            longitude: item.position?.lon,
           };
 
         case "Geography":
           if (item.entityType === "Municipality") {
             return {
-              poiName: item.address?.municipality || "Unknown Municipality",
+              poiName: item.address?.municipality,
               category: "Locality",
-              address: item.address?.country || "Unknown Address",
+              address: item.address?.country,
+              latitude: item.position?.lat,
+              longitude: item.position?.lon,
             };
           }
 
           if (item.entityType === "MunicipalitySubdivision") {
             return {
-              poiName: item.address?.municipality || "Unknown Municipality",
+              poiName: item.address?.municipality,
               category: "Locality",
-              address: item.address?.country || "Unknown Address",
+              address: item.address?.country,
+              latitude: item.position?.lat,
+              longitude: item.position?.lon,
             };
           }
 
           if (item.entityType === "Country") {
             return {
-              poiName: item.address?.country || "Unknown Country",
+              poiName: item.address?.country,
               category: "Country",
               address: "",
+              latitude: item.position?.lat,
+              longitude: item.position?.lon,
             };
           }
 
           if (item.entityType === "Neighbourhood") {
             return {
-              poiName: item.address?.neighbourhood || "Unknown Neighbourhood",
+              poiName: item.address?.neighbourhood,
               category: "Neighbourhood",
-              address: item.address?.freeformAddress || "Unknown Address",
+              address: item.address?.freeformAddress,
+              latitude: item.position?.lat,
+              longitude: item.position?.lon,
             };
           }
 
           return {
-            poiName: item.address?.country || "Unknown Geography",
+            poiName: item.address?.country,
             category: "",
-            address: item.address?.freeformAddress || "Unknown Address",
+            address: item.address?.freeformAddress,
+            latitude: item.position?.lat,
+            longitude: item.position?.lon,
           };
 
         case "Street":
           return {
-            poiName: item.address?.streetName || "Unknown Street",
+            poiName: item.address?.streetName,
             category: "Street",
-            address: item.address?.freeformAddress || "Unknown Address",
+            address: item.address?.freeformAddress,
+            latitude: item.position?.lat,
+            longitude: item.position?.lon,
           };
 
         default:
           return {
-            poiName: "Unknown",
-            category: "Unknown",
-            address: "Unknown Address",
+            poiName: "",
+            category: "",
+            address: "",
+            latitude: 0,
+            longitude: 0,
           };
       }
     });

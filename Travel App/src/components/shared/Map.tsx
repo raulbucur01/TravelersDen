@@ -11,7 +11,6 @@ import { ISuggestionInfo } from "@/types";
 import { useDebounce } from "use-debounce";
 import { formatSuggestions as formatMapSearchSuggestions } from "@/lib/utils";
 
-
 const Map = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
@@ -44,10 +43,18 @@ const Map = () => {
         container: mapElement.current,
         center: [mapLongitude, mapLatitude],
         zoom: 15,
+        // trackResize: true,
       });
+      // newMap?.addControl(new tt.FullscreenControl());
+      // newMap?.addControl(new tt.NavigationControl());
       setMap(newMap);
+
       setMarker(
-        new tt.Marker().setLngLat([mapLongitude, mapLatitude]).addTo(newMap)
+        new tt.Marker({
+          color: "#070C0D",
+        })
+          .setLngLat([mapLongitude, mapLatitude])
+          .addTo(newMap)
       );
       return () => newMap.remove();
     }
@@ -62,9 +69,8 @@ const Map = () => {
           if (response?.data) {
             console.log(response.data);
 
-            const formattedSuggestions = formatMapSearchSuggestions(
-              response.data.results
-            );
+            const formattedSuggestions: ISuggestionInfo[] =
+              formatMapSearchSuggestions(response.data.results);
 
             console.log(formattedSuggestions);
             setSuggestions(formattedSuggestions);
@@ -85,6 +91,35 @@ const Map = () => {
 
   const handleSearch = () => {
     console.log("Search query:", searchQuery);
+  };
+
+  const handleSuggestionPicked = (latitude: number, longitude: number) => {
+    if (map) {
+      // Update the map's center
+      map.flyTo({
+        // Cast to `any` or a more appropriate type if necessary
+        ...({
+          center: [longitude, latitude],
+          essential: true, // Ensure smooth transitions
+          zoom: 15,
+          speed: 1.2,
+        } as any),
+      });
+
+      // Update the marker's position
+      if (marker) {
+        marker.setLngLat([longitude, latitude]);
+      } else {
+        const newMarker = new tt.Marker()
+          .setLngLat([longitude, latitude])
+          .addTo(map);
+        setMarker(newMarker);
+      }
+
+      // Optionally update state to reflect the selected location
+      setMapLongitude(longitude);
+      setMapLatitude(latitude);
+    }
   };
 
   return (
@@ -120,7 +155,10 @@ const Map = () => {
 
           {/* Search Suggestions */}
           {suggestions.length > 0 && searchQuery.length > 3 && (
-            <MapSearchSuggestions suggestions={suggestions} />
+            <MapSearchSuggestions
+              suggestions={suggestions}
+              onSuggestionPicked={handleSuggestionPicked}
+            />
           )}
         </div>
       </div>
