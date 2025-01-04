@@ -6,17 +6,17 @@ type MapSearchSuggestionsProps = {
 
 const MapSearchSuggestions = ({ suggestions }: MapSearchSuggestionsProps) => {
   return (
-    <div className="absolute top-14 left-0 w-full max-h-64 bg-white border border-gray-300 rounded-xl overflow-auto shadow-lg z-10 custom-scrollbar">
+    <div className="absolute top-13 left-0 w-full max-h-96 bg-dm-dark border border-dm-secondary rounded-b-lg overflow-auto shadow-lg z-10 custom-scrollbar">
       {suggestions.length === 0 ? (
-        <p className="p-4 text-gray-500">No suggestions available</p>
+        <p className="p-4 text-dm-light">No suggestions available</p>
       ) : (
         suggestions.map((suggestion, index) => (
-          <div key={index} className="p-3 hover:bg-gray-100 cursor-pointer">
-            <h3 className="font-semibold text-lg text-gray-800">
+          <div key={index} className="p-3 hover:bg-dm-secondary cursor-pointer">
+            <h3 className="font-semibold text-lg text-dm-light">
               {suggestion.poiName}
             </h3>
-            <p className="text-sm text-gray-600">{suggestion.address}</p>
-            <span className="px-2 py-1 mt-2 inline-block bg-blue-100 text-blue-700 text-xs font-medium rounded">
+            <p className="text-sm text-dm-dark-4">{suggestion.address}</p>
+            <span className="px-2 py-1 mt-2 inline-block bg-dm-dark-3 text-dm-light-2 text-xs font-medium rounded">
               {suggestion.category}
             </span>
           </div>

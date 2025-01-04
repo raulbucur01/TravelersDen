@@ -11,6 +11,7 @@ import { ISuggestionInfo } from "@/types";
 import { useDebounce } from "use-debounce";
 import { formatSuggestions as formatMapSearchSuggestions } from "@/lib/utils";
 
+
 const Map = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
@@ -87,38 +88,41 @@ const Map = () => {
   };
 
   return (
-    <div className="container h-full w-full">
-      <div className="flex flex-col items-center">
-        {/* Search Input and Button */}
-        <div className="mb-4 flex">
-          <Input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => handleInputChange(e)}
-            placeholder="Search location"
-            className="shad-input"
-          />
-          <Button
-            className="h-12 ml-1 bg-dm-dark text-dm-light hover:bg-dm-secondary"
-            onClick={handleSearch}
-          >
-            <img
-              src="/assets/icons/search.svg"
-              alt="search"
-              width={24}
-              height={24}
+    <div className="container h-full w-full relative">
+      {/* Map Container */}
+      <div
+        ref={mapElement}
+        className="relative w-[100vh] h-full border rounded-3xl"
+      >
+        {/* Overlay: Search Box and Suggestions */}
+        <div className="absolute top-4 left-4 z-10 bg-opacity-100">
+          {/* Search Input and Button */}
+          <div className="flex">
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => handleInputChange(e)}
+              placeholder="Search location..."
+              className="shad-input rounded-r-none"
             />
-          </Button>
+            <Button
+              className="h-12 bg-dm-dark text-dm-light hover:bg-dm-secondary rounded-l-none"
+              onClick={handleSearch}
+            >
+              <img
+                src="/assets/icons/search.svg"
+                alt="search"
+                width={24}
+                height={24}
+              />
+            </Button>
+          </div>
+
+          {/* Search Suggestions */}
+          {suggestions.length > 0 && searchQuery.length > 3 && (
+            <MapSearchSuggestions suggestions={suggestions} />
+          )}
         </div>
-
-        {/* Search suggestions */}
-        <MapSearchSuggestions suggestions={suggestions} />
-
-        {/* Map Container */}
-        <div
-          ref={mapElement}
-          className="w-[100vh] h-[100vh] border border-gray-300 rounded-3xl"
-        ></div>
       </div>
     </div>
   );
