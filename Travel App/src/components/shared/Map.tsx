@@ -12,6 +12,7 @@ import { useDebounce } from "use-debounce";
 import { formatMapSearchSuggestions } from "@/lib/utils";
 import { createRoot } from "react-dom/client";
 import MapPopup from "./MapPopup";
+import { set } from "date-fns";
 
 const Map = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,10 +26,10 @@ const Map = () => {
   const API_KEY = import.meta.env.VITE_TOMTOM_API_KEY;
   const mapElement = useRef<HTMLDivElement | null>(null);
 
-  const [mapLongitude, setMapLongitude] = useState(24.79279);
-  const [mapLatitude, setMapLatitude] = useState(46.22141);
+  const [selectedMapLongitude, setSelectedMapLongitude] = useState(24.79279);
+  const [selectedMapLatitude, setSelectedMapLatitude] = useState(46.22141);
   const [map, setMap] = useState<tt.Map | null>(null);
-  const [marker, setMarker] = useState<tt.Marker | null>(null);
+  const markerRef = useRef<tt.Marker | null>(null);
 
   const [suggestions, setSuggestions] = useState<ISuggestionInfo[]>([]);
   const [popup, setPopup] = useState<tt.Popup | null>(null);
@@ -44,54 +45,79 @@ const Map = () => {
           trafficFlow: "2/flow_relative-dark",
         },
         container: mapElement.current,
-        center: [mapLongitude, mapLatitude],
+        center: [selectedMapLongitude, selectedMapLatitude],
         zoom: 15,
         // trackResize: true,
       });
-      // newMap?.addControl(new tt.FullscreenControl());
-      // newMap?.addControl(new tt.NavigationControl());
+      newMap?.addControl(new tt.FullscreenControl());
+      newMap?.addControl(new tt.NavigationControl());
       setMap(newMap);
 
-      setMarker(
-        new tt.Marker({
-          color: "#070C0D",
-        })
-          .setLngLat([mapLongitude, mapLatitude])
-          .addTo(newMap)
-      );
+      // Initialize the marker
+      const initialMarker = new tt.Marker({
+        color: "#070C0D",
+      })
+        .setLngLat([selectedMapLongitude, selectedMapLatitude])
+        .addTo(newMap);
+      markerRef.current = initialMarker;
 
       // Add event listeners
       newMap.on("load", () => {
-        bindMapEvents(newMap);
+        // map click event
+        newMap.on("click", (event) => {
+          setSuggestions([]);
+          setSearchQuery("");
+          const feature = newMap.queryRenderedFeatures(event.point)[0];
+          const lngLat = event.lngLat;
+
+          // Remove the existing marker if it exists
+          if (markerRef.current) {
+            markerRef.current.remove();
+          }
+
+          if (feature.id != 0 && feature.layer.id === "POI") {
+            createPopup(newMap, feature);
+
+            newMap.flyTo({
+              ...({
+                center: lngLat,
+                essential: true,
+                zoom: 15,
+                speed: 1.2,
+              } as any),
+            });
+          } else {
+            // Create a new marker at the clicked position
+            const newMarker = new tt.Marker()
+              .setLngLat([lngLat.lng, lngLat.lat])
+              .addTo(newMap);
+
+            // Update the ref with the new marker
+            markerRef.current = newMarker;
+            removePopup();
+          }
+
+          setSelectedMapLatitude(lngLat.lat);
+          setSelectedMapLongitude(lngLat.lng);
+          console.log("lngLat", [lngLat.lng, lngLat.lat]);
+        });
+
+        newMap.on("mouseenter", "POI", () => {
+          newMap.getCanvas().style.cursor = "pointer";
+        });
+
+        newMap.on("mouseleave", "POI", () => {
+          newMap.getCanvas().style.cursor = "";
+        });
       });
 
       return () => newMap.remove();
     }
   }, []);
 
-  const bindMapEvents = (mapInstance: tt.Map) => {
-    mapInstance.on("click", (event) => {
-      const feature = mapInstance.queryRenderedFeatures(event.point)[0];
-      console.log(feature);
-      if (feature.id != 0 && feature.layer.id === "POI") {
-        createPopup(mapInstance, feature);
-      } else {
-        removePopup();
-      }
-    });
-
-    mapInstance.on("mouseenter", "POI", () => {
-      mapInstance.getCanvas().style.cursor = "pointer";
-    });
-
-    mapInstance.on("mouseleave", "POI", () => {
-      mapInstance.getCanvas().style.cursor = "";
-    });
-  };
-
   const createPopup = (mapInstance: tt.Map, feature: any) => {
     removePopup(); // Remove any existing popup
-
+    console.log("feature", feature);
     const popupContainer = document.createElement("div");
 
     // Use `createRoot` to render the React component into the popup container
@@ -106,7 +132,8 @@ const Map = () => {
     );
 
     const newPopup = new tt.Popup({
-      offset: { top: [0, 20], bottom: [0, -20] },
+      offset: { top: [0, 20], bottom: [0, -10] },
+      closeButton: false,
     })
       .setLngLat(feature.geometry.coordinates)
       .setDOMContent(popupContainer)
@@ -129,7 +156,7 @@ const Map = () => {
         try {
           const response = await refetchSearchResults();
           if (response?.data) {
-            // console.log(response.data);
+            console.log(response.data);
 
             const formattedSuggestions: ISuggestionInfo[] =
               formatMapSearchSuggestions(response.data.results);
@@ -169,19 +196,23 @@ const Map = () => {
         } as any),
       });
 
-      // Update the marker's position
-      if (marker) {
-        marker.setLngLat([longitude, latitude]);
-      } else {
-        const newMarker = new tt.Marker()
-          .setLngLat([longitude, latitude])
-          .addTo(map);
-        setMarker(newMarker);
-      }
+      // // Update the marker's position
+      // if (markerRef.current) {
+      //   markerRef.current.setLngLat([longitude, latitude]);
+      // } else {
+      markerRef.current?.remove();
+
+      const newMarker = new tt.Marker()
+        .setLngLat([longitude, latitude])
+        .addTo(map);
+
+      markerRef.current = newMarker;
+      // }
 
       // Optionally update state to reflect the selected location
-      setMapLongitude(longitude);
-      setMapLatitude(latitude);
+      setSelectedMapLongitude(longitude);
+      setSelectedMapLatitude(latitude);
+      console.log("lngLat", [longitude, latitude]);
     }
   };
 
