@@ -9,7 +9,9 @@ import { Button } from "../ui/button";
 import MapSearchSuggestions from "./MapSearchSuggestions";
 import { ISuggestionInfo } from "@/types";
 import { useDebounce } from "use-debounce";
-import { formatSuggestions as formatMapSearchSuggestions } from "@/lib/utils";
+import { formatMapSearchSuggestions } from "@/lib/utils";
+import { createRoot } from "react-dom/client";
+import MapPopup from "./MapPopup";
 
 const Map = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,6 +31,7 @@ const Map = () => {
   const [marker, setMarker] = useState<tt.Marker | null>(null);
 
   const [suggestions, setSuggestions] = useState<ISuggestionInfo[]>([]);
+  const [popup, setPopup] = useState<tt.Popup | null>(null);
 
   useEffect(() => {
     if (mapElement.current) {
@@ -56,9 +59,68 @@ const Map = () => {
           .setLngLat([mapLongitude, mapLatitude])
           .addTo(newMap)
       );
+
+      // Add event listeners
+      newMap.on("load", () => {
+        bindMapEvents(newMap);
+      });
+
       return () => newMap.remove();
     }
   }, []);
+
+  const bindMapEvents = (mapInstance: tt.Map) => {
+    mapInstance.on("click", (event) => {
+      const feature = mapInstance.queryRenderedFeatures(event.point)[0];
+      console.log(feature);
+      if (feature.id != 0 && feature.layer.id === "POI") {
+        createPopup(mapInstance, feature);
+      } else {
+        removePopup();
+      }
+    });
+
+    mapInstance.on("mouseenter", "POI", () => {
+      mapInstance.getCanvas().style.cursor = "pointer";
+    });
+
+    mapInstance.on("mouseleave", "POI", () => {
+      mapInstance.getCanvas().style.cursor = "";
+    });
+  };
+
+  const createPopup = (mapInstance: tt.Map, feature: any) => {
+    removePopup(); // Remove any existing popup
+
+    const popupContainer = document.createElement("div");
+
+    // Use `createRoot` to render the React component into the popup container
+    const root = createRoot(popupContainer);
+
+    root.render(
+      <MapPopup
+        name={feature.properties.name || "POI Name"}
+        category={feature.properties.category || "Category"}
+        coordinates={feature.geometry.coordinates}
+      />
+    );
+
+    const newPopup = new tt.Popup({
+      offset: { top: [0, 20], bottom: [0, -20] },
+    })
+      .setLngLat(feature.geometry.coordinates)
+      .setDOMContent(popupContainer)
+      .addTo(mapInstance);
+
+    setPopup(newPopup);
+  };
+
+  const removePopup = () => {
+    if (popup) {
+      popup.remove();
+      setPopup(null);
+    }
+  };
 
   // Handle search query changes and refetch results
   useEffect(() => {
@@ -67,7 +129,7 @@ const Map = () => {
         try {
           const response = await refetchSearchResults();
           if (response?.data) {
-            console.log(response.data);
+            // console.log(response.data);
 
             const formattedSuggestions: ISuggestionInfo[] =
               formatMapSearchSuggestions(response.data.results);
@@ -94,6 +156,7 @@ const Map = () => {
   };
 
   const handleSuggestionPicked = (latitude: number, longitude: number) => {
+    removePopup();
     if (map) {
       // Update the map's center
       map.flyTo({

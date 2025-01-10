@@ -106,7 +106,9 @@ export const formatCommentCount = (count: number): string => {
   return `${formattedCount}b Comments`;
 };
 
-export const formatSuggestions = (results: any[]): ISuggestionInfo[] => {
+export const formatMapSearchSuggestions = (
+  results: any[]
+): ISuggestionInfo[] => {
   return results
     .filter((item: any) => {
       // Keep only items with known types
