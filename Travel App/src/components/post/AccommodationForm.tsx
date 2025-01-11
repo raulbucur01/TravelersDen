@@ -30,8 +30,18 @@ const AccommodationForm = ({ fieldName }: AccommodationFormProps) => {
       {fields.map((field, index) => (
         <div
           key={field.id}
-          className="flex flex-col gap-2 border border-dm-secondary p-4 rounded"
+          className="relative flex flex-col gap-2 border border-dm-secondary p-4 rounded"
         >
+          {/* Red "X" Button */}
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={() => remove(index)}
+            className="absolute top-2 right-2 bg-transparent hover:bg-transparent hover:text-dm-red"
+          >
+            ✕
+          </Button>
+
           <FormField
             control={control}
             name={`${fieldName}.${index}.name`}

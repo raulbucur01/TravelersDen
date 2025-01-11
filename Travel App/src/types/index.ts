@@ -54,10 +54,10 @@ export type ITripStep = {
 export type IAccommodation = {
   name: string;
   description: string;
-  latitude: number;
-  longitude: number;
-  startDate: string;
-  endDate: string;
+  // latitude: number;
+  // longitude: number;
+  startDate: string | null;
+  endDate: string | null;
   pricePerNight: number;
   totalPrice: number;
   link: string;

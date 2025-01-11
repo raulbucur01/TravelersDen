@@ -10,6 +10,7 @@ import {
   signInAccount,
   signOutAccount,
   createNormalPost,
+  createItineraryPost,
   likePost,
   unsavePost,
   savePost,
@@ -81,7 +82,7 @@ export const useCreateItineraryPost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (post: INewItineraryPost) => createNormalPost(post),
+    mutationFn: (post: INewItineraryPost) => createItineraryPost(post),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],

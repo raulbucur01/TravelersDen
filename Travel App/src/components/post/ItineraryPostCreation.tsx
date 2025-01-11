@@ -61,36 +61,6 @@ const ItineraryPostCreation = ({
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof ItineraryPostValidation>) {
-    // if (post && action === "Update") {
-    //   const updatedPost = await updatePost({
-    //     ...values,
-    //     postId: post.$id,
-    //     imageId: post?.imageId,
-    //     imageUrl: post?.imageUrl,
-    //   });
-
-    //   if (!updatedPost) {
-    //     return toast({
-    //       title: "Please try again",
-    //     });
-    //   }
-
-    //   return navigate(`/posts/${post.$id}`);
-    // }
-
-    // const newPost = await createPost({
-    //   ...values,
-    //   userId: user.userId,
-    // });
-
-    // if (!newPost) {
-    //   return toast({
-    //     title: "Please try again",
-    //   });
-    // }
-
-    // navigate("/");
-
     const formattedValues = {
       ...values,
       accommodations: values.accommodations.map((accommodation) => ({
@@ -111,6 +81,36 @@ const ItineraryPostCreation = ({
 
     // Log the formatted values
     console.log("Formatted values:", formattedValues);
+
+    // if (post && action === "Update") {
+    //   const updatedPost = await updatePost({
+    //     ...values,
+    //     postId: post.$id,
+    //     imageId: post?.imageId,
+    //     imageUrl: post?.imageUrl,
+    //   });
+
+    //   if (!updatedPost) {
+    //     return toast({
+    //       title: "Please try again",
+    //     });
+    //   }
+
+    //   return navigate(`/posts/${post.$id}`);
+    // }
+
+    const newPost = await createPost({
+      ...formattedValues,
+      userId: user.userId,
+    });
+
+    if (!newPost) {
+      return toast({
+        title: "Please try again",
+      });
+    }
+
+    navigate("/");
   }
 
   return (

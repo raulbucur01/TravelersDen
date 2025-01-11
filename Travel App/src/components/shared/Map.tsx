@@ -12,9 +12,18 @@ import { useDebounce } from "use-debounce";
 import { formatMapSearchSuggestions } from "@/lib/utils";
 import { createRoot } from "react-dom/client";
 import MapPopup from "./MapPopup";
-import { set } from "date-fns";
 
-const Map = () => {
+type MapProps = {
+  width?: string;
+  height?: string;
+  onLocationPicked?: (longitude: number, latitude: number) => void;
+};
+
+const Map = ({
+  width = "100vh",
+  height = "90vh",
+  onLocationPicked,
+}: MapProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
   const {
@@ -34,6 +43,32 @@ const Map = () => {
   const [suggestions, setSuggestions] = useState<ISuggestionInfo[]>([]);
   const [popup, setPopup] = useState<tt.Popup | null>(null);
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const handleLocationPicked = (longitude: number, latitude: number) => {
+    setSelectedMapLongitude(longitude);
+    setSelectedMapLatitude(latitude);
+    if (onLocationPicked) {
+      onLocationPicked(longitude, latitude);
+    }
+  };
+
+  const handleFullscreenToggle = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!document.fullscreenElement) {
+      // Request fullscreen
+      if (mapElement.current) {
+        mapElement.current.requestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      // Exit fullscreen
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
   useEffect(() => {
     if (mapElement.current) {
       const newMap = tt.map({
@@ -49,8 +84,6 @@ const Map = () => {
         zoom: 15,
         // trackResize: true,
       });
-      newMap?.addControl(new tt.FullscreenControl());
-      newMap?.addControl(new tt.NavigationControl());
       setMap(newMap);
 
       // Initialize the marker
@@ -97,8 +130,7 @@ const Map = () => {
             removePopup();
           }
 
-          setSelectedMapLatitude(lngLat.lat);
-          setSelectedMapLongitude(lngLat.lng);
+          handleLocationPicked(lngLat.lng, lngLat.lat);
           console.log("lngLat", [lngLat.lng, lngLat.lat]);
         });
 
@@ -196,10 +228,6 @@ const Map = () => {
         } as any),
       });
 
-      // // Update the marker's position
-      // if (markerRef.current) {
-      //   markerRef.current.setLngLat([longitude, latitude]);
-      // } else {
       markerRef.current?.remove();
 
       const newMarker = new tt.Marker()
@@ -207,11 +235,8 @@ const Map = () => {
         .addTo(map);
 
       markerRef.current = newMarker;
-      // }
 
-      // Optionally update state to reflect the selected location
-      setSelectedMapLongitude(longitude);
-      setSelectedMapLatitude(latitude);
+      handleLocationPicked(longitude, latitude);
       console.log("lngLat", [longitude, latitude]);
     }
   };
@@ -221,7 +246,8 @@ const Map = () => {
       {/* Map Container */}
       <div
         ref={mapElement}
-        className="relative w-[100vh] h-full border rounded-3xl"
+        style={{ width, height }}
+        className={`relative border border-dm-dark rounded-3xl`} // dynamic width and height
       >
         {/* Overlay: Search Box and Suggestions */}
         <div className="absolute top-4 left-4 z-10 bg-opacity-100">
@@ -243,6 +269,7 @@ const Map = () => {
                 alt="search"
                 width={24}
                 height={24}
+                className="w-full h-full object-contain"
               />
             </Button>
           </div>
@@ -254,6 +281,27 @@ const Map = () => {
               onSuggestionPicked={handleSuggestionPicked}
             />
           )}
+        </div>
+
+        <div className="absolute top-4 right-4 z-10">
+          <Button
+            className="bg-dm-dark hover:bg-dm-secondary flex items-center justify-center w-10 h-10 p-2"
+            onClick={(e) => handleFullscreenToggle(e)}
+          >
+            {!isFullscreen ? (
+              <img
+                src="/assets/icons/fullscreen.png"
+                alt="fullscreen"
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <img
+                src="/assets/icons/minimize.png"
+                alt="minimize"
+                className="w-full h-full object-contain"
+              />
+            )}
+          </Button>
         </div>
       </div>
     </div>
