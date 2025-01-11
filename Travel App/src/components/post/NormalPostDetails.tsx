@@ -7,6 +7,7 @@ import { multiFormatDateString } from "@/lib/utils";
 import { IPost, IUser } from "@/types";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import MediaCarousel from "../shared/MediaCarousel";
 
 type NormalPostProps = {
   id: string | undefined;
@@ -72,11 +73,7 @@ const NormalPostDetails = ({ id, currentUser, post }: NormalPostProps) => {
     <div className="overflow-scroll custom-scrollbar">
       <div className="post_details-container">
         <div className="post_details-card">
-          <img
-            src={post.mediaUrls[currentIndex].url}
-            alt="post"
-            className="post_details-img"
-          />
+          <MediaCarousel mediaUrls={post.mediaUrls} />
           <div className="post_details-info">
             <div className="flex-between w-full">
               <Link

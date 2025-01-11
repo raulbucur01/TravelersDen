@@ -7,6 +7,7 @@ import { multiFormatDateString } from "@/lib/utils";
 import { IPost, IUser } from "@/types";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import MediaCarousel from "../shared/MediaCarousel";
 
 type ItineraryPostProps = {
   id: string | undefined;
@@ -79,11 +80,7 @@ const ItineraryPostDetails = ({
     <div className="overflow-scroll custom-scrollbar">
       <div className="post_details-container">
         <div className="post_details-card">
-          <img
-            src={basePostInfo.mediaUrls[currentIndex].url}
-            alt="post"
-            className="post_details-img"
-          />
+          <MediaCarousel mediaUrls={basePostInfo.mediaUrls} />
           <div className="post_details-info">
             <div className="flex-between w-full">
               <Link
