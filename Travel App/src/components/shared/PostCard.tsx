@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 import { multiFormatDateString } from "@/lib/utils";
 import { useUserContext } from "@/context/AuthContext";
 import PostStats from "./PostStats";
-import { IPost } from "@/types";
+import { IBasePost } from "@/types";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
 import Loader from "./Loader";
 import { useState } from "react";
 import MediaCarousel from "./MediaCarousel";
 
 type PostCardProps = {
-  post: IPost;
+  post: IBasePost;
 };
 
 const PostCard = ({ post }: PostCardProps) => {

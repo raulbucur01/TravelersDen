@@ -9,12 +9,12 @@ import {
 } from "@/lib/react-query/queriesAndMutations";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
-import { IPost } from "@/types";
+import { IBasePost } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { formatCommentCount, formatLikeCount } from "@/lib/utils";
 
 type PostStatsProps = {
-  post: IPost;
+  post: IBasePost;
   userId: string;
 };
 

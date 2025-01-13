@@ -20,6 +20,7 @@ export enum QUERY_KEYS {
   GET_POST_COMMENTS = "getPostComments",
   GET_COMMENT_LIKED_BY = "getCommentLikedBy",
   GET_COMMENT_LIKE_COUNT = "getCommentLikeCount",
+  GET_ITINERARY_DETAILS = "getItineraryDetails",
 
   //  SEARCH KEYS
   SEARCH_POSTS = "getSearchPosts",

@@ -217,17 +217,20 @@ body {
   }
 
   .post_details-card {
-    @apply bg-dark-2 w-full max-w-5xl rounded-[30px] flex-col flex xl:flex-row border border-dark-4 xl:rounded-l-[24px];
+    @apply bg-dm-dark-2 w-full max-w-5xl flex-col flex xl:flex-row border border-dm-dark;
+  }
+
+  .post_details-media-carousel {
+    @apply relative w-full xl:mt-5 xl:ml-5 xs:mt-4;
   }
 
   .post_details-img {
-    @apply h-80 lg:h-[480px] xl:w-[48%] rounded-t-[30px] xl:rounded-l-[24px] xl:rounded-tr-none object-cover p-5 bg-dark-1;
+    @apply flex-shrink-0 w-full xl:w-[40%] h-80 lg:h-[480px]  xl:rounded-tr-none object-cover p-5 bg-dm-dark-2;
   }
 
   .post_details-info {
-    @apply bg-dark-2 flex flex-col gap-5 lg:gap-7 flex-1 items-start p-8 rounded-[30px];
+    @apply flex-1 bg-dm-dark-2 flex flex-col gap-5 lg:gap-7 items-start p-8 rounded-[30px] min-w-[60%];
   }
-
   .post_details-delete_btn {
     @apply p-0 flex gap-3 hover:bg-transparent hover:text-light-1  text-light-1 small-medium lg:base-medium;
   }
@@ -292,7 +295,7 @@ body {
 
   /* Post Card */
   .post-card {
-    @apply bg-dm-dark-2 rounded-3xl border border-dm-dark p-5 lg:p-7 w-full max-w-screen-sm;
+    @apply bg-dm-dark-2 border border-dm-dark p-5 lg:p-7 w-full max-w-screen-sm;
   }
 
   .post-card_img {

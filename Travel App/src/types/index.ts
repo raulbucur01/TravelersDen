@@ -82,7 +82,7 @@ export type IUser = {
   bio: string;
 };
 
-export type IPost = {
+export type IBasePost = {
   postId: string;
   userId: string;
   caption: string;
@@ -93,6 +93,43 @@ export type IPost = {
   createdAt: string;
   likesCount: number;
   isItinerary: boolean;
+};
+
+export type IItineraryPost = {
+  postId: string;
+  userId: string;
+  caption: string;
+  body: string;
+  mediaUrls: { url: string; type: string }[];
+  location?: string;
+  tags?: string;
+  createdAt: string;
+  likesCount: number;
+  isItinerary: boolean;
+
+  tripSteps: ITripStep[];
+  accommodations: IAccommodation[];
+};
+
+export type IDisplayedTripStep = {
+  stepNumber: number;
+  latitude: number;
+  longitude: number;
+  price: number;
+  description: string;
+  mediaUrls: { url: string; type: string }[];
+};
+
+export type IDisplayedAccommodation = {
+  name: string;
+  description: string;
+  // latitude: number;
+  // longitude: number;
+  startDate: string | null;
+  endDate: string | null;
+  pricePerNight: number;
+  totalPrice: number;
+  link: string;
 };
 
 export type INewUser = {

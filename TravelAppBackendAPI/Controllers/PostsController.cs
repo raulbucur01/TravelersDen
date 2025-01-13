@@ -405,7 +405,7 @@ namespace TravelAppBackendAPI.Controllers
                 // Fetch the itinerary steps and accommodations for the given post ID
                 var itineraryDetails = new
                 {
-                    Steps = await _context.TripSteps
+                    TripSteps = await _context.TripSteps
                         .Where(ts => ts.PostId == id)
                         .OrderBy(ts => ts.StepNumber) // Ensure steps are ordered
                         .Select(ts => new
@@ -415,7 +415,7 @@ namespace TravelAppBackendAPI.Controllers
                             Longitude = ts.Longitude,
                             Price = ts.Price,
                             Description = ts.Description,
-                            Media = ts.Media.Select(m => new
+                            MediaUrls = ts.Media.Select(m => new
                             {
                                 Url = m.AppwriteFileUrl,
                                 Type = m.MediaType
@@ -440,7 +440,7 @@ namespace TravelAppBackendAPI.Controllers
                 };
 
                 // Check if any data is available
-                if (itineraryDetails.Steps.Count == 0 && itineraryDetails.Accommodations.Count == 0)
+                if (itineraryDetails.TripSteps.Count == 0 && itineraryDetails.Accommodations.Count == 0)
                 {
                     return NotFound(new { Message = "No itinerary details found for this post." });
                 }

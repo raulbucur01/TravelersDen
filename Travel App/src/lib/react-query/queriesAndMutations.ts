@@ -30,6 +30,7 @@ import {
   unlikeComment,
   getCommentLikeCount,
   getMapSearchResults,
+  getItineraryDetails,
 } from "../../api/api";
 import {
   INewItineraryPost,
@@ -201,6 +202,14 @@ export const useGetRecentPosts = () => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
     queryFn: getRecentPosts,
+  });
+};
+
+export const useGetItineraryDetails = (postId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_ITINERARY_DETAILS, postId],
+    queryFn: () => getItineraryDetails(postId),
+    enabled: !!postId,
   });
 };
 

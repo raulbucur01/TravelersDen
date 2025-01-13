@@ -2,6 +2,8 @@ import { ID, ImageGravity } from "appwrite";
 
 import {
   IComment,
+  IDisplayedAccommodation,
+  IDisplayedTripStep,
   INewItineraryPost,
   INewNormalPost,
   INewUser,
@@ -304,6 +306,25 @@ export async function getRecentPosts() {
     const response = await axios.get(API_BASE_URL + "/posts/recent-posts");
 
     if (!response) throw Error;
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getItineraryDetails(postId: string): Promise<
+  | {
+      tripSteps: IDisplayedTripStep[];
+      accommodations: IDisplayedAccommodation[];
+    }
+  | undefined
+> {
+  try {
+    console.log(postId);
+    const response = await axios.get<{
+      tripSteps: IDisplayedTripStep[];
+      accommodations: IDisplayedAccommodation[];
+    }>(API_BASE_URL + `/posts/${postId}/itinerary-details`);
 
     return response.data;
   } catch (error) {

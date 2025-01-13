@@ -1,7 +1,7 @@
 import Loader from "@/components/shared/Loader";
 import PostCard from "@/components/shared/PostCard";
 import { useGetRecentPosts } from "@/lib/react-query/queriesAndMutations";
-import { IPost } from "@/types";
+import { IBasePost } from "@/types";
 import { Models } from "appwrite";
 
 const Home = () => {
@@ -14,9 +14,8 @@ const Home = () => {
   if (isPostLoading || !posts) {
     return <Loader />;
   }
-
   return (
-    <div className="flex flex-1x">
+    <div className="flex flex-1">
       <div className="home-container">
         <div className="home-posts">
           <h2 className="h3-bold md:h2-bold text-left w-full">Home Feed</h2>
@@ -24,13 +23,14 @@ const Home = () => {
             <Loader />
           ) : (
             <ul className="flex flex-col flex-1 gap-5 w-full">
-              {posts.map((post: IPost) => (
+              {posts.map((post: IBasePost) => (
                 <PostCard post={post} key={post.postId} />
               ))}
             </ul>
           )}
         </div>
       </div>
+      <div className="home-creators">Suggested Users</div>
     </div>
   );
 };
