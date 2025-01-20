@@ -16,12 +16,16 @@ import MapPopup from "./MapPopup";
 type MapProps = {
   width?: string;
   height?: string;
+  preselectedLongitude?: number;
+  preselectedLatitude?: number;
   onLocationPicked?: (longitude: number, latitude: number) => void;
 };
 
 const Map = ({
   width = "100vh",
   height = "90vh",
+  preselectedLongitude = 24.79279,
+  preselectedLatitude = 46.22141,
   onLocationPicked,
 }: MapProps) => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,8 +39,10 @@ const Map = ({
   const API_KEY = import.meta.env.VITE_TOMTOM_API_KEY;
   const mapElement = useRef<HTMLDivElement | null>(null);
 
-  const [selectedMapLongitude, setSelectedMapLongitude] = useState(24.79279);
-  const [selectedMapLatitude, setSelectedMapLatitude] = useState(46.22141);
+  const [selectedMapLongitude, setSelectedMapLongitude] =
+    useState(preselectedLongitude);
+  const [selectedMapLatitude, setSelectedMapLatitude] =
+    useState(preselectedLatitude);
   const [map, setMap] = useState<tt.Map | null>(null);
   const markerRef = useRef<tt.Marker | null>(null);
 
@@ -251,7 +257,6 @@ const Map = ({
       >
         {/* Overlay: Search Box and Suggestions */}
         <div className="absolute top-4 left-4 z-10 bg-opacity-100">
-          {/* Search Input and Button */}
           <div className="flex">
             <Input
               type="text"

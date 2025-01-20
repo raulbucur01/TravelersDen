@@ -1,6 +1,8 @@
 import { useGetItineraryDetails } from "@/lib/react-query/queriesAndMutations";
 import React from "react";
 import Loader from "../shared/Loader";
+import AccommodationsDisplay from "../shared/AccommodationsDisplay";
+import Map from "../shared/Map";
 
 const ItineraryDetails = ({ id }: { id: string }) => {
   console.log(id);
@@ -14,19 +16,24 @@ const ItineraryDetails = ({ id }: { id: string }) => {
 
   return (
     <div>
+      <div>
+        {!itineraryData ? (
+          <Loader />
+        ) : (
+          <AccommodationsDisplay
+            accommodations={itineraryData.accommodations}
+          />
+        )}
+      </div>
       <h2>Trip Steps</h2>
       {itineraryData?.tripSteps.map((step, index) => (
         <div key={index}>
           <h1>Step {step.stepNumber}</h1>
           <p>{step.description}</p>
-        </div>
-      ))}
-
-      <h2>Accomodations</h2>
-      {itineraryData?.accommodations.map((accomodation, index) => (
-        <div key={index}>
-          <h1>{accomodation.name}</h1>
-          <p>{accomodation.description}</p>
+          <Map
+            preselectedLatitude={step.latitude}
+            preselectedLongitude={step.longitude}
+          />
         </div>
       ))}
     </div>
