@@ -82,7 +82,9 @@ export const ItineraryPostValidation = z.object({
         description: z
           .string()
           .min(2, { message: "Description must be at least 2 characters" })
-          .max(100, { message: "Description must be at most 100 characters" }),
+          .max(2200, {
+            message: "Description must be at most 2200 characters",
+          }),
         startDate: z.date().nullable().optional(),
         endDate: z.date().nullable().optional(),
         pricePerNight: z
@@ -114,7 +116,9 @@ export const ItineraryPostValidation = z.object({
         description: z
           .string()
           .min(2, { message: "Description must be at least 2 characters" })
-          .max(100, { message: "Description must be at most 100 characters" }),
+          .max(2200, {
+            message: "Description must be at most 2200 characters",
+          }),
         price: z
           .string()
           .transform((val) =>

@@ -202,3 +202,15 @@ export const formatMapSearchSuggestions = (
       }
     });
 };
+
+export const formatDate = (dateString: string | null): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString); // Convert the string to a Date object
+
+  // Use Intl.DateTimeFormat to format the date
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+};

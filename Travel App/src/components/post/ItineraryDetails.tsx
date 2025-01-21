@@ -10,32 +10,13 @@ const ItineraryDetails = ({ id }: { id: string }) => {
     useGetItineraryDetails(id);
 
   console.log(itineraryData);
-  if (isGettingItineraryData) {
+  if (isGettingItineraryData || !itineraryData) {
     return <Loader />;
   }
 
   return (
     <div>
-      <div>
-        {!itineraryData ? (
-          <Loader />
-        ) : (
-          <AccommodationsDisplay
-            accommodations={itineraryData.accommodations}
-          />
-        )}
-      </div>
-      <h2>Trip Steps</h2>
-      {itineraryData?.tripSteps.map((step, index) => (
-        <div key={index}>
-          <h1>Step {step.stepNumber}</h1>
-          <p>{step.description}</p>
-          <Map
-            preselectedLatitude={step.latitude}
-            preselectedLongitude={step.longitude}
-          />
-        </div>
-      ))}
+      <AccommodationsDisplay accommodations={itineraryData.accommodations} />
     </div>
   );
 };
