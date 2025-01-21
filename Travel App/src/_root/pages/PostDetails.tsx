@@ -6,7 +6,7 @@ import CommentSection from "@/components/comment/CommentSection";
 import PostStats from "@/components/shared/PostStats";
 import { Button } from "@/components/ui/button";
 import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
-import { multiFormatDateString } from "@/lib/utils";
+import { formatToRelativeDate } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import MediaCarousel from "@/components/shared/MediaCarousel";
 import ItineraryDetails from "@/components/post/ItineraryDetails";
@@ -60,7 +60,7 @@ const PostDetails = () => {
                       </p>
                       <div className="flex-center gap-2 text-dm-dark-4">
                         <p className="subtle-semibold lg:small-regular ">
-                          {multiFormatDateString(post.createdAt)}
+                          {formatToRelativeDate(post.createdAt)}
                         </p>
                         •
                         <p className="subtle-semibold lg:small-regular">

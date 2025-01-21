@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button } from "../ui/button";
 import { IAccommodation, IDisplayedAccommodation } from "@/types";
-import { formatDate, formatDateString } from "@/lib/utils";
+import { formatToLongDate } from "@/lib/utils";
 
 type AccommodationsDisplayProps = {
   accommodations: IDisplayedAccommodation[];
@@ -106,12 +106,12 @@ const AccommodationsDisplay = ({
               <div className="grid grid-cols-2 gap-x-4 text-left mt-2">
                 <p className="font-medium text-dm-dark-4">Check-in:</p>
                 <p className="text-dm-light">
-                  {formatDate(accommodations[currentIndex].startDate)}
+                  {formatToLongDate(accommodations[currentIndex].startDate)}
                 </p>
 
                 <p className="font-medium text-dm-dark-4">Check-out:</p>
                 <p className="text-dm-light">
-                  {formatDate(accommodations[currentIndex].endDate)}
+                  {formatToLongDate(accommodations[currentIndex].endDate)}
                 </p>
               </div>
             </div>

@@ -26,7 +26,19 @@ export function formatDateString(dateString: string) {
   return `${formattedDate} at ${time}`;
 }
 
-export const multiFormatDateString = (timestamp: string = ""): string => {
+/**
+ * Returns a human-readable, relative time string based on the difference
+ * between the current time and the given timestamp.
+ *
+ * Example:
+ * - "5 minutes ago"
+ * - "2 days ago"
+ * - "Just now"
+ *
+ * @param {string} timestamp - The timestamp to compare with the current time.
+ * @returns {string} A formatted relative time string.
+ */
+export const formatToRelativeDate = (timestamp: string = ""): string => {
   const date: Date = new Date(timestamp);
   const now: Date = new Date();
 
@@ -203,7 +215,16 @@ export const formatMapSearchSuggestions = (
     });
 };
 
-export const formatDate = (dateString: string | null): string => {
+/**
+ * Formats a given date string into a full, human-readable date.
+ *
+ * Example:
+ * - "21 January 2025"
+ *
+ * @param {string | null} dateString - The date string to format.
+ * @returns {string} A formatted full date string.
+ */
+export const formatToLongDate = (dateString: string | null): string => {
   if (!dateString) return "";
   const date = new Date(dateString); // Convert the string to a Date object
 

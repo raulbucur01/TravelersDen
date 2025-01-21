@@ -2,7 +2,7 @@ import { IComment, ICommentReply, IUser } from "@/types";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import CommentForm from "./CommentForm";
-import { multiFormatDateString } from "@/lib/utils";
+import { formatToRelativeDate } from "@/lib/utils";
 import { useDeleteComment } from "@/lib/react-query/queriesAndMutations";
 import Loader from "../shared/Loader";
 import CommentStats from "./CommentStats";
@@ -90,7 +90,7 @@ const Comment = ({
 
         {/* Date Section */}
         <span className="text-dm-dark-4 text-sm mr-5">
-          {multiFormatDateString(data.createdAt)}
+          {formatToRelativeDate(data.createdAt)}
         </span>
       </div>
 

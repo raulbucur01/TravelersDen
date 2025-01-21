@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { multiFormatDateString } from "@/lib/utils";
+import { formatToRelativeDate } from "@/lib/utils";
 import { useUserContext } from "@/context/AuthContext";
 import PostStats from "./PostStats";
 import { IBasePost } from "@/types";
@@ -48,7 +48,7 @@ const PostCard = ({ post }: PostCardProps) => {
             </p>
             <div className="flex-center gap-2 text-dm-light-3">
               <p className="subtle-semibold lg:small-regular ">
-                {multiFormatDateString(post.createdAt)}
+                {formatToRelativeDate(post.createdAt)}
               </p>
               •
               <p className="subtle-semibold lg:small-regular">
