@@ -34,7 +34,7 @@ const AccommodationsDisplay = ({
       <h1 className="text-2xl ml-10 font-semibold text-dm-light">
         Accommodation
       </h1>
-      <div className="flex items-center gap-10 xs:gap-1 mt-4 justify-center">
+      <div className="flex items-center mt-4 justify-center">
         {/* Previous Button */}
         <button
           onClick={handlePrevious}
