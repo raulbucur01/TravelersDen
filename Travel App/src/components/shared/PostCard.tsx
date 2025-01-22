@@ -7,6 +7,7 @@ import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
 import Loader from "./Loader";
 import { useState } from "react";
 import MediaCarousel from "./MediaCarousel";
+import ExpandableText from "./ExpandableText";
 
 type PostCardProps = {
   post: IBasePost;
@@ -75,7 +76,11 @@ const PostCard = ({ post }: PostCardProps) => {
 
       <Link to={`/posts/${post.postId}`}>
         <div className="small-medium lg:base-medium py-5">
-          <h1>{post.caption}</h1>
+          <ExpandableText
+            text={post.caption}
+            maxLength={47}
+            className="whitespace-pre-line overflow-hidden"
+          />
           <ul className="flex gap-1 mt-2">
             {separatedPostTags.map((tag: string) => (
               <li key={tag} className="text-dm-light-3">

@@ -31,10 +31,7 @@ const AccommodationsDisplay = ({
 
   return (
     <div className="gap-4 ml-10 mr-10 w-auto">
-      <h1 className="text-2xl ml-10 font-semibold text-dm-light">
-        Accommodation
-      </h1>
-      <div className="flex items-center mt-4 justify-center">
+      <div className="flex items-center justify-center">
         {/* Previous Button */}
         <button
           onClick={handlePrevious}
@@ -60,6 +57,8 @@ const AccommodationsDisplay = ({
                 {accommodations[currentIndex].name}
               </h2>
               <ExpandableText
+                key={currentIndex}
+                maxCharsPerLine={40}
                 text={accommodations[currentIndex].description}
                 maxLength={50}
                 className="whitespace-pre-line overflow-hidden"

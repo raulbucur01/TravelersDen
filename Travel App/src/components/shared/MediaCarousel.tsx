@@ -4,12 +4,18 @@ type MediaCarouselProps = {
   mediaUrls: any[];
   autoSlide?: boolean;
   autoSlideInterval?: number;
+  customStyles?: {
+    container?: string; // For carousel container
+    image?: string; // For images
+    video?: string; // For videos
+  };
 };
 
 const MediaCarousel = ({
   mediaUrls,
   autoSlide = false,
   autoSlideInterval = 3000,
+  customStyles = {},
 }: MediaCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -27,7 +33,7 @@ const MediaCarousel = ({
   }, []);
 
   return (
-    <div className="overflow-hidden relative">
+    <div className={`overflow-hidden relative ${customStyles.container || ""}`}>
       <div
         className="flex transition-transform ease-out duration-500"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -41,12 +47,18 @@ const MediaCarousel = ({
               <img
                 src={media.url}
                 alt={`media-${index}`}
-                className="post-card_img"
+                className={
+                  customStyles.image ? customStyles.image : "post-card_img"
+                }
               />
             ) : media.type === "Video" ? (
               <video
                 controls
-                className="post-card_img bg-black z-10"
+                className={
+                  customStyles.video
+                    ? customStyles.video
+                    : "post-card_img bg-black z-10"
+                }
                 src={media.url}
                 autoPlay
                 onClick={(e) => {
