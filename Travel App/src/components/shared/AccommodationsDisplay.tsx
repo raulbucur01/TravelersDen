@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button } from "../ui/button";
-import { IAccommodation, IDisplayedAccommodation } from "@/types";
+import { IDisplayedAccommodation } from "@/types";
 import { formatToLongDate } from "@/lib/utils";
+import ExpandableText from "./ExpandableText";
 
 type AccommodationsDisplayProps = {
   accommodations: IDisplayedAccommodation[];
@@ -10,21 +11,10 @@ type AccommodationsDisplayProps = {
 const AccommodationsDisplay = ({
   accommodations,
 }: AccommodationsDisplayProps) => {
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
   const handleClick = (link: string) => {
     window.open(link, "_blank"); // Opens the link in a new tab
-  };
-
-  const toggleDescription = (index: number) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
-
-  const truncateText = (text: string, maxLength: number = 150) => {
-    return text.length > maxLength
-      ? text.substring(0, maxLength) + "..."
-      : text;
   };
 
   const handlePrevious = () => {
@@ -40,7 +30,7 @@ const AccommodationsDisplay = ({
   };
 
   return (
-    <div className="gap-4 ml-10 mr-10">
+    <div className="gap-4 ml-10 mr-10 w-auto">
       <h1 className="text-2xl ml-10 font-semibold text-dm-light">
         Accommodation
       </h1>
@@ -69,25 +59,11 @@ const AccommodationsDisplay = ({
               <h2 className="text-lg font-bold text-left text-dm-light">
                 {accommodations[currentIndex].name}
               </h2>
-              <p
-                className="text-dm-light mt-2 whitespace-pre-line overflow-hidden"
-                style={{
-                  maxHeight: expandedIndex === currentIndex ? "none" : "4.5em", // Adjust preview height for the collapsed state
-                  display: "-webkit-box", // For multiline truncation
-                  WebkitLineClamp: expandedIndex === currentIndex ? "none" : 3, // Limit lines
-                  WebkitBoxOrient: "vertical",
-                }}
-              >
-                {expandedIndex === currentIndex
-                  ? accommodations[currentIndex].description
-                  : truncateText(accommodations[currentIndex].description)}
-              </p>
-              <button
-                className="text-dm-dark-4 mt-2"
-                onClick={() => toggleDescription(currentIndex)}
-              >
-                {expandedIndex === currentIndex ? "less" : "more"}
-              </button>
+              <ExpandableText
+                text={accommodations[currentIndex].description}
+                maxLength={50}
+                className="whitespace-pre-line overflow-hidden"
+              />
             </div>
 
             {/* Middle: Price and Dates */}
@@ -118,7 +94,7 @@ const AccommodationsDisplay = ({
 
             {/* Right: Map */}
             <div className="lg:w-1/3 lg:pl-4">
-              <p className="text-dm-light text-center">MAP</p>
+              <p className="text-dm-light text-center">Toggle MAP/Photos</p>
             </div>
           </div>
           {/* More Button */}

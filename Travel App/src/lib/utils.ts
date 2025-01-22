@@ -235,3 +235,15 @@ export const formatToLongDate = (dateString: string | null): string => {
     year: "numeric",
   }).format(date);
 };
+
+/**
+ * Truncates a given text to a specified maximum length.
+ * Adds an ellipsis ("...") if the text exceeds the maxLength.
+ *
+ * @param text - The text to truncate.
+ * @param maxLength - The maximum length of the text. Defaults to 150.
+ * @returns The truncated text.
+ */
+export const truncateText = (text: string, maxLength: number = 150): string => {
+  return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+};

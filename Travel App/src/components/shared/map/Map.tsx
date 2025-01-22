@@ -4,8 +4,8 @@ import "@tomtom-international/web-sdk-maps/dist/maps.css";
 import * as tt from "@tomtom-international/web-sdk-maps";
 
 import { useGetMapSearchResults } from "@/lib/react-query/queriesAndMutations";
-import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { Input } from "../../ui/input";
+import { Button } from "../../ui/button";
 import MapSearchSuggestions from "./MapSearchSuggestions";
 import { ISuggestionInfo } from "@/types";
 import { useDebounce } from "use-debounce";

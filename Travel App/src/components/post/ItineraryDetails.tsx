@@ -2,7 +2,7 @@ import { useGetItineraryDetails } from "@/lib/react-query/queriesAndMutations";
 import React from "react";
 import Loader from "../shared/Loader";
 import AccommodationsDisplay from "../shared/AccommodationsDisplay";
-import Map from "../shared/Map";
+import Map from "../shared/map/Map";
 
 const ItineraryDetails = ({ id }: { id: string }) => {
   console.log(id);
@@ -15,9 +15,7 @@ const ItineraryDetails = ({ id }: { id: string }) => {
   }
 
   return (
-    <div>
-      <AccommodationsDisplay accommodations={itineraryData.accommodations} />
-    </div>
+    <AccommodationsDisplay accommodations={itineraryData.accommodations} />
   );
 };
 

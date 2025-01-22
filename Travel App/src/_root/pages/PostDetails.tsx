@@ -10,6 +10,7 @@ import { formatToRelativeDate } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import MediaCarousel from "@/components/shared/MediaCarousel";
 import ItineraryDetails from "@/components/post/ItineraryDetails";
+import ExpandableText from "@/components/shared/ExpandableText";
 
 const PostDetails = () => {
   const { id } = useParams();
@@ -35,10 +36,12 @@ const PostDetails = () => {
         <div className="overflow-scroll custom-scrollbar">
           <div className="post_details-container">
             <div className="post_details-card">
+              {/* Media Carousel */}
               <div className="post_details-media-carousel">
                 <MediaCarousel mediaUrls={post.mediaUrls} />
               </div>
 
+              {/* Post Details Top Info */}
               <div className="post_details-info">
                 <div className="flex-between w-full">
                   <Link
@@ -104,13 +107,16 @@ const PostDetails = () => {
 
                 <hr className="border w-full border-dm-accent" />
 
+                {/* Post Caption and Body + Tags */}
                 <div className="flex flex-col flex-1 w-full small-medium lg:base-regular">
                   <h1 className="base-medium lg:body-bold text-dm-light mb-4">
                     {post.caption}
                   </h1>
-                  <p className="text-base text-dm-light flex-grow">
-                    {post.body}
-                  </p>
+                  <ExpandableText
+                    text={post.body}
+                    maxLength={250}
+                    className="whitespace-pre-line overflow-hidden"
+                  />
                   <ul className="flex gap-1 mt-2 self-center">
                     {separatedPostTags.map((tag: string) => (
                       <li key={tag} className="text-dm-dark-4">
@@ -120,12 +126,15 @@ const PostDetails = () => {
                   </ul>
                 </div>
 
+                {/* Post Stats */}
                 <div className="w-full">
                   <PostStats post={post} userId={currentUser.userId} />
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Itinerary data if it is an itinerary post */}
           {post.isItinerary && <ItineraryDetails id={post.postId} />}
 
           <CommentSection postId={post.postId} />

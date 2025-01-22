@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { watch } from "node:fs";
 import FileUploader from "../shared/FileUploader";
-import Map from "../shared/Map";
+import Map from "../shared/map/Map";
 
 type TripStepFormProps = {
   fieldName: string; // Field name for form context, e.g., "accommodations"
