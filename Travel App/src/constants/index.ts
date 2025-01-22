@@ -24,6 +24,11 @@ export const sidebarLinks = [
     route: "/create-post",
     label: "Create Post",
   },
+  {
+    imgURL: "/assets/icons/map.png",
+    route: "/map",
+    label: "Map",
+  },
 ];
 
 export const bottombarLinks = [

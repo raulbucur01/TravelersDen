@@ -6,7 +6,6 @@ import { useUserContext } from "@/context/AuthContext";
 import { sidebarLinks } from "@/constants";
 import { INavLink } from "@/types";
 import { ModeToggle } from "../ModeToggle";
-import Loader from "./Loader";
 
 const LeftSidebar = () => {
   const navigate = useNavigate();

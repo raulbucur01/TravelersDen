@@ -248,7 +248,7 @@ const Map = ({
   };
 
   return (
-    <div className="container h-full w-full relative">
+    <div className="h-full w-full relative">
       {/* Map Container */}
       <div
         ref={mapElement}

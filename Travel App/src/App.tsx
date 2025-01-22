@@ -8,6 +8,7 @@ import {
   AllUsers,
   CreatePost,
   Profile,
+  MapPage,
 } from "./_root/pages";
 import PostDetails from "./_root/pages/PostDetails";
 import RootLayout from "./_root/RootLayout";
@@ -33,6 +34,7 @@ const App = () => {
           <Route path="/create-post" element={<CreatePost />} />
           <Route path="/posts/:id" element={<PostDetails />} />
           <Route path="/profile/:id/*" element={<Profile />} />
+          <Route path="/map" element={<MapPage />} />
         </Route>
       </Routes>
     </main>
