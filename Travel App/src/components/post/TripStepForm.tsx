@@ -24,7 +24,7 @@ const TripStepForm = ({ fieldName }: TripStepFormProps) => {
   });
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-10">
       <h3 className="text-lg font-semibold">Trip Steps</h3>
       {fields.map((field, index) => (
         <div
@@ -41,12 +41,10 @@ const TripStepForm = ({ fieldName }: TripStepFormProps) => {
             ✕
           </Button>
 
+          <div className="top-left-index-number">{index + 1}</div>
+
           {/* Left Section */}
           <div className="flex-1 flex flex-col gap-4">
-            <div className="text-sm font-medium text-dm-accent">
-              {index + 1}.
-            </div>
-
             <FormField
               control={control}
               name={`${fieldName}.${index}.description`}

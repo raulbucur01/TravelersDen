@@ -311,6 +311,11 @@ body {
   .user-card {
     @apply flex-center flex-col gap-4 border border-dark-4 rounded-[20px] px-5 py-8;
   }
+
+  /* More */
+  .top-left-index-number {
+    @apply absolute -top-1 -left-1 transform -translate-x-1/2 -translate-y-1/2 bg-dm-dark text-white text-xl font-bold rounded-full h-12 w-12 flex items-center justify-center;
+  }
 }
 
 @layer components {

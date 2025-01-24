@@ -16,9 +16,7 @@ const TripStepDisplay = ({ tripSteps }: TripStepDisplayProps) => {
           key={index}
         >
           {/* Left: Step Number */}
-          <div className="absolute top-0 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-dm-dark text-white text-xl font-bold rounded-full h-12 w-12 flex items-center justify-center">
-            {index + 1}
-          </div>
+          <div className="top-left-index-number">{index + 1}</div>
 
           {/* Left: Carousel */}
           <div className="lg:w-1/3 lg:pr-4 lg:border-r border-b border-dm-dark lg:border-b-0 pb-4 lg:pb-0 max-w-[400px]">
