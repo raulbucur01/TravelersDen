@@ -15,7 +15,8 @@ Documentation pdf (in romanian) with photos and video tutorial at the end:
 - Map integration using TomTom Api
 - Comment section for each post where users can interact and discuss (with delete, edit features)
 
-# Technologies: React, C#, Entity Framework, Tanstack React Query, Appwrite, Tailwind.css
+# Technologies: 
+React, C#, Entity Framework, Tanstack React Query, Appwrite, Tailwind.css
 
 # 2. Technologies
 # Folder structure
