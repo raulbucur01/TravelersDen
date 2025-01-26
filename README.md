@@ -22,6 +22,8 @@ React, C#, Entity Framework, Tanstack React Query, Appwrite, Tailwind.css
 - [Frontend](https://drive.google.com/file/d/1-ZsZ8X8o3Lq-vsMMBDgfD3nv0HbB3bg2/view?usp=sharing)
 - [Backend](https://drive.google.com/file/d/1xGUn2FjZiKuiblOFDTyn5zOtoVIIF5mg/view?usp=sharing)
 
+# 3. [Architectural diagram](https://drive.google.com/file/d/1MInfcX1eKHq9CzmHIDOFlDCYQAj0f1Ww/view?usp=sharing)
+
 
 
   
