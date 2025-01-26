@@ -26,6 +26,5 @@ React, C#, Entity Framework, Tanstack React Query, Appwrite, Tailwind.css
 
 # 4. Installation procedure
 Unfortunately momentarily it is not possible to use the app on other devices as this is a feature that will be made possible in the future.
-You can see the app workflow in this [video](https://drive.google.com/file/d/1ECst38NeP8ABaqFEIMk-8Bt-
-pUdMvG4f/view?usp=sharing)
+You can see the app workflow in this [video](https://drive.google.com/file/d/1ECst38NeP8ABaqFEIMk-8Bt-pUdMvG4f/view?usp=sharing)
   
