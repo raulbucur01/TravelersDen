@@ -3,7 +3,7 @@
 Travel App is a social platform where users can share their travel experiences and itineraries, explore places, and connect with other travelers.
 Built with a React frontend and a C# backend using Entity Framework.
 Documentation pdf (in romanian) with photos and video tutorial at the end:
-[Link](https://drive.google.com/file/d/1mXvs3_6OCUyiA467SEgyCYgoSoJFoJnc/view?usp=sharing) 
+[https://drive.google.com/file/d/1mXvs3_6OCUyiA467SEgyCYgoSoJFoJnc/view?usp=sharing](https://drive.google.com/file/d/1mXvs3_6OCUyiA467SEgyCYgoSoJFoJnc/view?usp=sharing) 
 # Key Features:
 - User authentication and session management made with the help of the Appwrite cloud service
 - Home feed with scrollable posts
