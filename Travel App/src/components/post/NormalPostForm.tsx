@@ -15,28 +15,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
-import { ItineraryPostValidation } from "@/lib/validation";
+import { NormalPostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import {
-  useCreateItineraryPost,
+  useCreateNormalPost,
   // useUpdatePost,
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import AccommodationForm from "./AccommodationForm";
-import TripStepForm from "./TripStepForm";
+import { IBasePost } from "@/types";
 
-type ItineraryPostCreationProps = {
-  post?: Models.Document;
+type NormalPostFormProps = {
+  post?: IBasePost;
   action: "Create" | "Update";
 };
 
-const ItineraryPostCreation = ({
-  post,
-  action,
-}: ItineraryPostCreationProps) => {
+const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
-    useCreateItineraryPost();
+    useCreateNormalPost();
   // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
   //   useUpdatePost();
   const isLoadingUpdate = false;
@@ -46,42 +42,19 @@ const ItineraryPostCreation = ({
   const navigate = useNavigate();
 
   // 1. Define your form.
-  const form = useForm<z.infer<typeof ItineraryPostValidation>>({
-    resolver: zodResolver(ItineraryPostValidation),
+  const form = useForm<z.infer<typeof NormalPostValidation>>({
+    resolver: zodResolver(NormalPostValidation),
     defaultValues: {
       caption: post ? post?.caption : "",
       body: post ? post?.body : "",
       files: [],
       location: post ? post?.location : "",
-      tags: post ? post?.tags.join(",") : "",
-      accommodations: post?.accommodations || [],
-      tripSteps: post?.tripSteps || [],
+      tags: post ? post?.tags : "",
     },
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof ItineraryPostValidation>) {
-    const formattedValues = {
-      ...values,
-      accommodations: values.accommodations.map((accommodation) => ({
-        ...accommodation,
-        startDate: accommodation.startDate
-          ? accommodation.startDate.toISOString()
-          : null,
-        endDate: accommodation.endDate
-          ? accommodation.endDate.toISOString()
-          : null,
-      })),
-
-      tripSteps: values.tripSteps.map((tripStep, index) => ({
-        ...tripStep,
-        stepNumber: index + 1,
-      })),
-    };
-
-    // Log the formatted values
-    console.log("Formatted values:", formattedValues);
-
+  async function onSubmit(values: z.infer<typeof NormalPostValidation>) {
     // if (post && action === "Update") {
     //   const updatedPost = await updatePost({
     //     ...values,
@@ -100,7 +73,7 @@ const ItineraryPostCreation = ({
     // }
 
     const newPost = await createPost({
-      ...formattedValues,
+      ...values,
       userId: user.userId,
     });
 
@@ -112,6 +85,8 @@ const ItineraryPostCreation = ({
 
     navigate("/");
   }
+
+  console.log(post?.mediaUrls);
 
   return (
     <Form {...form}>
@@ -127,7 +102,7 @@ const ItineraryPostCreation = ({
               <FormLabel className="shad-form_label">Caption</FormLabel>
               <FormControl>
                 <Textarea
-                  className="itinerary-textarea custom-scrollbar"
+                  className="shad-textarea custom-scrollbar"
                   {...field}
                 />
               </FormControl>
@@ -140,10 +115,10 @@ const ItineraryPostCreation = ({
           name="body"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Trip Summary</FormLabel>
+              <FormLabel className="shad-form_label">Body</FormLabel>
               <FormControl>
                 <Textarea
-                  className="itinerary-textarea custom-scrollbar"
+                  className="shad-textarea custom-scrollbar"
                   {...field}
                 />
               </FormControl>
@@ -156,7 +131,7 @@ const ItineraryPostCreation = ({
           name="files"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Cover Media</FormLabel>
+              <FormLabel className="shad-form_label">Photos</FormLabel>
               <FormControl>
                 <FileUploader
                   fieldChange={field.onChange}
@@ -172,9 +147,7 @@ const ItineraryPostCreation = ({
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">
-                Trip Location(s)
-              </FormLabel>
+              <FormLabel className="shad-form_label">Add Location</FormLabel>
               <FormControl>
                 <Input type="text" className="shad-input" {...field} />
               </FormControl>
@@ -202,11 +175,6 @@ const ItineraryPostCreation = ({
             </FormItem>
           )}
         />
-
-        <AccommodationForm fieldName="accommodations" />
-
-        <TripStepForm fieldName="tripSteps" />
-
         <div className="flex gap-4 items-center justify-end">
           <Button
             type="button"
@@ -230,4 +198,4 @@ const ItineraryPostCreation = ({
   );
 };
 
-export default ItineraryPostCreation;
+export default NormalPostForm;

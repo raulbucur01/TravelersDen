@@ -9,3 +9,5 @@ export { default as Profile } from "./Profile";
 // export { default as LikedPosts } from "./LikedPosts";
 export { default as AllUsers } from "./AllUsers";
 export { default as MapPage } from "./MapPage";
+export { default as UpdatePost } from "./UpdatePost";
+export { default as PostDetails } from "./PostDetails";

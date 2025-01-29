@@ -205,11 +205,14 @@ export const useGetRecentPosts = () => {
   });
 };
 
-export const useGetItineraryDetails = (postId: string) => {
+export const useGetItineraryDetails = (
+  postId: string,
+  enabledFlag: boolean = true // used at editing post to fetch the itinerary details only in Update mode
+) => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_ITINERARY_DETAILS, postId],
     queryFn: () => getItineraryDetails(postId),
-    enabled: !!postId,
+    enabled: !!postId && enabledFlag,
   });
 };
 
@@ -227,7 +230,7 @@ export const useGetPostSavedBy = (postId: string) => {
   });
 };
 
-export const useGetUserById = (userId: string) => {
+export const useGetUserById = (userId: string | undefined) => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_USER_BY_ID, userId],
     queryFn: () => getUserById(userId),

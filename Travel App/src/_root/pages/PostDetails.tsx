@@ -25,7 +25,7 @@ const PostDetails = () => {
   }
 
   // Convert tags into an array
-  const separatedPostTags = post.tags?.replace(/ /g, "").split(",") || [];
+  const separatedPostTags = post?.tags?.replace(/ /g, "").split(",") || [];
 
   const handleDeletePost = () => {};
   return (
@@ -40,7 +40,7 @@ const PostDetails = () => {
               <div className="post_details-card">
                 {/* Media Carousel */}
                 <div className="post_details-media-carousel">
-                  <MediaCarousel mediaUrls={post.mediaUrls} />
+                  <MediaCarousel mediaUrls={post!.mediaUrls} />
                 </div>
 
                 {/* Post Details Top Info */}
@@ -65,11 +65,11 @@ const PostDetails = () => {
                         </p>
                         <div className="flex-center gap-2 text-dm-dark-4">
                           <p className="subtle-semibold lg:small-regular ">
-                            {formatToRelativeDate(post.createdAt)}
+                            {formatToRelativeDate(post!.createdAt)}
                           </p>
                           •
                           <p className="subtle-semibold lg:small-regular">
-                            {post.location}
+                            {post!.location}
                           </p>
                         </div>
                       </div>
@@ -112,10 +112,10 @@ const PostDetails = () => {
                   {/* Post Caption and Body + Tags */}
                   <div className="flex flex-col flex-1 w-full small-medium lg:base-regular">
                     <h1 className="base-medium lg:body-bold text-dm-light mb-4">
-                      {post.caption}
+                      {post!.caption}
                     </h1>
                     <ExpandableText
-                      text={post.body}
+                      text={post!.body}
                       maxLength={250}
                       className="whitespace-pre-line overflow-hidden"
                     />
@@ -130,17 +130,16 @@ const PostDetails = () => {
 
                   {/* Post Stats */}
                   <div className="w-full">
-                    <PostStats post={post} userId={currentUser.userId} />
+                    <PostStats post={post!} userId={currentUser.userId} />
                   </div>
                 </div>
               </div>
-              <div className="">SIMILAR POSTS</div>
             </div>
 
             {/* Itinerary data if it is an itinerary post */}
-            {post.isItinerary && <ItineraryDetails id={post.postId} />}
+            {post!.isItinerary && <ItineraryDetails id={post!.postId} />}
 
-            <CommentSection postId={post.postId} />
+            <CommentSection postId={post!.postId} />
           </div>
 
           {/* Similar Posts Section */}

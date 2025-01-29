@@ -9,8 +9,9 @@ import {
   CreatePost,
   Profile,
   MapPage,
+  UpdatePost,
+  PostDetails,
 } from "./_root/pages";
-import PostDetails from "./_root/pages/PostDetails";
 import RootLayout from "./_root/RootLayout";
 import "./globals.css";
 import { Routes, Route } from "react-router-dom";
@@ -35,6 +36,7 @@ const App = () => {
           <Route path="/posts/:id" element={<PostDetails />} />
           <Route path="/profile/:id/*" element={<Profile />} />
           <Route path="/map" element={<MapPage />} />
+          <Route path="/update-post/:id" element={<UpdatePost />} />
         </Route>
       </Routes>
     </main>

@@ -12,17 +12,30 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePickerWithRange } from "../shared/DatePickerWithRange";
 import { DateRange } from "react-day-picker";
+import { IDisplayedAccommodation } from "@/types";
+import { useEffect } from "react";
 
 type AccommodationFormProps = {
   fieldName: string; // Field name for form context, e.g., "accommodations"
+  accommodations?: IDisplayedAccommodation[]; // when in update mode prefilled
 };
 
-const AccommodationForm = ({ fieldName }: AccommodationFormProps) => {
+const AccommodationForm = ({
+  fieldName,
+  accommodations,
+}: AccommodationFormProps) => {
   const { control, setValue } = useFormContext();
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: fieldName,
   });
+
+  // Prefill the form when updating
+  useEffect(() => {
+    if (accommodations && accommodations.length > 0) {
+      replace(accommodations); // Replaces the form fields with existing accommodations
+    }
+  }, [accommodations, replace]);
 
   return (
     <div className="flex flex-col gap-4">

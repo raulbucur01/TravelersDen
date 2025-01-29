@@ -4,15 +4,17 @@ import { Button } from "../ui/button";
 
 type FileUploaderProps = {
   fieldChange: (FILES: File[]) => void;
-  mediaUrls?: string[]; // Optional for existing media during editing
+  mediaUrls?: { url: string; type: string }[]; // Optional for existing media during editing
 };
 
 const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
   const [files, setFiles] = useState<File[]>([]);
   const [fileUrls, setFileUrls] = useState<string[]>(
-    mediaUrls.length ? mediaUrls : []
+    mediaUrls.length ? mediaUrls.map((media) => media.url) : []
   );
-  const [mimeTypes, setMimeTypes] = useState<string[]>([]);
+  const [mimeTypes, setMimeTypes] = useState<string[]>(
+    mediaUrls.length ? mediaUrls.map((media) => media.type) : []
+  );
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -25,9 +27,9 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
       ].slice(0, 6);
 
       const newMimeTypes = [
-        ...fileUrls,
+        ...mimeTypes,
         ...acceptedFiles.map((file) => file.type),
-      ];
+      ].slice(0, 6);
 
       setFiles(newFiles);
       setFileUrls(newFileUrls);

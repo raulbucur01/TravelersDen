@@ -15,25 +15,33 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
-import { NormalPostValidation } from "@/lib/validation";
+import { ItineraryPostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import {
-  useCreateNormalPost,
+  useCreateItineraryPost,
+  useGetItineraryDetails,
   // useUpdatePost,
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import AccommodationForm from "./AccommodationForm";
+import TripStepForm from "./TripStepForm";
+import { IBasePost } from "@/types";
+import Loader from "../shared/Loader";
 
-type NormalPostCreationProps = {
-  post?: Models.Document;
+type ItineraryPostFormProps = {
+  post?: IBasePost;
   action: "Create" | "Update";
 };
 
-const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
+const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
-    useCreateNormalPost();
+    useCreateItineraryPost();
   // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
   //   useUpdatePost();
+  const { data: itineraryData, isPending: isGettingItineraryData } =
+    useGetItineraryDetails(post?.postId ?? "", action === "Update");
+
   const isLoadingUpdate = false;
 
   const { user } = useUserContext();
@@ -41,19 +49,40 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
   const navigate = useNavigate();
 
   // 1. Define your form.
-  const form = useForm<z.infer<typeof NormalPostValidation>>({
-    resolver: zodResolver(NormalPostValidation),
+  const form = useForm<z.infer<typeof ItineraryPostValidation>>({
+    resolver: zodResolver(ItineraryPostValidation),
     defaultValues: {
       caption: post ? post?.caption : "",
       body: post ? post?.body : "",
       files: [],
       location: post ? post?.location : "",
-      tags: post ? post?.tags.join(",") : "",
+      tags: post ? post?.tags : "",
     },
   });
 
   // 2. Define a submit handler.
-  async function onSubmit(values: z.infer<typeof NormalPostValidation>) {
+  async function onSubmit(values: z.infer<typeof ItineraryPostValidation>) {
+    const formattedValues = {
+      ...values,
+      accommodations: values.accommodations.map((accommodation) => ({
+        ...accommodation,
+        startDate: accommodation.startDate
+          ? accommodation.startDate.toISOString()
+          : null,
+        endDate: accommodation.endDate
+          ? accommodation.endDate.toISOString()
+          : null,
+      })),
+
+      tripSteps: values.tripSteps.map((tripStep, index) => ({
+        ...tripStep,
+        stepNumber: index + 1,
+      })),
+    };
+
+    // Log the formatted values
+    console.log("Formatted values:", formattedValues);
+
     // if (post && action === "Update") {
     //   const updatedPost = await updatePost({
     //     ...values,
@@ -72,7 +101,7 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
     // }
 
     const newPost = await createPost({
-      ...values,
+      ...formattedValues,
       userId: user.userId,
     });
 
@@ -84,6 +113,11 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
 
     navigate("/");
   }
+
+  if (action === "Update" && (isGettingItineraryData || !itineraryData))
+    return <Loader />;
+
+  console.log(itineraryData);
 
   return (
     <Form {...form}>
@@ -99,7 +133,7 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
               <FormLabel className="shad-form_label">Caption</FormLabel>
               <FormControl>
                 <Textarea
-                  className="shad-textarea custom-scrollbar"
+                  className="itinerary-textarea custom-scrollbar"
                   {...field}
                 />
               </FormControl>
@@ -112,10 +146,10 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
           name="body"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Body</FormLabel>
+              <FormLabel className="shad-form_label">Trip Summary</FormLabel>
               <FormControl>
                 <Textarea
-                  className="shad-textarea custom-scrollbar"
+                  className="itinerary-textarea custom-scrollbar"
                   {...field}
                 />
               </FormControl>
@@ -128,7 +162,7 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
           name="files"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Photos</FormLabel>
+              <FormLabel className="shad-form_label">Cover Media</FormLabel>
               <FormControl>
                 <FileUploader
                   fieldChange={field.onChange}
@@ -144,7 +178,9 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
           name="location"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="shad-form_label">Add Location</FormLabel>
+              <FormLabel className="shad-form_label">
+                Trip Location(s)
+              </FormLabel>
               <FormControl>
                 <Input type="text" className="shad-input" {...field} />
               </FormControl>
@@ -172,6 +208,17 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
             </FormItem>
           )}
         />
+
+        <AccommodationForm
+          fieldName="accommodations"
+          accommodations={itineraryData?.accommodations}
+        />
+
+        <TripStepForm
+          fieldName="tripSteps"
+          tripSteps={itineraryData?.tripSteps}
+        />
+
         <div className="flex gap-4 items-center justify-end">
           <Button
             type="button"
@@ -195,4 +242,4 @@ const NormalPostCreation = ({ post, action }: NormalPostCreationProps) => {
   );
 };
 
-export default NormalPostCreation;
+export default ItineraryPostForm;

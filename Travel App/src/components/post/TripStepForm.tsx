@@ -11,17 +11,27 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FileUploader from "../shared/FileUploader";
 import Map from "../shared/map/Map";
+import { IDisplayedTripStep } from "@/types";
+import { useEffect } from "react";
 
 type TripStepFormProps = {
   fieldName: string; // Field name for form context, e.g., "accommodations"
+  tripSteps?: IDisplayedTripStep[]; // when in update mode prefilled
 };
 
-const TripStepForm = ({ fieldName }: TripStepFormProps) => {
+const TripStepForm = ({ fieldName, tripSteps }: TripStepFormProps) => {
   const { control, setValue } = useFormContext();
-  const { fields, append, remove } = useFieldArray({
+  const { fields, append, remove, replace } = useFieldArray({
     control,
     name: fieldName,
   });
+
+  // Prefill the form when updating
+  useEffect(() => {
+    if (tripSteps && tripSteps.length > 0) {
+      replace(tripSteps); // Replaces the form fields with existing accommodations
+    }
+  }, [tripSteps, replace]);
 
   return (
     <div className="flex flex-col gap-10">
@@ -74,7 +84,7 @@ const TripStepForm = ({ fieldName }: TripStepFormProps) => {
                   <FormControl>
                     <FileUploader
                       fieldChange={field.onChange}
-                      mediaUrls={[]} // Pre-fill for updates
+                      mediaUrls={tripSteps?.[index]?.mediaUrls || []} // Pre-fill for updates
                     />
                   </FormControl>
                   <FormMessage className="shad-form_message" />
@@ -117,6 +127,8 @@ const TripStepForm = ({ fieldName }: TripStepFormProps) => {
                         setValue(`${fieldName}.${index}.longitude`, longitude);
                         setValue(`${fieldName}.${index}.latitude`, latitude);
                       }}
+                      preselectedLongitude={tripSteps?.[index]?.longitude}
+                      preselectedLatitude={tripSteps?.[index]?.latitude}
                     />
                   </FormControl>
                   <FormMessage />

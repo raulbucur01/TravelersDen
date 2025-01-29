@@ -1,6 +1,7 @@
 import { ID, ImageGravity } from "appwrite";
 
 import {
+  IBasePost,
   IComment,
   IDisplayedAccommodation,
   IDisplayedTripStep,
@@ -153,7 +154,7 @@ export async function getCurrentUser() {
   }
 }
 
-export async function getUserById(id: string) {
+export async function getUserById(id: string | undefined) {
   try {
     const response = await axios.get(API_BASE_URL + `/users/${id}`);
     return response.data;
@@ -312,26 +313,6 @@ export async function getRecentPosts() {
   }
 }
 
-export async function getItineraryDetails(postId: string): Promise<
-  | {
-      tripSteps: IDisplayedTripStep[];
-      accommodations: IDisplayedAccommodation[];
-    }
-  | undefined
-> {
-  try {
-    console.log(postId);
-    const response = await axios.get<{
-      tripSteps: IDisplayedTripStep[];
-      accommodations: IDisplayedAccommodation[];
-    }>(API_BASE_URL + `/posts/${postId}/itinerary-details`);
-
-    return response.data;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 export async function likePost(userId: string, postId: string) {
   try {
     const response = await axios.post(API_BASE_URL + "/posts/like", {
@@ -400,9 +381,33 @@ export async function getPostSavedBy(postId: string) {
   }
 }
 
-export async function getPostById(postId: string) {
+export async function getPostById(
+  postId: string
+): Promise<IBasePost | undefined> {
   try {
-    const response = await axios.get(API_BASE_URL + `/posts/${postId}`);
+    const response = await axios.get<IBasePost>(
+      API_BASE_URL + `/posts/${postId}`
+    );
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getItineraryDetails(postId: string): Promise<
+  | {
+      tripSteps: IDisplayedTripStep[];
+      accommodations: IDisplayedAccommodation[];
+    }
+  | undefined
+> {
+  try {
+    console.log(postId);
+    const response = await axios.get<{
+      tripSteps: IDisplayedTripStep[];
+      accommodations: IDisplayedAccommodation[];
+    }>(API_BASE_URL + `/posts/${postId}/itinerary-details`);
+
     return response.data;
   } catch (error) {
     console.log(error);
