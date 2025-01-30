@@ -8,11 +8,15 @@ import {
   INewItineraryPost,
   INewNormalPost,
   INewUser,
-  IUpdatePost,
+  IUpdateNormalPost,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
 import axios from "axios";
+
+const API_BASE_URL = apiConfig.backendApiUrl;
+const AI_API_BASE_URL = apiConfig.recommApiUrl;
+const TOMTOM_API_KEY = import.meta.env.VITE_TOMTOM_API_KEY;
 
 // utility
 export const processFiles = async (files: File[]) => {
@@ -62,10 +66,6 @@ export const processFiles = async (files: File[]) => {
   return results;
 };
 // utility
-
-const API_BASE_URL = apiConfig.backendApiUrl;
-const AI_API_BASE_URL = apiConfig.recommApiUrl;
-const TOMTOM_API_KEY = import.meta.env.VITE_TOMTOM_API_KEY;
 
 export async function createUserAccount(user: INewUser) {
   try {
@@ -214,6 +214,21 @@ export async function createNormalPost(post: INewNormalPost) {
   }
 }
 
+export async function updateNormalPost(post: IUpdateNormalPost) {
+  try {
+    console.log("in update api");
+    console.log(post);
+    console.log("newFiles", post.newFiles);
+    console.log("deletedFiles", post.deletedFiles);
+
+    const newFiles = await processFiles(post.newFiles);
+
+    return;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export async function createItineraryPost(post: INewItineraryPost) {
   try {
     const mainFiles = await processFiles(post.files);
@@ -289,14 +304,6 @@ export async function deleteFile(fileId: string) {
     await storage.deleteFile(appwriteConfig.storageId, fileId);
 
     return { status: "ok" };
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-export async function updatePost(post: IUpdatePost) {
-  try {
-    return;
   } catch (error) {
     console.log(error);
   }

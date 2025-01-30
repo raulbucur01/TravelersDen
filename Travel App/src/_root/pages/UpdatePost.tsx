@@ -1,19 +1,14 @@
 import ItineraryPostForm from "@/components/post/ItineraryPostForm";
 import NormalPostForm from "@/components/post/NormalPostForm";
 import Loader from "@/components/shared/Loader";
-import {
-  useGetItineraryDetails,
-  useGetPostById,
-} from "@/lib/react-query/queriesAndMutations";
+import { useGetPostById } from "@/lib/react-query/queriesAndMutations";
 import { useParams } from "react-router-dom";
 
 const UpdatePost = () => {
   const { id } = useParams();
-  console.log(id);
   const { data: post, isPending: isGettingPost } = useGetPostById(id || "");
 
   if (isGettingPost || !post) return <Loader />;
-  console.log(post);
 
   return (
     <div className="flex flex-1 justify-center bg-dm-dark min-h-screen">

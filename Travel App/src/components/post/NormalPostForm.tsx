@@ -19,11 +19,12 @@ import { NormalPostValidation } from "@/lib/validation";
 import { Models } from "appwrite";
 import {
   useCreateNormalPost,
-  // useUpdatePost,
+  useUpdateNormalPost,
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { IBasePost } from "@/types";
+import { useEffect, useState } from "react";
 
 type NormalPostFormProps = {
   post?: IBasePost;
@@ -33,13 +34,26 @@ type NormalPostFormProps = {
 const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
     useCreateNormalPost();
-  // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
-  //   useUpdatePost();
-  const isLoadingUpdate = false;
+  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+    useUpdateNormalPost();
 
   const { user } = useUserContext();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [deletedFiles, setDeletedFiles] = useState<string[]>([]);
+
+  const handleMediaUpdate = ({
+    newFiles,
+    deletedFiles,
+  }: {
+    newFiles: File[];
+    deletedFiles: string[];
+  }) => {
+    setNewFiles(newFiles);
+    setDeletedFiles(deletedFiles);
+  };
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof NormalPostValidation>>({
@@ -47,7 +61,7 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
     defaultValues: {
       caption: post ? post?.caption : "",
       body: post ? post?.body : "",
-      files: [],
+      files: post ? post?.mediaUrls : [],
       location: post ? post?.location : "",
       tags: post ? post?.tags : "",
     },
@@ -55,23 +69,29 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof NormalPostValidation>) {
-    // if (post && action === "Update") {
-    //   const updatedPost = await updatePost({
-    //     ...values,
-    //     postId: post.$id,
-    //     imageId: post?.imageId,
-    //     imageUrl: post?.imageUrl,
-    //   });
+    if (post && action === "Update") {
+      const updatedPost = await updatePost({
+        ...values,
+        postId: post.postId,
+        newFiles: newFiles,
+        deletedFiles: deletedFiles,
+        tags: values.tags ?? "", // Ensure tags is always a string
+      });
 
-    //   if (!updatedPost) {
-    //     return toast({
-    //       title: "Please try again",
-    //     });
-    //   }
+      // console.log("on update", values);
+      // console.log("newFiles", newFiles);
+      // console.log("deletedFiles", deletedFiles);
 
-    //   return navigate(`/posts/${post.$id}`);
-    // }
+      if (!updatedPost) {
+        return toast({
+          title: "Please try again",
+        });
+      }
 
+      return navigate(`/posts/${post.postId}`);
+    }
+
+    console.log("on create", values);
     const newPost = await createPost({
       ...values,
       userId: user.userId,
@@ -86,7 +106,7 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
     navigate("/");
   }
 
-  console.log(post?.mediaUrls);
+  // console.log(post?.mediaUrls);
 
   return (
     <Form {...form}>
@@ -136,6 +156,7 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
                 <FileUploader
                   fieldChange={field.onChange}
                   mediaUrls={post?.mediaUrls || []} // Pre-fill for updates
+                  onUpdate={action === "Update" ? handleMediaUpdate : undefined}
                 />
               </FormControl>
               <FormMessage className="shad-form_message" />

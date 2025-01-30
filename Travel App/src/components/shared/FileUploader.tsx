@@ -1,14 +1,27 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { FileWithPath, useDropzone } from "react-dropzone";
 import { Button } from "../ui/button";
 
 type FileUploaderProps = {
   fieldChange: (FILES: File[]) => void;
   mediaUrls?: { url: string; type: string }[]; // Optional for existing media during editing
+  onUpdate?: (updatedFiles: {
+    newFiles: File[];
+    deletedFiles: string[];
+  }) => void; // sent to parent for update
 };
 
-const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
-  const [files, setFiles] = useState<File[]>([]);
+const FileUploader = ({
+  fieldChange,
+  mediaUrls = [],
+  onUpdate,
+}: FileUploaderProps) => {
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [deletedFiles, setDeletedFiles] = useState<string[]>([]);
+  const [fileObjects, setFileObjects] = useState<any[]>(
+    mediaUrls.length ? mediaUrls.map(() => undefined) : []
+  );
+
   const [fileUrls, setFileUrls] = useState<string[]>(
     mediaUrls.length ? mediaUrls.map((media) => media.url) : []
   );
@@ -18,25 +31,28 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  useEffect(() => {
+    if (onUpdate) {
+      onUpdate({ newFiles, deletedFiles });
+    }
+  }, [newFiles, deletedFiles]);
+
   const onDrop = useCallback(
     (acceptedFiles: FileWithPath[]) => {
-      const newFiles = [...files, ...acceptedFiles].slice(0, 6); // Limit to 6 files
-      const newFileUrls = [
-        ...fileUrls,
-        ...acceptedFiles.map((file) => URL.createObjectURL(file)),
-      ].slice(0, 6);
+      if (fileUrls.length >= 6) return; // Prevent exceeding limit
+      const newFileObjects = acceptedFiles.slice(0, 6 - fileUrls.length); // Limit to 6 files
+      const newFileUrls = newFileObjects.map((file) =>
+        URL.createObjectURL(file)
+      );
+      const newMimeTypes = newFileObjects.map((file) => file.type);
 
-      const newMimeTypes = [
-        ...mimeTypes,
-        ...acceptedFiles.map((file) => file.type),
-      ].slice(0, 6);
-
-      setFiles(newFiles);
-      setFileUrls(newFileUrls);
-      fieldChange(newFiles);
-      setMimeTypes(newMimeTypes);
+      setFileObjects((prev: any) => [...prev, ...newFileObjects]);
+      setNewFiles((prev) => [...prev, ...newFileObjects]);
+      setFileUrls((prev) => [...prev, ...newFileUrls]);
+      setMimeTypes((prev) => [...prev, ...newMimeTypes]);
+      fieldChange([...newFiles, ...newFileObjects]);
     },
-    [files, fileUrls, fieldChange]
+    [newFiles, fileUrls, fieldChange]
   );
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -57,27 +73,38 @@ const FileUploader = ({ fieldChange, mediaUrls = [] }: FileUploaderProps) => {
   };
 
   const handleDelete = () => {
-    // Remove the current file from the arrays
-    const updatedFiles = files.filter((_, index) => index !== currentIndex);
-    const updatedFileUrls = fileUrls.filter(
-      (_, index) => index !== currentIndex
-    );
-    const updatedMimeTypes = mimeTypes.filter(
-      (_, index) => index !== currentIndex
-    );
+    const fileUrlToDelete = fileUrls[currentIndex];
 
-    // Update state and notify parent component
-    setFiles(updatedFiles);
-    setFileUrls(updatedFileUrls);
-    fieldChange(updatedFiles);
-    setMimeTypes(updatedMimeTypes);
-
-    // Adjust currentIndex if necessary
-    if (updatedFileUrls.length > 0) {
-      setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1));
+    if (mediaUrls.some((media) => media.url === fileUrlToDelete)) {
+      // File was originally in mediaUrls → Track it for deletion
+      setDeletedFiles((prev) => [...prev, fileUrlToDelete]);
+    } else {
+      // File was newly added → Remove from newFiles
+      setNewFiles((prev) =>
+        prev.filter((file) => file !== fileObjects[currentIndex])
+      );
     }
+
+    // Update file lists
+    setFileUrls((prev) => prev.filter((_, index) => index !== currentIndex));
+    setMimeTypes((prev) => prev.filter((_, index) => index !== currentIndex));
+    setFileObjects((prev: any) =>
+      prev.filter((_: any, index: any) => index !== currentIndex)
+    );
+
+    // Adjust currentIndex if needed
+    setCurrentIndex((prev) => (prev === 0 ? 0 : prev - 1));
+
+    fieldChange([
+      ...newFiles.filter((file) => file !== fileObjects[currentIndex]),
+    ]);
   };
 
+  // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+  // console.log("newFiles", newFiles);
+  // console.log("deletedFiles", deletedFiles);
+  // console.log("fileUrls", fileUrls);
+  // console.log("fileObjects", fileObjects);
   return (
     <div
       {...getRootProps()}

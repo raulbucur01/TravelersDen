@@ -235,3 +235,14 @@ export const formatToLongDate = (dateString: string | null): string => {
     year: "numeric",
   }).format(date);
 };
+
+/**
+ * Extracts the media file id from the appwrite media url
+ *
+ * @param {string} url - The appwrite media url
+ * @returns {string | null} The media file id
+ */
+export const extractAppwriteMediaFileId = (url: string): string | null => {
+  const match = url.match(/files\/([^\/]+)\/view/);
+  return match ? match[1] : null;
+};

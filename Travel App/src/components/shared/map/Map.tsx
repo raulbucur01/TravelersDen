@@ -137,7 +137,6 @@ const Map = ({
           }
 
           handleLocationPicked(lngLat.lng, lngLat.lat);
-          console.log("lngLat", [lngLat.lng, lngLat.lat]);
         });
 
         newMap.on("mouseenter", "POI", () => {
@@ -155,7 +154,6 @@ const Map = ({
 
   const createPopup = (mapInstance: tt.Map, feature: any) => {
     removePopup(); // Remove any existing popup
-    console.log("feature", feature);
     const popupContainer = document.createElement("div");
 
     // Use `createRoot` to render the React component into the popup container
@@ -194,12 +192,9 @@ const Map = ({
         try {
           const response = await refetchSearchResults();
           if (response?.data) {
-            console.log(response.data);
-
             const formattedSuggestions: ISuggestionInfo[] =
               formatMapSearchSuggestions(response.data.results);
 
-            console.log(formattedSuggestions);
             setSuggestions(formattedSuggestions);
           } else {
             console.log("No data returned");
@@ -243,7 +238,6 @@ const Map = ({
       markerRef.current = newMarker;
 
       handleLocationPicked(longitude, latitude);
-      console.log("lngLat", [longitude, latitude]);
     }
   };
 

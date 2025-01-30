@@ -31,12 +31,13 @@ import {
   getCommentLikeCount,
   getMapSearchResults,
   getItineraryDetails,
+  updateNormalPost,
 } from "../../api/api";
 import {
   INewItineraryPost,
   INewNormalPost,
   INewUser,
-  IUpdatePost,
+  IUpdateNormalPost,
 } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
 
@@ -92,19 +93,19 @@ export const useCreateItineraryPost = () => {
   });
 };
 
-// export const useUpdatePost = () => {
-//   const queryClient = useQueryClient();
+export const useUpdateNormalPost = () => {
+  const queryClient = useQueryClient();
 
-//   return useMutation({
-//     mutationFn: (post: IUpdatePost) => updatePost(post),
-//     onSuccess: (data) => {
-//       // we practically get the data after the mutation finishes
-//       queryClient.invalidateQueries({
-//         queryKey: [QUERY_KEYS.GET_POST_BY_ID, data?.$id],
-//       });
-//     },
-//   });
-// };
+  return useMutation({
+    mutationFn: (post: IUpdateNormalPost) => updateNormalPost(post),
+    onSuccess: (data) => {
+      // we practically get the data after the mutation finishes
+      // queryClient.invalidateQueries({
+      //   queryKey: [QUERY_KEYS.GET_POST_BY_ID],
+      // });
+    },
+  });
+};
 
 export const useLikePost = () => {
   const queryClient = useQueryClient();

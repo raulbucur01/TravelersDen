@@ -4,11 +4,9 @@ import AccommodationsDisplay from "../shared/AccommodationsDisplay";
 import TripStepDisplay from "../shared/TripStepDisplay";
 
 const ItineraryDetails = ({ id }: { id: string }) => {
-  console.log(id);
   const { data: itineraryData, isPending: isGettingItineraryData } =
     useGetItineraryDetails(id);
 
-  console.log(itineraryData);
   if (isGettingItineraryData || !itineraryData) {
     return <Loader />;
   }

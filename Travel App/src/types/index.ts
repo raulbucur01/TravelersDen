@@ -63,14 +63,14 @@ export type IAccommodation = {
   link: string;
 };
 
-export type IUpdatePost = {
+export type IUpdateNormalPost = {
   postId: string;
   caption: string;
-  imageId: string;
-  imageUrl: URL;
-  file: File[];
-  location?: string;
-  tags?: string;
+  body: string;
+  location: string;
+  tags: string;
+  newFiles: File[];
+  deletedFiles: string[];
 };
 
 export type IUser = {

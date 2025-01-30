@@ -18,7 +18,6 @@ namespace TravelAppBackendAPI.Controllers
             _context = context;
         }
 
-        // POST: api/User
         [HttpPost("normal")]
         public async Task<IActionResult> CreateNormalPost(CreateNormalPostDTO postDto)
         {
@@ -152,6 +151,49 @@ namespace TravelAppBackendAPI.Controllers
                     await transaction.RollbackAsync();
                     return StatusCode(500, $"Internal server error: {ex.Message}");
                 }
+            }
+        }
+
+        [HttpPut("normal/{id}")]
+        public async Task<IActionResult> UpdateNormalPost(string id, UpdateNormalPostDTO postDto)
+        {
+            try
+            {
+                var post = await _context.Posts.Include(p => p.Media)
+                    .FirstOrDefaultAsync(p => p.PostId == id);
+
+                if (post == null)
+                {
+                    return NotFound(new { Message = "Post not found." });
+                }
+
+                // Update basic post details
+                post.Caption = postDto.Caption;
+                post.Body = postDto.Body;
+                post.Location = postDto.Location;
+                post.Tags = postDto.Tags;
+
+                // Remove old media
+                _context.PostMedia.RemoveRange(post.Media);
+
+                // Add new media files
+                foreach (var file in postDto.Files)
+                {
+                    _context.PostMedia.Add(new PostMedia
+                    {
+                        PostId = post.PostId,
+                        AppwriteFileUrl = file.Url,
+                        MediaType = file.Type
+                    });
+                }
+
+                await _context.SaveChangesAsync();
+
+                return StatusCode(201, new { post.PostId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 

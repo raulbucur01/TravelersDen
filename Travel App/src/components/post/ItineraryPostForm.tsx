@@ -117,8 +117,6 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
   if (action === "Update" && (isGettingItineraryData || !itineraryData))
     return <Loader />;
 
-  console.log(itineraryData);
-
   return (
     <Form {...form}>
       <form
