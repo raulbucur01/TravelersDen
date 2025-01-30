@@ -8,11 +8,13 @@ import {
   INewItineraryPost,
   INewNormalPost,
   INewUser,
+  IUpdateItineraryPost,
   IUpdateNormalPost,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
 import axios from "axios";
+import { extractAppwriteStorageFileIdFromUrl } from "@/lib/utils";
 
 const API_BASE_URL = apiConfig.backendApiUrl;
 const AI_API_BASE_URL = apiConfig.recommApiUrl;
@@ -216,14 +218,55 @@ export async function createNormalPost(post: INewNormalPost) {
 
 export async function updateNormalPost(post: IUpdateNormalPost) {
   try {
-    console.log("in update api");
-    console.log(post);
-    console.log("newFiles", post.newFiles);
-    console.log("deletedFiles", post.deletedFiles);
+    let newFiles: { url: string; type: string }[] = [];
+    // add the new files to appwrite if any
+    if (post.newFiles.length > 0) {
+      newFiles = await processFiles(post.newFiles);
 
-    const newFiles = await processFiles(post.newFiles);
+      if (!newFiles) throw Error("Failed to process new files");
+    }
 
-    return;
+    // delete files from appwrite if any
+    if (post.deletedFiles.length > 0) {
+      const deletedFiles = await Promise.all(
+        post.deletedFiles.map(async (url) => {
+          const id = extractAppwriteStorageFileIdFromUrl(url);
+          try {
+            if (!id) return { id, success: false };
+
+            await deleteFile(id);
+            return { id, success: true };
+          } catch (error) {
+            console.error(`Failed to delete file ${id}:`, error);
+            return { id, success: false };
+          }
+        })
+      );
+
+      const allSuccessful = deletedFiles.every((file) => file.success);
+
+      if (!allSuccessful) throw Error("Failed to delete files");
+    }
+
+    const response = await axios.put(
+      API_BASE_URL + `/posts/normal/${post.postId}`,
+      {
+        caption: post.caption,
+        body: post.body,
+        location: post.location,
+        tags: post.tags,
+        newFiles: newFiles,
+        deletedFiles: post.deletedFiles,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log(response.data);
+    return response.data;
   } catch (error) {
     console.log(error);
   }
@@ -263,6 +306,67 @@ export async function createItineraryPost(post: INewItineraryPost) {
     );
 
     return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function updateItineraryPost(post: IUpdateItineraryPost) {
+  try {
+    console.log(post);
+    // let newFiles: { url: string; type: string }[] = [];
+    // // add the new files to appwrite if any
+    // if (post.newFiles.length > 0) {
+    //   newFiles = await processFiles(post.newFiles);
+
+    //   if (!newFiles) throw Error("Failed to process new files");
+    // }
+
+    // // delete files from appwrite if any
+    // if (post.deletedFiles.length > 0) {
+    //   const deletedFiles = await Promise.all(
+    //     post.deletedFiles.map(async (url) => {
+    //       const id = extractAppwriteStorageFileIdFromUrl(url);
+    //       try {
+    //         if (!id) return { id, success: false };
+
+    //         await deleteFile(id);
+    //         return { id, success: true };
+    //       } catch (error) {
+    //         console.error(`Failed to delete file ${id}:`, error);
+    //         return { id, success: false };
+    //       }
+    //     })
+    //   );
+
+    //   const allSuccessful = deletedFiles.every((file) => file.success);
+
+    //   if (!allSuccessful) throw Error("Failed to delete files");
+    // }
+
+    // const response = await axios.put(
+    //   API_BASE_URL + `/posts/itinerary/${post.postId}`,
+    //   {
+    //     caption: post.caption,
+    //     body: post.body,
+    //     location: post.location,
+    //     tags: post.tags,
+    //     newFiles: newFiles,
+    //     deletedFiles: post.deletedFiles,
+    //     tripSteps: post.tripSteps,
+    //     accommodations: post.accommodations,
+    //   },
+    //   {
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //   }
+    // );
+
+    // console.log(response.data);
+    // return response.data;
+
+    return;
   } catch (error) {
     console.log(error);
   }
@@ -409,7 +513,6 @@ export async function getItineraryDetails(postId: string): Promise<
   | undefined
 > {
   try {
-    console.log(postId);
     const response = await axios.get<{
       tripSteps: IDisplayedTripStep[];
       accommodations: IDisplayedAccommodation[];

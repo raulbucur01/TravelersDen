@@ -20,7 +20,7 @@ import { Models } from "appwrite";
 import {
   useCreateItineraryPost,
   useGetItineraryDetails,
-  // useUpdatePost,
+  useUpdateItineraryPost,
 } from "@/lib/react-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -28,6 +28,7 @@ import AccommodationForm from "./AccommodationForm";
 import TripStepForm from "./TripStepForm";
 import { IBasePost } from "@/types";
 import Loader from "../shared/Loader";
+import { useState } from "react";
 
 type ItineraryPostFormProps = {
   post?: IBasePost;
@@ -37,16 +38,43 @@ type ItineraryPostFormProps = {
 const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
     useCreateItineraryPost();
-  // const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
-  //   useUpdatePost();
+  const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
+    useUpdateItineraryPost();
   const { data: itineraryData, isPending: isGettingItineraryData } =
     useGetItineraryDetails(post?.postId ?? "", action === "Update");
-
-  const isLoadingUpdate = false;
 
   const { user } = useUserContext();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [deletedFiles, setDeletedFiles] = useState<string[]>([]);
+
+  const [newTripStepFiles, setNewTripStepFiles] = useState<{
+    [key: string]: File[];
+  }>({});
+  const [deletedTripStepFiles, setDeletedTripStepFiles] = useState<{
+    [key: string]: string[];
+  }>({});
+
+  const handleMediaUpdate = ({
+    newFiles,
+    deletedFiles,
+  }: {
+    newFiles: File[];
+    deletedFiles: string[];
+  }) => {
+    setNewFiles(newFiles);
+    setDeletedFiles(deletedFiles);
+  };
+
+  const handleTripStepMediaUpdate = (
+    newFiles: { [key: string]: File[] },
+    deletedFiles: { [key: string]: string[] }
+  ) => {
+    setNewTripStepFiles(newFiles);
+    setDeletedTripStepFiles(deletedFiles);
+  };
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof ItineraryPostValidation>>({
@@ -54,7 +82,7 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
     defaultValues: {
       caption: post ? post?.caption : "",
       body: post ? post?.body : "",
-      files: [],
+      files: post ? post?.mediaUrls : [],
       location: post ? post?.location : "",
       tags: post ? post?.tags : "",
     },
@@ -62,6 +90,56 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof ItineraryPostValidation>) {
+    console.log("Entered onSubmit");
+
+    if (post && action === "Update") {
+      const formattedValues = {
+        ...values,
+        accommodations: values.accommodations.map((accommodation) => ({
+          ...accommodation,
+          startDate: accommodation.startDate
+            ? accommodation.startDate.toISOString()
+            : null,
+          endDate: accommodation.endDate
+            ? accommodation.endDate.toISOString()
+            : null,
+        })),
+
+        tripSteps: values.tripSteps.map((tripStep, index) => ({
+          ...tripStep,
+          stepNumber: index + 1,
+          newFiles: newTripStepFiles[index],
+          deletedFiles: deletedTripStepFiles[index],
+        })),
+
+        deletedFiles: deletedFiles,
+        newFiles: newFiles,
+      };
+
+      // Log the formatted values
+      console.log("Formatted values:", formattedValues);
+      console.log("values:", values);
+      console.log("Formatted values:", formattedValues);
+      console.log("newFiles:", newFiles);
+      console.log("deletedFiles:", deletedFiles);
+      console.log("newTripStepFiles:", newTripStepFiles);
+      console.log("deletedTripStepFiles:", deletedTripStepFiles);
+
+      const updatedPost = await updatePost({
+        ...formattedValues,
+        postId: post.postId,
+        tags: values.tags ?? "", // Ensure tags is always a string
+      });
+
+      if (!updatedPost) {
+        return toast({
+          title: "Please try again",
+        });
+      }
+
+      return navigate(`/posts/${post.postId}`);
+    }
+
     const formattedValues = {
       ...values,
       accommodations: values.accommodations.map((accommodation) => ({
@@ -82,23 +160,6 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
 
     // Log the formatted values
     console.log("Formatted values:", formattedValues);
-
-    // if (post && action === "Update") {
-    //   const updatedPost = await updatePost({
-    //     ...values,
-    //     postId: post.$id,
-    //     imageId: post?.imageId,
-    //     imageUrl: post?.imageUrl,
-    //   });
-
-    //   if (!updatedPost) {
-    //     return toast({
-    //       title: "Please try again",
-    //     });
-    //   }
-
-    //   return navigate(`/posts/${post.$id}`);
-    // }
 
     const newPost = await createPost({
       ...formattedValues,
@@ -165,6 +226,7 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
                 <FileUploader
                   fieldChange={field.onChange}
                   mediaUrls={post?.mediaUrls || []} // Pre-fill for updates
+                  onUpdate={action === "Update" ? handleMediaUpdate : undefined}
                 />
               </FormControl>
               <FormMessage className="shad-form_message" />
@@ -212,10 +274,16 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
           accommodations={itineraryData?.accommodations}
         />
 
-        <TripStepForm
-          fieldName="tripSteps"
-          tripSteps={itineraryData?.tripSteps}
-        />
+        {action === "Create" ? (
+          <TripStepForm fieldName="tripSteps" />
+        ) : (
+          <TripStepForm
+            fieldName="tripSteps"
+            tripSteps={itineraryData?.tripSteps}
+            action="Update"
+            onTripStepMediaUpdate={handleTripStepMediaUpdate}
+          />
+        )}
 
         <div className="flex gap-4 items-center justify-end">
           <Button

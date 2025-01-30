@@ -242,7 +242,9 @@ export const formatToLongDate = (dateString: string | null): string => {
  * @param {string} url - The appwrite media url
  * @returns {string | null} The media file id
  */
-export const extractAppwriteMediaFileId = (url: string): string | null => {
-  const match = url.match(/files\/([^\/]+)\/view/);
+export const extractAppwriteStorageFileIdFromUrl = (
+  url: string
+): string | null => {
+  const match = url.match(/files\/([^\/]+)\/(preview|view|download)/);
   return match ? match[1] : null;
 };

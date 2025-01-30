@@ -173,23 +173,30 @@ namespace TravelAppBackendAPI.Controllers
                 post.Location = postDto.Location;
                 post.Tags = postDto.Tags;
 
-                // Remove old media
-                _context.PostMedia.RemoveRange(post.Media);
-
-                // Add new media files
-                foreach (var file in postDto.Files)
+                // delete the media the user deleted if any
+                var urlsToDelete = postDto.DeletedFiles;
+                if (urlsToDelete.Any()) // Avoid executing if no files are marked for deletion
                 {
-                    _context.PostMedia.Add(new PostMedia
+                    await _context.PostMedia
+                        .Where(m => urlsToDelete.Contains(m.AppwriteFileUrl))
+                        .ExecuteDeleteAsync();
+                }
+
+                // add the newly added media if any
+                var mediaToAdd = postDto.NewFiles;
+                if (mediaToAdd.Any())
+                {
+                    _context.PostMedia.AddRange(mediaToAdd.Select(media => new PostMedia
                     {
-                        PostId = post.PostId,
-                        AppwriteFileUrl = file.Url,
-                        MediaType = file.Type
-                    });
+                        PostId = id,
+                        AppwriteFileUrl = media.Url,
+                        MediaType = media.Type
+                    }));
                 }
 
                 await _context.SaveChangesAsync();
 
-                return StatusCode(201, new { post.PostId });
+                return StatusCode(201, new { id });
             }
             catch (Exception ex)
             {

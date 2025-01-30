@@ -12,19 +12,42 @@ import { Textarea } from "@/components/ui/textarea";
 import FileUploader from "../shared/FileUploader";
 import Map from "../shared/map/Map";
 import { IDisplayedTripStep } from "@/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type TripStepFormProps = {
   fieldName: string; // Field name for form context, e.g., "accommodations"
   tripSteps?: IDisplayedTripStep[]; // when in update mode prefilled
+  action?: "Create" | "Update";
+  onTripStepMediaUpdate?: (
+    newFiles: { [key: number]: File[] },
+    deletedFiles: { [key: number]: string[] }
+  ) => void;
 };
 
-const TripStepForm = ({ fieldName, tripSteps }: TripStepFormProps) => {
+const TripStepForm = ({
+  fieldName,
+  tripSteps,
+  action,
+  onTripStepMediaUpdate,
+}: TripStepFormProps) => {
   const { control, setValue } = useFormContext();
   const { fields, append, remove, replace } = useFieldArray({
     control,
     name: fieldName,
   });
+
+  const [newTripStepFiles, setNewTripStepFiles] = useState<{
+    [key: number]: File[];
+  }>({});
+  const [deletedTripStepFiles, setDeletedTripStepFiles] = useState<{
+    [key: number]: string[];
+  }>({});
+
+  useEffect(() => {
+    if (onTripStepMediaUpdate) {
+      onTripStepMediaUpdate(newTripStepFiles, deletedTripStepFiles);
+    }
+  }, [newTripStepFiles, deletedTripStepFiles]);
 
   // Prefill the form when updating
   useEffect(() => {
@@ -32,6 +55,9 @@ const TripStepForm = ({ fieldName, tripSteps }: TripStepFormProps) => {
       replace(tripSteps); // Replaces the form fields with existing accommodations
     }
   }, [tripSteps, replace]);
+
+  // console.log("newTripStepFiles", newTripStepFiles);
+  // console.log("deletedTripStepFiles", deletedTripStepFiles);
 
   return (
     <div className="flex flex-col gap-10">
@@ -85,6 +111,20 @@ const TripStepForm = ({ fieldName, tripSteps }: TripStepFormProps) => {
                     <FileUploader
                       fieldChange={field.onChange}
                       mediaUrls={tripSteps?.[index]?.mediaUrls || []} // Pre-fill for updates
+                      onUpdate={
+                        action === "Update"
+                          ? ({ newFiles, deletedFiles }) => {
+                              setNewTripStepFiles((prev) => ({
+                                ...prev,
+                                [index]: newFiles,
+                              }));
+                              setDeletedTripStepFiles((prev) => ({
+                                ...prev,
+                                [index]: deletedFiles,
+                              }));
+                            }
+                          : undefined
+                      }
                     />
                   </FormControl>
                   <FormMessage className="shad-form_message" />

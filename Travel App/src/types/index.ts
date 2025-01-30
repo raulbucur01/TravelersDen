@@ -73,6 +73,40 @@ export type IUpdateNormalPost = {
   deletedFiles: string[];
 };
 
+export type IUpdateItineraryPost = {
+  postId: string;
+  caption: string;
+  body: string;
+  location: string;
+  tags: string;
+  newFiles: File[];
+  deletedFiles: string[];
+  tripSteps: IUpdateTripStep[];
+  accommodations: IUpdateAccommodation[];
+};
+
+export type IUpdateTripStep = {
+  stepNumber: number;
+  latitude: number;
+  longitude: number;
+  price: number;
+  description: string;
+  newFiles: File[];
+  deletedFiles: string[];
+};
+
+export type IUpdateAccommodation = {
+  name: string;
+  description: string;
+  // latitude: number;
+  // longitude: number;
+  startDate: string | null;
+  endDate: string | null;
+  pricePerNight: number;
+  totalPrice: number;
+  link: string;
+};
+
 export type IUser = {
   userId: string;
   name: string;

@@ -32,11 +32,13 @@ import {
   getMapSearchResults,
   getItineraryDetails,
   updateNormalPost,
+  updateItineraryPost,
 } from "../../api/api";
 import {
   INewItineraryPost,
   INewNormalPost,
   INewUser,
+  IUpdateItineraryPost,
   IUpdateNormalPost,
 } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
@@ -100,8 +102,22 @@ export const useUpdateNormalPost = () => {
     mutationFn: (post: IUpdateNormalPost) => updateNormalPost(post),
     onSuccess: (data) => {
       // we practically get the data after the mutation finishes
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
+      });
+    },
+  });
+};
+
+export const useUpdateItineraryPost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (post: IUpdateItineraryPost) => updateItineraryPost(post),
+    onSuccess: (data) => {
+      // we practically get the data after the mutation finishes
       // queryClient.invalidateQueries({
-      //   queryKey: [QUERY_KEYS.GET_POST_BY_ID],
+      //   queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
       // });
     },
   });

@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
 import { NormalPostValidation } from "@/lib/validation";
-import { Models } from "appwrite";
 import {
   useCreateNormalPost,
   useUpdateNormalPost,
@@ -24,7 +23,7 @@ import {
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { IBasePost } from "@/types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type NormalPostFormProps = {
   post?: IBasePost;
@@ -78,10 +77,6 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
         tags: values.tags ?? "", // Ensure tags is always a string
       });
 
-      // console.log("on update", values);
-      // console.log("newFiles", newFiles);
-      // console.log("deletedFiles", deletedFiles);
-
       if (!updatedPost) {
         return toast({
           title: "Please try again",
@@ -91,7 +86,6 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
       return navigate(`/posts/${post.postId}`);
     }
 
-    console.log("on create", values);
     const newPost = await createPost({
       ...values,
       userId: user.userId,
@@ -105,8 +99,6 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
 
     navigate("/");
   }
-
-  // console.log(post?.mediaUrls);
 
   return (
     <Form {...form}>
