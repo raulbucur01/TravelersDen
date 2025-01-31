@@ -34,6 +34,31 @@ const AccommodationForm = ({
   useEffect(() => {
     if (accommodations && accommodations.length > 0) {
       replace(accommodations); // Replaces the form fields with existing accommodations
+
+      accommodations.forEach((accommodation, index) => {
+        setValue(`${fieldName}.${index}.name`, accommodation.name);
+        setValue(
+          `${fieldName}.${index}.description`,
+          accommodation.description
+        );
+        setValue(
+          `${fieldName}.${index}.startDate`,
+          accommodation.startDate ? new Date(accommodation.startDate) : null
+        );
+        setValue(
+          `${fieldName}.${index}.endDate`,
+          accommodation.endDate ? new Date(accommodation.endDate) : null
+        );
+        setValue(
+          `${fieldName}.${index}.pricePerNight`,
+          accommodation.pricePerNight.toString()
+        );
+        setValue(
+          `${fieldName}.${index}.totalPrice`,
+          accommodation.totalPrice.toString()
+        );
+        setValue(`${fieldName}.${index}.link`, accommodation.link);
+      });
     }
   }, [accommodations, replace]);
 

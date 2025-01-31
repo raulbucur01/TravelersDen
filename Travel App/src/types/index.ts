@@ -81,30 +81,10 @@ export type IUpdateItineraryPost = {
   tags: string;
   newFiles: File[];
   deletedFiles: string[];
-  tripSteps: IUpdateTripStep[];
-  accommodations: IUpdateAccommodation[];
-};
-
-export type IUpdateTripStep = {
-  stepNumber: number;
-  latitude: number;
-  longitude: number;
-  price: number;
-  description: string;
-  newFiles: File[];
-  deletedFiles: string[];
-};
-
-export type IUpdateAccommodation = {
-  name: string;
-  description: string;
-  // latitude: number;
-  // longitude: number;
-  startDate: string | null;
-  endDate: string | null;
-  pricePerNight: number;
-  totalPrice: number;
-  link: string;
+  tripSteps: ITripStep[];
+  accommodations: IAccommodation[];
+  newTripStepFiles: { [key: string]: File[] };
+  deletedTripStepFiles: { [key: string]: string[] };
 };
 
 export type IUser = {
@@ -146,6 +126,7 @@ export type IItineraryPost = {
 };
 
 export type IDisplayedTripStep = {
+  tripStepId: string;
   stepNumber: number;
   latitude: number;
   longitude: number;

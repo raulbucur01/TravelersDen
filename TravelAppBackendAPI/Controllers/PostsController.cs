@@ -204,6 +204,62 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
+        [HttpPut("itinerary/{id}")]
+        public async Task<IActionResult> UpdateItineraryPost(string id, UpdateItineraryPostDTO postDto)
+        {
+            try
+            {
+                var post = await _context.Posts
+                    .Include(p => p.Media)
+                    .Include(p => p.Accommodations)
+                    .Include(p => p.TripSteps)
+                    .ThenInclude(ts=>ts.Media)
+                    .FirstOrDefaultAsync(p => p.PostId == id);
+
+                if (post == null)
+                {
+                    return NotFound(new { Message = "Post not found." });
+                }
+
+                // Update basic post details
+                post.Caption = postDto.Caption;
+                post.Body = postDto.Body;
+                post.Location = postDto.Location;
+                post.Tags = postDto.Tags;
+
+                // delete the media the user deleted if any
+                var urlsToDelete = postDto.DeletedFiles;
+                if (urlsToDelete.Any()) // Avoid executing if no files are marked for deletion
+                {
+                    await _context.PostMedia
+                        .Where(m => urlsToDelete.Contains(m.AppwriteFileUrl))
+                        .ExecuteDeleteAsync();
+                }
+
+                // add the newly added media if any
+                var mediaToAdd = postDto.NewFiles;
+                if (mediaToAdd.Any())
+                {
+                    _context.PostMedia.AddRange(mediaToAdd.Select(media => new PostMedia
+                    {
+                        PostId = id,
+                        AppwriteFileUrl = media.Url,
+                        MediaType = media.Type
+                    }));
+                }
+
+                // update details for all accommodations
+
+
+                await _context.SaveChangesAsync();
+
+                return StatusCode(201, new { id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
 
         [HttpGet("{id}")]   
         public async Task<IActionResult> GetPostById(string id)
@@ -459,6 +515,7 @@ namespace TravelAppBackendAPI.Controllers
                         .OrderBy(ts => ts.StepNumber) // Ensure steps are ordered
                         .Select(ts => new
                         {
+                            TripStepId = ts.TripStepId,
                             StepNumber = ts.StepNumber,
                             Latitude = ts.Latitude,
                             Longitude = ts.Longitude,

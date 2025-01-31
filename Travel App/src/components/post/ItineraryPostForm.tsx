@@ -66,6 +66,12 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
   }) => {
     setNewFiles(newFiles);
     setDeletedFiles(deletedFiles);
+
+    // Ensure form state is updated
+    const updatedFiles =
+      post?.mediaUrls?.filter((media) => !deletedFiles.includes(media.url)) ||
+      [];
+    form.setValue("files", [...updatedFiles, ...newFiles]);
   };
 
   const handleTripStepMediaUpdate = (
@@ -108,27 +114,27 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
         tripSteps: values.tripSteps.map((tripStep, index) => ({
           ...tripStep,
           stepNumber: index + 1,
-          newFiles: newTripStepFiles[index],
-          deletedFiles: deletedTripStepFiles[index],
         })),
 
         deletedFiles: deletedFiles,
         newFiles: newFiles,
       };
 
-      // Log the formatted values
-      console.log("Formatted values:", formattedValues);
-      console.log("values:", values);
-      console.log("Formatted values:", formattedValues);
-      console.log("newFiles:", newFiles);
-      console.log("deletedFiles:", deletedFiles);
-      console.log("newTripStepFiles:", newTripStepFiles);
-      console.log("deletedTripStepFiles:", deletedTripStepFiles);
+      // // Log the formatted values
+      // console.log("Formatted values:", formattedValues);
+      // console.log("values:", values);
+      // console.log("Formatted values:", formattedValues);
+      // console.log("newFiles:", newFiles);
+      // console.log("deletedFiles:", deletedFiles);
+      // console.log("newTripStepFiles:", newTripStepFiles);
+      // console.log("deletedTripStepFiles:", deletedTripStepFiles);
 
       const updatedPost = await updatePost({
         ...formattedValues,
         postId: post.postId,
         tags: values.tags ?? "", // Ensure tags is always a string
+        newTripStepFiles: newTripStepFiles,
+        deletedTripStepFiles: deletedTripStepFiles,
       });
 
       if (!updatedPost) {
@@ -159,7 +165,7 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
     };
 
     // Log the formatted values
-    console.log("Formatted values:", formattedValues);
+    // console.log("Formatted values:", formattedValues);
 
     const newPost = await createPost({
       ...formattedValues,
@@ -225,7 +231,7 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
               <FormControl>
                 <FileUploader
                   fieldChange={field.onChange}
-                  mediaUrls={post?.mediaUrls || []} // Pre-fill for updates
+                  mediaUrls={action === "Update" ? post?.mediaUrls : []} // Pre-fill for updates
                   onUpdate={action === "Update" ? handleMediaUpdate : undefined}
                 />
               </FormControl>

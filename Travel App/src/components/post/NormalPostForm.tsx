@@ -52,6 +52,12 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
   }) => {
     setNewFiles(newFiles);
     setDeletedFiles(deletedFiles);
+
+    // Ensure form state is updated
+    const updatedFiles =
+      post?.mediaUrls?.filter((media) => !deletedFiles.includes(media.url)) ||
+      [];
+    form.setValue("files", [...updatedFiles, ...newFiles]);
   };
 
   // 1. Define your form.

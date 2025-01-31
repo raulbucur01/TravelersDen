@@ -19,8 +19,8 @@ type TripStepFormProps = {
   tripSteps?: IDisplayedTripStep[]; // when in update mode prefilled
   action?: "Create" | "Update";
   onTripStepMediaUpdate?: (
-    newFiles: { [key: number]: File[] },
-    deletedFiles: { [key: number]: string[] }
+    newFiles: { [key: string]: File[] },
+    deletedFiles: { [key: string]: string[] }
   ) => void;
 };
 
@@ -52,12 +52,46 @@ const TripStepForm = ({
   // Prefill the form when updating
   useEffect(() => {
     if (tripSteps && tripSteps.length > 0) {
-      replace(tripSteps); // Replaces the form fields with existing accommodations
+      replace(tripSteps);
+      tripSteps.forEach((step, index) => {
+        setValue(`${fieldName}.${index}.description`, step.description);
+        setValue(`${fieldName}.${index}.price`, step.price.toString());
+        setValue(`${fieldName}.${index}.longitude`, step.longitude);
+        setValue(`${fieldName}.${index}.latitude`, step.latitude);
+        setValue(`${fieldName}.${index}.files`, step.mediaUrls ?? []); // Ensure existing media is properly set
+      });
     }
   }, [tripSteps, replace]);
 
   // console.log("newTripStepFiles", newTripStepFiles);
   // console.log("deletedTripStepFiles", deletedTripStepFiles);
+
+  const handleMediaUpdate = ({
+    index,
+    newFiles,
+    deletedFiles,
+  }: {
+    index: number;
+    newFiles: File[];
+    deletedFiles: string[];
+  }) => {
+    setNewTripStepFiles((prev) => ({
+      ...prev,
+      [tripSteps?.[index]?.tripStepId as string]: newFiles,
+    }));
+    setDeletedTripStepFiles((prev) => ({
+      ...prev,
+      [tripSteps?.[index]?.tripStepId as string]: deletedFiles,
+    }));
+
+    // Ensure form state is updated
+    const updatedFiles =
+      tripSteps?.[index]?.mediaUrls?.filter(
+        (media) => !deletedFiles.includes(media.url)
+      ) || [];
+
+    setValue(`tripSteps.${index}.files`, [...updatedFiles, ...newFiles]);
+  };
 
   return (
     <div className="flex flex-col gap-10">
@@ -110,19 +144,17 @@ const TripStepForm = ({
                   <FormControl>
                     <FileUploader
                       fieldChange={field.onChange}
-                      mediaUrls={tripSteps?.[index]?.mediaUrls || []} // Pre-fill for updates
+                      mediaUrls={
+                        action === "Update" ? tripSteps?.[index]?.mediaUrls : []
+                      } // Pre-fill for updates
                       onUpdate={
                         action === "Update"
-                          ? ({ newFiles, deletedFiles }) => {
-                              setNewTripStepFiles((prev) => ({
-                                ...prev,
-                                [index]: newFiles,
-                              }));
-                              setDeletedTripStepFiles((prev) => ({
-                                ...prev,
-                                [index]: deletedFiles,
-                              }));
-                            }
+                          ? ({ newFiles, deletedFiles }) =>
+                              handleMediaUpdate({
+                                index,
+                                newFiles,
+                                deletedFiles,
+                              })
                           : undefined
                       }
                     />

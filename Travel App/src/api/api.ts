@@ -234,8 +234,9 @@ export async function updateNormalPost(post: IUpdateNormalPost) {
           try {
             if (!id) return { id, success: false };
 
-            await deleteFile(id);
-            return { id, success: true };
+            const deletionResult = await deleteFile(id);
+            if (deletionResult?.status === "ok") return { id, success: true };
+            return { id, success: false };
           } catch (error) {
             console.error(`Failed to delete file ${id}:`, error);
             return { id, success: false };
@@ -314,24 +315,25 @@ export async function createItineraryPost(post: INewItineraryPost) {
 export async function updateItineraryPost(post: IUpdateItineraryPost) {
   try {
     console.log(post);
-    // let newFiles: { url: string; type: string }[] = [];
-    // // add the new files to appwrite if any
+    // let newBasePostFiles: { url: string; type: string }[] = [];
+    // // add the new base post files to appwrite if any
     // if (post.newFiles.length > 0) {
-    //   newFiles = await processFiles(post.newFiles);
+    //   newBasePostFiles = await processFiles(post.newFiles);
 
-    //   if (!newFiles) throw Error("Failed to process new files");
+    //   if (!newBasePostFiles) throw Error("Failed to process new files");
     // }
 
-    // // delete files from appwrite if any
+    // // delete base post files from appwrite if any
     // if (post.deletedFiles.length > 0) {
-    //   const deletedFiles = await Promise.all(
+    //   const deletedBasePostFiles = await Promise.all(
     //     post.deletedFiles.map(async (url) => {
     //       const id = extractAppwriteStorageFileIdFromUrl(url);
     //       try {
     //         if (!id) return { id, success: false };
 
-    //         await deleteFile(id);
-    //         return { id, success: true };
+    //         const deletionResult = await deleteFile(id);
+    //         if (deletionResult?.status === "ok") return { id, success: true };
+    //         return { id, success: false };
     //       } catch (error) {
     //         console.error(`Failed to delete file ${id}:`, error);
     //         return { id, success: false };
@@ -339,9 +341,49 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
     //     })
     //   );
 
-    //   const allSuccessful = deletedFiles.every((file) => file.success);
+    //   const allSuccessful = deletedBasePostFiles.every((file) => file.success);
 
     //   if (!allSuccessful) throw Error("Failed to delete files");
+    // }
+
+    // // add the new trip step files to appwrite if any
+    // let newTripStepFiles: { [key: string]: { url: string; type: string }[] } =
+    //   {};
+    // for (const key in post.newTripStepFiles) {
+    //   const fileArray = post.newTripStepFiles[key];
+    //   if (fileArray.length > 0) {
+    //     newTripStepFiles[key] = await processFiles(fileArray);
+
+    //     if (!newTripStepFiles[key]) throw Error("Failed to process new files");
+    //   }
+    // }
+
+    // // delete trip step files from appwrite if any
+    // for (const key in post.deletedTripStepFiles) {
+    //   const fileArray = post.deletedTripStepFiles[key];
+    //   if (fileArray.length > 0) {
+    //     const deletedTripStepFiles = await Promise.all(
+    //       fileArray.map(async (url) => {
+    //         const id = extractAppwriteStorageFileIdFromUrl(url);
+    //         try {
+    //           if (!id) return { id, success: false };
+
+    //           const deletionResult = await deleteFile(id);
+    //           if (deletionResult?.status === "ok") return { id, success: true };
+    //           return { id, success: false };
+    //         } catch (error) {
+    //           console.error(`Failed to delete file ${id}:`, error);
+    //           return { id, success: false };
+    //         }
+    //       })
+    //     );
+
+    //     const allSuccessful = deletedTripStepFiles.every(
+    //       (file) => file.success
+    //     );
+
+    //     if (!allSuccessful) throw Error("Failed to delete files");
+    //   }
     // }
 
     // const response = await axios.put(
@@ -351,10 +393,12 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
     //     body: post.body,
     //     location: post.location,
     //     tags: post.tags,
-    //     newFiles: newFiles,
+    //     newFiles: newBasePostFiles,
     //     deletedFiles: post.deletedFiles,
     //     tripSteps: post.tripSteps,
     //     accommodations: post.accommodations,
+    //     newTripStepFiles: newTripStepFiles,
+    //     deletedTripStepFiles: post.deletedTripStepFiles,
     //   },
     //   {
     //     headers: {
@@ -365,8 +409,6 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
 
     // console.log(response.data);
     // return response.data;
-
-    return;
   } catch (error) {
     console.log(error);
   }
