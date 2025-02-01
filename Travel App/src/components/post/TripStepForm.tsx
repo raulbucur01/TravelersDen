@@ -1,4 +1,4 @@
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -19,8 +19,9 @@ type TripStepFormProps = {
   tripSteps?: IDisplayedTripStep[]; // when in update mode prefilled
   action?: "Create" | "Update";
   onTripStepMediaUpdate?: (
-    newFiles: { [key: string]: File[] },
-    deletedFiles: { [key: string]: string[] }
+    newFiles: File[],
+    deletedFiles: string[],
+    completelyDeletedTripStepFiles: string[]
   ) => void;
 };
 
@@ -36,61 +37,101 @@ const TripStepForm = ({
     name: fieldName,
   });
 
-  const [newTripStepFiles, setNewTripStepFiles] = useState<{
-    [key: number]: File[];
-  }>({});
-  const [deletedTripStepFiles, setDeletedTripStepFiles] = useState<{
-    [key: number]: string[];
-  }>({});
+  const [newTripStepFiles, setNewTripStepFiles] = useState<File[]>([]);
+  const [deletedTripStepFiles, setDeletedTripStepFiles] = useState<string[]>(
+    []
+  );
+  const [completelyDeletedTripStepFiles, setCompletelyDeletedTripStepFiles] =
+    useState<string[]>([]);
+
+  const [localTripSteps, setLocalTripSteps] = useState<IDisplayedTripStep[]>(
+    tripSteps || []
+  );
 
   useEffect(() => {
     if (onTripStepMediaUpdate) {
-      onTripStepMediaUpdate(newTripStepFiles, deletedTripStepFiles);
+      onTripStepMediaUpdate(
+        newTripStepFiles,
+        deletedTripStepFiles,
+        completelyDeletedTripStepFiles
+      );
     }
-  }, [newTripStepFiles, deletedTripStepFiles]);
+  }, [newTripStepFiles, deletedTripStepFiles, completelyDeletedTripStepFiles]);
 
   // Prefill the form when updating
   useEffect(() => {
-    if (tripSteps && tripSteps.length > 0) {
-      replace(tripSteps);
-      tripSteps.forEach((step, index) => {
+    if (action === "Update" && localTripSteps && localTripSteps.length > 0) {
+      replace(localTripSteps);
+      localTripSteps.forEach((step, index) => {
         setValue(`${fieldName}.${index}.description`, step.description);
         setValue(`${fieldName}.${index}.price`, step.price.toString());
         setValue(`${fieldName}.${index}.longitude`, step.longitude);
         setValue(`${fieldName}.${index}.latitude`, step.latitude);
-        setValue(`${fieldName}.${index}.files`, step.mediaUrls ?? []); // Ensure existing media is properly set
+        // setValue(`${fieldName}.${index}.files`, step.mediaUrls ?? []); // Ensure existing media is properly set
       });
     }
-  }, [tripSteps, replace]);
+  }, []);
 
-  // console.log("newTripStepFiles", newTripStepFiles);
-  // console.log("deletedTripStepFiles", deletedTripStepFiles);
+  const handleMediaUpdate = (
+    index: number,
+    newFiles: File[],
+    deletedFiles: string[]
+  ) => {
+    setNewTripStepFiles((prev) => {
+      const existingFiles = new Set(prev || []);
+      newFiles.forEach((file) => {
+        if (!existingFiles.has(file)) existingFiles.add(file);
+      });
+      return Array.from(existingFiles);
+    });
 
-  const handleMediaUpdate = ({
-    index,
-    newFiles,
-    deletedFiles,
-  }: {
-    index: number;
-    newFiles: File[];
-    deletedFiles: string[];
-  }) => {
-    setNewTripStepFiles((prev) => ({
-      ...prev,
-      [tripSteps?.[index]?.tripStepId as string]: newFiles,
-    }));
-    setDeletedTripStepFiles((prev) => ({
-      ...prev,
-      [tripSteps?.[index]?.tripStepId as string]: deletedFiles,
-    }));
+    setDeletedTripStepFiles((prev) => {
+      const existingDeleted = new Set(prev || []);
+      deletedFiles.forEach((file) => {
+        if (!existingDeleted.has(file)) existingDeleted.add(file);
+      });
+      return Array.from(existingDeleted);
+    });
 
     // Ensure form state is updated
     const updatedFiles =
-      tripSteps?.[index]?.mediaUrls?.filter(
+      localTripSteps?.[index]?.mediaUrls?.filter(
         (media) => !deletedFiles.includes(media.url)
       ) || [];
 
     setValue(`tripSteps.${index}.files`, [...updatedFiles, ...newFiles]);
+  };
+
+  const handleRemove = (index: number) => {
+    remove(index);
+
+    if (localTripSteps && localTripSteps[index]?.mediaUrls) {
+      const mediaUrls = localTripSteps[index].mediaUrls.map(
+        (media) => media.url
+      );
+
+      setCompletelyDeletedTripStepFiles((prev) => [
+        ...prev,
+        ...mediaUrls.filter((url) => !prev.includes(url)), // Avoid duplicates
+      ]);
+
+      // Remove the URLs from deletedTripStepFiles
+      setDeletedTripStepFiles((prev) =>
+        prev.filter((url) => !mediaUrls.includes(url))
+      );
+    }
+
+    // Remove from tripSteps state if it's defined
+    if (localTripSteps) {
+      const updatedTripSteps = localTripSteps.filter((_, i) => i !== index);
+      setLocalTripSteps(updatedTripSteps);
+    }
+
+    // setNewTripStepFiles((prev) => {
+    //   const updated = { ...prev };
+    //   delete updated[index];
+    //   return updated;
+    // });
   };
 
   return (
@@ -105,7 +146,7 @@ const TripStepForm = ({
           <Button
             type="button"
             variant="destructive"
-            onClick={() => remove(index)}
+            onClick={() => handleRemove(index)}
             className="absolute top-2 right-2 bg-transparent hover:bg-transparent hover:text-dm-red"
           >
             ✕
@@ -145,16 +186,14 @@ const TripStepForm = ({
                     <FileUploader
                       fieldChange={field.onChange}
                       mediaUrls={
-                        action === "Update" ? tripSteps?.[index]?.mediaUrls : []
+                        action === "Update"
+                          ? localTripSteps?.[index]?.mediaUrls
+                          : []
                       } // Pre-fill for updates
                       onUpdate={
                         action === "Update"
-                          ? ({ newFiles, deletedFiles }) =>
-                              handleMediaUpdate({
-                                index,
-                                newFiles,
-                                deletedFiles,
-                              })
+                          ? (newFiles, deletedFiles) =>
+                              handleMediaUpdate(index, newFiles, deletedFiles)
                           : undefined
                       }
                     />
@@ -199,8 +238,12 @@ const TripStepForm = ({
                         setValue(`${fieldName}.${index}.longitude`, longitude);
                         setValue(`${fieldName}.${index}.latitude`, latitude);
                       }}
-                      preselectedLongitude={tripSteps?.[index]?.longitude}
-                      preselectedLatitude={tripSteps?.[index]?.latitude}
+                      preselectedLongitude={
+                        localTripSteps?.[index]?.longitude || undefined
+                      }
+                      preselectedLatitude={
+                        localTripSteps?.[index]?.latitude || undefined
+                      }
                     />
                   </FormControl>
                   <FormMessage />
@@ -229,10 +272,13 @@ const TripStepForm = ({
         variant="secondary"
         onClick={() =>
           append({
-            stepNumber: 0,
             description: "",
-            price: 0,
+            price: "",
+            longitude: "",
+            latitude: "",
             files: [],
+            mediaUrls: [],
+            stepNumber: fields.length + 1,
           })
         }
       >

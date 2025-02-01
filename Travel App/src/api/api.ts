@@ -10,6 +10,7 @@ import {
   INewUser,
   IUpdateItineraryPost,
   IUpdateNormalPost,
+  MediaUrl,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
@@ -67,6 +68,37 @@ export const processFiles = async (files: File[]) => {
   await Promise.all(filePromises);
   return results;
 };
+
+async function processPostFilesForUpdate(
+  postFiles: (MediaUrl | File)[]
+): Promise<MediaUrl[]> {
+  // Check if all files are already in the correct format
+  const allFilesAreMediaUrls = postFiles.every(
+    (item) => "url" in item && "type" in item
+  );
+
+  if (allFilesAreMediaUrls) {
+    return postFiles as MediaUrl[];
+  }
+
+  let formattedMediaFiles = postFiles.filter(
+    (item) => "url" in item && "type" in item
+  ) as MediaUrl[];
+
+  // Identify files that need to be processed
+  const unformattedMediaFiles = postFiles.filter(
+    (item) => !("url" in item && "type" in item)
+  ) as File[];
+
+  const newFiles = await processFiles(unformattedMediaFiles);
+
+  if (!newFiles) throw new Error("Failed to process new files");
+
+  formattedMediaFiles = [...formattedMediaFiles, ...(newFiles as MediaUrl[])];
+
+  return formattedMediaFiles;
+}
+
 // utility
 
 export async function createUserAccount(user: INewUser) {
@@ -314,101 +346,76 @@ export async function createItineraryPost(post: INewItineraryPost) {
 
 export async function updateItineraryPost(post: IUpdateItineraryPost) {
   try {
-    console.log(post);
-    // let newBasePostFiles: { url: string; type: string }[] = [];
-    // // add the new base post files to appwrite if any
-    // if (post.newFiles.length > 0) {
-    //   newBasePostFiles = await processFiles(post.newFiles);
+    console.log("Post: ", post);
+    // delete files from appwrite if any
+    if (post.toDeleteFromAppwrite.length > 0) {
+      const deletedFiles = await Promise.all(
+        post.toDeleteFromAppwrite.map(async (url) => {
+          const id = extractAppwriteStorageFileIdFromUrl(url);
+          try {
+            if (!id) return { id, success: false };
 
-    //   if (!newBasePostFiles) throw Error("Failed to process new files");
-    // }
+            const deletionResult = await deleteFile(id);
+            if (deletionResult?.status === "ok") return { id, success: true };
+            return { id, success: false };
+          } catch (error) {
+            console.error(`Failed to delete file ${id}:`, error);
+            return { id, success: false };
+          }
+        })
+      );
 
-    // // delete base post files from appwrite if any
-    // if (post.deletedFiles.length > 0) {
-    //   const deletedBasePostFiles = await Promise.all(
-    //     post.deletedFiles.map(async (url) => {
-    //       const id = extractAppwriteStorageFileIdFromUrl(url);
-    //       try {
-    //         if (!id) return { id, success: false };
+      const allSuccessful = deletedFiles.every((file) => file.success);
 
-    //         const deletionResult = await deleteFile(id);
-    //         if (deletionResult?.status === "ok") return { id, success: true };
-    //         return { id, success: false };
-    //       } catch (error) {
-    //         console.error(`Failed to delete file ${id}:`, error);
-    //         return { id, success: false };
-    //       }
-    //     })
-    //   );
+      if (!allSuccessful) throw Error("Failed to delete files");
+    }
 
-    //   const allSuccessful = deletedBasePostFiles.every((file) => file.success);
+    // add the new files to appwrite if needed
+    const basefilesToSendToBackend = processPostFilesForUpdate(post.files);
 
-    //   if (!allSuccessful) throw Error("Failed to delete files");
-    // }
+    // add the new trip step files to appwrite if any
+    const tripStepsToSendToBackend = [];
+    for (let item of post.tripSteps) {
+      const tripStepFilesToSendToBackend = processPostFilesForUpdate(
+        item.files
+      );
 
-    // // add the new trip step files to appwrite if any
-    // let newTripStepFiles: { [key: string]: { url: string; type: string }[] } =
-    //   {};
-    // for (const key in post.newTripStepFiles) {
-    //   const fileArray = post.newTripStepFiles[key];
-    //   if (fileArray.length > 0) {
-    //     newTripStepFiles[key] = await processFiles(fileArray);
+      tripStepsToSendToBackend.push({
+        ...item,
+        files: tripStepFilesToSendToBackend,
+      });
+    }
 
-    //     if (!newTripStepFiles[key]) throw Error("Failed to process new files");
-    //   }
-    // }
+    console.log("Payload: ", {
+      caption: post.caption,
+      body: post.body,
+      location: post.location,
+      tags: post.tags,
+      files: basefilesToSendToBackend,
+      tripSteps: tripStepsToSendToBackend,
+      accommodations: post.accommodations,
+    });
 
-    // // delete trip step files from appwrite if any
-    // for (const key in post.deletedTripStepFiles) {
-    //   const fileArray = post.deletedTripStepFiles[key];
-    //   if (fileArray.length > 0) {
-    //     const deletedTripStepFiles = await Promise.all(
-    //       fileArray.map(async (url) => {
-    //         const id = extractAppwriteStorageFileIdFromUrl(url);
-    //         try {
-    //           if (!id) return { id, success: false };
+    const response = await axios.put(
+      API_BASE_URL + `/posts/itinerary/${post.postId}`,
+      {
+        caption: post.caption,
+        body: post.body,
+        location: post.location,
+        tags: post.tags,
+        files: basefilesToSendToBackend,
+        tripSteps: tripStepsToSendToBackend,
+        accommodations: post.accommodations,
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    //           const deletionResult = await deleteFile(id);
-    //           if (deletionResult?.status === "ok") return { id, success: true };
-    //           return { id, success: false };
-    //         } catch (error) {
-    //           console.error(`Failed to delete file ${id}:`, error);
-    //           return { id, success: false };
-    //         }
-    //       })
-    //     );
-
-    //     const allSuccessful = deletedTripStepFiles.every(
-    //       (file) => file.success
-    //     );
-
-    //     if (!allSuccessful) throw Error("Failed to delete files");
-    //   }
-    // }
-
-    // const response = await axios.put(
-    //   API_BASE_URL + `/posts/itinerary/${post.postId}`,
-    //   {
-    //     caption: post.caption,
-    //     body: post.body,
-    //     location: post.location,
-    //     tags: post.tags,
-    //     newFiles: newBasePostFiles,
-    //     deletedFiles: post.deletedFiles,
-    //     tripSteps: post.tripSteps,
-    //     accommodations: post.accommodations,
-    //     newTripStepFiles: newTripStepFiles,
-    //     deletedTripStepFiles: post.deletedTripStepFiles,
-    //   },
-    //   {
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //   }
-    // );
-
-    // console.log(response.data);
-    // return response.data;
+    console.log(response.data);
+    return response.data;
   } catch (error) {
     console.log(error);
   }

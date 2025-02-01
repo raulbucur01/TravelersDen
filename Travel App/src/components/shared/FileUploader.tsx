@@ -5,10 +5,7 @@ import { Button } from "../ui/button";
 type FileUploaderProps = {
   fieldChange: (FILES: File[]) => void;
   mediaUrls?: { url: string; type: string }[]; // Optional for existing media during editing
-  onUpdate?: (updatedFiles: {
-    newFiles: File[];
-    deletedFiles: string[];
-  }) => void; // sent to parent for update
+  onUpdate?: (newFiles: File[], deletedFiles: string[]) => void; // sent to parent for update
 };
 
 const FileUploader = ({
@@ -33,7 +30,7 @@ const FileUploader = ({
 
   useEffect(() => {
     if (onUpdate) {
-      onUpdate({ newFiles, deletedFiles });
+      onUpdate(newFiles, deletedFiles);
     }
   }, [newFiles, deletedFiles]);
 

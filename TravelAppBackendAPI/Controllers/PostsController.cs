@@ -207,57 +207,96 @@ namespace TravelAppBackendAPI.Controllers
         [HttpPut("itinerary/{id}")]
         public async Task<IActionResult> UpdateItineraryPost(string id, UpdateItineraryPostDTO postDto)
         {
-            try
+            using (var transaction = await _context.Database.BeginTransactionAsync())
             {
-                var post = await _context.Posts
-                    .Include(p => p.Media)
-                    .Include(p => p.Accommodations)
-                    .Include(p => p.TripSteps)
-                    .ThenInclude(ts=>ts.Media)
-                    .FirstOrDefaultAsync(p => p.PostId == id);
-
-                if (post == null)
+                try
                 {
-                    return NotFound(new { Message = "Post not found." });
-                }
+                    var post = await _context.Posts
+                        .Include(p => p.Media)
+                        .Include(p => p.Accommodations)
+                        .Include(p => p.TripSteps)
+                        .FirstOrDefaultAsync(p => p.PostId == id);
 
-                // Update basic post details
-                post.Caption = postDto.Caption;
-                post.Body = postDto.Body;
-                post.Location = postDto.Location;
-                post.Tags = postDto.Tags;
-
-                // delete the media the user deleted if any
-                var urlsToDelete = postDto.DeletedFiles;
-                if (urlsToDelete.Any()) // Avoid executing if no files are marked for deletion
-                {
-                    await _context.PostMedia
-                        .Where(m => urlsToDelete.Contains(m.AppwriteFileUrl))
-                        .ExecuteDeleteAsync();
-                }
-
-                // add the newly added media if any
-                var mediaToAdd = postDto.NewFiles;
-                if (mediaToAdd.Any())
-                {
-                    _context.PostMedia.AddRange(mediaToAdd.Select(media => new PostMedia
+                    if (post == null)
                     {
-                        PostId = id,
-                        AppwriteFileUrl = media.Url,
-                        MediaType = media.Type
-                    }));
+                        return NotFound(new { Message = "Post not found." });
+                    }
+
+                    // Update basic post details
+                    post.Caption = postDto.Caption;
+                    post.Body = postDto.Body;
+                    post.Location = postDto.Location;
+                    post.Tags = postDto.Tags;
+
+                    // Remove old TripSteps and Accommodations
+                    _context.TripSteps.RemoveRange(post.TripSteps);
+                    _context.Accommodations.RemoveRange(post.Accommodations);
+                    _context.PostMedia.RemoveRange(post.Media);
+
+                    // Collect related entities
+                    var postMediaList = postDto.Files.Select(file => new PostMedia
+                    {
+                        PostId = post.PostId,
+                        AppwriteFileUrl = file.Url,
+                        MediaType = file.Type
+                    }).ToList();
+
+                    var tripStepList = new List<TripStep>();
+                    var tripStepMediaList = new List<TripStepMedia>();
+
+                    foreach (var step in postDto.TripSteps)
+                    {
+                        var tripStep = new TripStep
+                        {
+                            PostId = post.PostId,
+                            StepNumber = step.StepNumber,
+                            Latitude = step.Latitude,
+                            Longitude = step.Longitude,
+                            Price = step.Price,
+                            Description = step.Description
+                        };
+                        tripStepList.Add(tripStep);
+
+                        if (step.Files != null)
+                        {
+                            tripStepMediaList.AddRange(step.Files.Select(file => new TripStepMedia
+                            {
+                                TripStepId = tripStep.TripStepId, // Updated later during save
+                                AppwriteFileUrl = file.Url,
+                                MediaType = file.Type
+                            }));
+                        }
+                    }
+
+                    var accommodationList = postDto.Accommodations.Select(acc => new Accommodation
+                    {
+                        PostId = post.PostId,
+                        Name = acc.Name,
+                        Description = acc.Description,
+                        Latitude = acc.Latitude,
+                        Longitude = acc.Longitude,
+                        StartDate = acc.StartDate,
+                        EndDate = acc.EndDate,
+                        PricePerNight = acc.PricePerNight,
+                        TotalPrice = acc.TotalPrice,
+                        Link = acc.Link
+                    }).ToList();
+
+                    // Add all entities in batch
+                    _context.PostMedia.AddRange(postMediaList);
+                    _context.TripSteps.AddRange(tripStepList);
+                    _context.TripStepMedia.AddRange(tripStepMediaList);
+                    _context.Accommodations.AddRange(accommodationList);
+
+                    await transaction.CommitAsync();
+                    await _context.SaveChangesAsync();
+
+                    return StatusCode(201, new { id });
                 }
-
-                // update details for all accommodations
-
-
-                await _context.SaveChangesAsync();
-
-                return StatusCode(201, new { id });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                catch (Exception ex)
+                {
+                    return StatusCode(500, $"Internal server error: {ex.Message}");
+                }
             }
         }
 

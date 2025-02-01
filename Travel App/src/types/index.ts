@@ -79,12 +79,10 @@ export type IUpdateItineraryPost = {
   body: string;
   location: string;
   tags: string;
-  newFiles: File[];
-  deletedFiles: string[];
+  files: (File | MediaUrl)[];
   tripSteps: ITripStep[];
   accommodations: IAccommodation[];
-  newTripStepFiles: { [key: string]: File[] };
-  deletedTripStepFiles: { [key: string]: string[] };
+  toDeleteFromAppwrite: string[];
 };
 
 export type IUser = {
@@ -192,3 +190,8 @@ export interface ISuggestionInfo {
   latitude: number;
   longitude: number;
 }
+
+export type MediaUrl = {
+  url: string;
+  type: string;
+};

@@ -29,6 +29,7 @@ import TripStepForm from "./TripStepForm";
 import { IBasePost } from "@/types";
 import Loader from "../shared/Loader";
 import { useState } from "react";
+import { set } from "date-fns";
 
 type ItineraryPostFormProps = {
   post?: IBasePost;
@@ -50,20 +51,15 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [deletedFiles, setDeletedFiles] = useState<string[]>([]);
 
-  const [newTripStepFiles, setNewTripStepFiles] = useState<{
-    [key: string]: File[];
-  }>({});
-  const [deletedTripStepFiles, setDeletedTripStepFiles] = useState<{
-    [key: string]: string[];
-  }>({});
+  const [newTripStepFiles, setNewTripStepFiles] = useState<File[]>([]);
+  const [deletedTripStepFiles, setDeletedTripStepFiles] = useState<string[]>(
+    []
+  );
 
-  const handleMediaUpdate = ({
-    newFiles,
-    deletedFiles,
-  }: {
-    newFiles: File[];
-    deletedFiles: string[];
-  }) => {
+  const [completelyDeletedTripStepFiles, setCompletelyDeletedTripStepFiles] =
+    useState<string[]>([]);
+
+  const handleMediaUpdate = (newFiles: File[], deletedFiles: string[]) => {
     setNewFiles(newFiles);
     setDeletedFiles(deletedFiles);
 
@@ -75,11 +71,13 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
   };
 
   const handleTripStepMediaUpdate = (
-    newFiles: { [key: string]: File[] },
-    deletedFiles: { [key: string]: string[] }
+    newFiles: File[],
+    deletedFiles: string[],
+    completelyDeletedTripStepFiles: string[]
   ) => {
     setNewTripStepFiles(newFiles);
     setDeletedTripStepFiles(deletedFiles);
+    setCompletelyDeletedTripStepFiles(completelyDeletedTripStepFiles);
   };
 
   // 1. Define your form.
@@ -96,11 +94,14 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof ItineraryPostValidation>) {
-    console.log("Entered onSubmit");
-
     if (post && action === "Update") {
       const formattedValues = {
         ...values,
+        toDeleteFromAppwrite: [
+          ...deletedFiles,
+          ...deletedTripStepFiles,
+          ...completelyDeletedTripStepFiles,
+        ],
         accommodations: values.accommodations.map((accommodation) => ({
           ...accommodation,
           startDate: accommodation.startDate
@@ -116,25 +117,12 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
           stepNumber: index + 1,
         })),
 
-        deletedFiles: deletedFiles,
-        newFiles: newFiles,
+        postId: post.postId,
+        tags: values.tags ?? "", // Ensure tags is always a string
       };
-
-      // // Log the formatted values
-      // console.log("Formatted values:", formattedValues);
-      // console.log("values:", values);
-      // console.log("Formatted values:", formattedValues);
-      // console.log("newFiles:", newFiles);
-      // console.log("deletedFiles:", deletedFiles);
-      // console.log("newTripStepFiles:", newTripStepFiles);
-      // console.log("deletedTripStepFiles:", deletedTripStepFiles);
 
       const updatedPost = await updatePost({
         ...formattedValues,
-        postId: post.postId,
-        tags: values.tags ?? "", // Ensure tags is always a string
-        newTripStepFiles: newTripStepFiles,
-        deletedTripStepFiles: deletedTripStepFiles,
       });
 
       if (!updatedPost) {
@@ -163,9 +151,6 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
         stepNumber: index + 1,
       })),
     };
-
-    // Log the formatted values
-    // console.log("Formatted values:", formattedValues);
 
     const newPost = await createPost({
       ...formattedValues,
