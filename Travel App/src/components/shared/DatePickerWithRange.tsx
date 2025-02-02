@@ -1,9 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { DateRange } from "react-day-picker";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,17 +16,24 @@ import {
 
 interface DatePickerWithRangeProps {
   className?: string;
+  value?: DateRange; // for pre-filled dates
   onChange: (date: DateRange | undefined) => void;
 }
 
 export function DatePickerWithRange({
   className,
+  value,
   onChange,
 }: DatePickerWithRangeProps) {
-  const [date, setDate] = React.useState<DateRange | undefined>({
+  const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
     to: new Date(),
   });
+
+  useEffect(() => {
+    if (!value) return;
+    setDate(value); // Update when external value changes
+  }, [value]);
 
   const handleDateChange = (selectedDate: DateRange | undefined) => {
     if (selectedDate) {

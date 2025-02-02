@@ -298,7 +298,6 @@ export async function updateNormalPost(post: IUpdateNormalPost) {
       }
     );
 
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -346,7 +345,6 @@ export async function createItineraryPost(post: INewItineraryPost) {
 
 export async function updateItineraryPost(post: IUpdateItineraryPost) {
   try {
-    console.log("Post: ", post);
     // delete files from appwrite if any
     if (post.toDeleteFromAppwrite.length > 0) {
       const deletedFiles = await Promise.all(
@@ -371,12 +369,14 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
     }
 
     // add the new files to appwrite if needed
-    const basefilesToSendToBackend = processPostFilesForUpdate(post.files);
+    const basefilesToSendToBackend = await processPostFilesForUpdate(
+      post.files
+    );
 
     // add the new trip step files to appwrite if any
     const tripStepsToSendToBackend = [];
     for (let item of post.tripSteps) {
-      const tripStepFilesToSendToBackend = processPostFilesForUpdate(
+      const tripStepFilesToSendToBackend = await processPostFilesForUpdate(
         item.files
       );
 
@@ -385,16 +385,6 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
         files: tripStepFilesToSendToBackend,
       });
     }
-
-    console.log("Payload: ", {
-      caption: post.caption,
-      body: post.body,
-      location: post.location,
-      tags: post.tags,
-      files: basefilesToSendToBackend,
-      tripSteps: tripStepsToSendToBackend,
-      accommodations: post.accommodations,
-    });
 
     const response = await axios.put(
       API_BASE_URL + `/posts/itinerary/${post.postId}`,
@@ -414,7 +404,6 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
       }
     );
 
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.log(error);

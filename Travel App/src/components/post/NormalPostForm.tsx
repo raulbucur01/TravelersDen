@@ -43,13 +43,7 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [deletedFiles, setDeletedFiles] = useState<string[]>([]);
 
-  const handleMediaUpdate = ({
-    newFiles,
-    deletedFiles,
-  }: {
-    newFiles: File[];
-    deletedFiles: string[];
-  }) => {
+  const handleMediaUpdate = (newFiles: File[], deletedFiles: string[]) => {
     setNewFiles(newFiles);
     setDeletedFiles(deletedFiles);
 

@@ -288,8 +288,8 @@ namespace TravelAppBackendAPI.Controllers
                     _context.TripStepMedia.AddRange(tripStepMediaList);
                     _context.Accommodations.AddRange(accommodationList);
 
-                    await transaction.CommitAsync();
                     await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
 
                     return StatusCode(201, new { id });
                 }

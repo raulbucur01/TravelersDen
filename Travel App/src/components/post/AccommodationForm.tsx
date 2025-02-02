@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   FormControl,
@@ -119,29 +119,41 @@ const AccommodationForm = ({
           <FormField
             control={control}
             name={`${fieldName}.${index}.startDate`}
-            render={() => (
-              <FormItem>
-                <FormLabel>Accommodation Period</FormLabel>
-                <FormControl>
-                  <DatePickerWithRange
-                    className="w-full"
-                    onChange={(date: DateRange | undefined) => {
-                      if (date) {
-                        setValue(
-                          `${fieldName}.${index}.startDate`,
-                          date.from || null
-                        );
-                        setValue(
-                          `${fieldName}.${index}.endDate`,
-                          date.to || null
-                        );
-                      }
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+            render={() => {
+              const startDate = useWatch({
+                control,
+                name: `${fieldName}.${index}.startDate`,
+              });
+              const endDate = useWatch({
+                control,
+                name: `${fieldName}.${index}.endDate`,
+              });
+
+              return (
+                <FormItem>
+                  <FormLabel>Accommodation Period</FormLabel>
+                  <FormControl>
+                    <DatePickerWithRange
+                      className="w-full"
+                      value={{ from: startDate || null, to: endDate || null }}
+                      onChange={(date: DateRange | undefined) => {
+                        if (date) {
+                          setValue(
+                            `${fieldName}.${index}.startDate`,
+                            date.from || null
+                          );
+                          setValue(
+                            `${fieldName}.${index}.endDate`,
+                            date.to || null
+                          );
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField

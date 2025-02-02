@@ -97,11 +97,6 @@ const FileUploader = ({
     ]);
   };
 
-  // console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
-  // console.log("newFiles", newFiles);
-  // console.log("deletedFiles", deletedFiles);
-  // console.log("fileUrls", fileUrls);
-  // console.log("fileObjects", fileObjects);
   return (
     <div
       {...getRootProps()}
