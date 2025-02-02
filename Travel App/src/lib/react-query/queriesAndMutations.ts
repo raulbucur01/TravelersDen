@@ -33,6 +33,8 @@ import {
   getItineraryDetails,
   updateNormalPost,
   updateItineraryPost,
+  deletePost,
+  getRelatedItineraryMediaUrls,
 } from "../../api/api";
 import {
   INewItineraryPost,
@@ -42,6 +44,7 @@ import {
   IUpdateNormalPost,
 } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
+import { useNavigate } from "react-router-dom";
 
 export const useCreateUserAccount = () => {
   return useMutation({
@@ -121,6 +124,49 @@ export const useUpdateItineraryPost = () => {
         queryKey: [QUERY_KEYS.GET_ITINERARY_DETAILS, data.postId],
       });
     },
+  });
+};
+
+export const useDeletePost = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      postId,
+      toDeleteFromAppwrite,
+    }: {
+      postId: string;
+      toDeleteFromAppwrite: string[];
+    }) => deletePost(postId, toDeleteFromAppwrite),
+
+    onSuccess: async (data) => {
+      // Directly modify the cache to remove the deleted post
+      queryClient.setQueryData(
+        [QUERY_KEYS.GET_RECENT_POSTS],
+        (oldPosts: any[] | undefined) =>
+          oldPosts ? oldPosts.filter((post) => post.id !== data.postId) : []
+      );
+
+      // Refetch to ensure everything is up-to-date
+      await queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
+
+      // await queryClient.invalidateQueries({
+      //   queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
+      // });
+    },
+  });
+};
+
+export const useGetRelatedItineraryMediaUrls = (
+  postId: string,
+  enabledFlag: boolean
+) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_RELATED_ITINERARY_MEDIA_URLS, postId],
+    queryFn: () => getRelatedItineraryMediaUrls(postId),
+    enabled: enabledFlag,
   });
 };
 

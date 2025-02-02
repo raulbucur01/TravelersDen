@@ -410,6 +410,55 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
   }
 }
 
+export async function deletePost(
+  postId: string,
+  toDeleteFromAppwrite: string[]
+) {
+  try {
+    console.log("Inside deletePost", postId, toDeleteFromAppwrite);
+
+    // delete files from appwrite if any
+    if (toDeleteFromAppwrite.length > 0) {
+      const deletedFiles = await Promise.all(
+        toDeleteFromAppwrite.map(async (url) => {
+          const id = extractAppwriteStorageFileIdFromUrl(url);
+          try {
+            if (!id) return { id, success: false };
+
+            const deletionResult = await deleteFile(id);
+            if (deletionResult?.status === "ok") return { id, success: true };
+            return { id, success: false };
+          } catch (error) {
+            console.error(`Failed to delete file ${id}:`, error);
+            return { id, success: false };
+          }
+        })
+      );
+
+      const allSuccessful = deletedFiles.every((file) => file.success);
+
+      if (!allSuccessful) throw Error("Failed to delete files");
+    }
+
+    const response = await axios.delete(API_BASE_URL + `/posts/${postId}`);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getRelatedItineraryMediaUrls(postId: string) {
+  try {
+    const response = await axios.get(
+      API_BASE_URL + `/posts/${postId}/related-itinerary-media-urls`
+    );
+    console.log("related media urls in api", response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export async function uploadFile(file: File) {
   try {
     const uploadedFile = await storage.createFile(

@@ -1,7 +1,11 @@
 import Loader from "@/components/shared/Loader";
 import { useUserContext } from "@/context/AuthContext";
-import { useGetPostById } from "@/lib/react-query/queriesAndMutations";
-import { useParams } from "react-router-dom";
+import {
+  useDeletePost,
+  useGetPostById,
+  useGetRelatedItineraryMediaUrls,
+} from "@/lib/react-query/queriesAndMutations";
+import { useNavigate, useParams } from "react-router-dom";
 import CommentSection from "@/components/comment/CommentSection";
 import PostStats from "@/components/shared/PostStats";
 import { Button } from "@/components/ui/button";
@@ -11,23 +15,63 @@ import { Link } from "react-router-dom";
 import MediaCarousel from "@/components/shared/MediaCarousel";
 import ItineraryDetails from "@/components/post/ItineraryDetails";
 import ExpandableText from "@/components/shared/ExpandableText";
+import { toast, useToast } from "@/hooks/use-toast";
 
 const PostDetails = () => {
-  const { id } = useParams();
+  const navigate = useNavigate();
+  let { id } = useParams();
   const { user: currentUser } = useUserContext();
   const { data: post, isPending: isGettingPost } = useGetPostById(id || "");
   const { data: postCreator, isPending: isPostCreatorLoading } = useGetUserById(
     post?.userId
   );
+  const { refetch: refetchRelatedItineraryMediaUrls } =
+    useGetRelatedItineraryMediaUrls(post?.postId || "", false);
 
-  if (isPostCreatorLoading || isGettingPost) {
+  const { mutateAsync: deletePost, isPending: isDeletingPost } =
+    useDeletePost();
+
+  if (isPostCreatorLoading || isGettingPost || isDeletingPost) {
     return <Loader />;
   }
 
   // Convert tags into an array
   const separatedPostTags = post?.tags?.replace(/ /g, "").split(",") || [];
 
-  const handleDeletePost = () => {};
+  const handleDeletePost = async () => {
+    let toDeleteFromAppwrite: string[] = post!.mediaUrls.map(
+      (media) => media.url
+    );
+
+    console.log("Base Media Urls", toDeleteFromAppwrite);
+
+    if (post?.isItinerary) {
+      const { data: relatedItineraryMediaUrls } =
+        await refetchRelatedItineraryMediaUrls();
+
+      console.log("Related Media Urls", relatedItineraryMediaUrls);
+
+      toDeleteFromAppwrite = [
+        ...toDeleteFromAppwrite,
+        ...relatedItineraryMediaUrls,
+      ];
+
+      console.log("Base + Related Media Urls", toDeleteFromAppwrite);
+    }
+
+    const result = await deletePost({
+      postId: post!.postId,
+      toDeleteFromAppwrite,
+    });
+
+    if (!result)
+      return toast({
+        title: "Failed to delete post, Please try again.",
+      });
+
+    navigate("/");
+  };
+
   return (
     <>
       {isGettingPost ? (

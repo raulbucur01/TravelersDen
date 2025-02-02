@@ -108,12 +108,12 @@ namespace TravelAppBackendAPI.Controllers
                     .Include(c => c.Replies) // Include replies for cascading delete
                     .FirstOrDefaultAsync(c => c.CommentId == commentId);
 
-                string postId = comment.PostId;
-
                 if (comment == null)
                 {
                     return NotFound("Comment not found.");
                 }
+
+                string postId = comment.PostId;
 
                 // Recursively delete replies first
                 foreach (var reply in comment.Replies)

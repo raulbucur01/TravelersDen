@@ -300,6 +300,52 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePost(string id)
+        {
+            try {
+                var post = await _context.Posts.FindAsync(id);
+
+                if (post == null)
+                {
+                    return NotFound(new { Message = "Post not found." });
+                }
+
+                _context.Posts.Remove(post);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { PostId = id });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id}/related-itinerary-media-urls")]
+        public async Task<IActionResult> GetRelatedItineraryMediaUrls(string id) {
+            try
+            {
+                // Query the TripSteps where PostId matches the provided id
+                var tripSteps = await _context.TripSteps
+                    .Where(ts => ts.PostId == id)
+                    .Include(ts => ts.Media)
+                    .ToListAsync(); ;
+
+                var mediaUrls = tripSteps
+                    .SelectMany(ts => ts.Media)
+                    .Select(media => media.AppwriteFileUrl)
+                    .ToArray();
+
+                return Ok(mediaUrls);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
         [HttpGet("{id}")]   
         public async Task<IActionResult> GetPostById(string id)
         {
