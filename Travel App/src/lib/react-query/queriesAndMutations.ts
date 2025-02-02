@@ -100,9 +100,8 @@ export const useUpdateNormalPost = () => {
 
   return useMutation({
     mutationFn: (post: IUpdateNormalPost) => updateNormalPost(post),
-    onSuccess: (data) => {
-      // we practically get the data after the mutation finishes
-      queryClient.invalidateQueries({
+    onSuccess: async (data) => {
+      await queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
       });
     },
@@ -114,11 +113,13 @@ export const useUpdateItineraryPost = () => {
 
   return useMutation({
     mutationFn: (post: IUpdateItineraryPost) => updateItineraryPost(post),
-    onSuccess: (data) => {
-      // we practically get the data after the mutation finishes
-      // queryClient.invalidateQueries({
-      //   queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
-      // });
+    onSuccess: async (data) => {
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
+      });
+      await queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_ITINERARY_DETAILS, data.postId],
+      });
     },
   });
 };

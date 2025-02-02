@@ -196,7 +196,7 @@ namespace TravelAppBackendAPI.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return StatusCode(201, new { id });
+                return StatusCode(201, new { PostId = id });
             }
             catch (Exception ex)
             {
@@ -291,7 +291,7 @@ namespace TravelAppBackendAPI.Controllers
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
-                    return StatusCode(201, new { id });
+                    return StatusCode(201, new { PostId = id });
                 }
                 catch (Exception ex)
                 {
