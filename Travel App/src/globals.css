@@ -231,6 +231,7 @@ body {
   .post_details-info {
     @apply flex-1 bg-dm-dark-2 flex flex-col gap-5 lg:gap-7 items-start p-8 rounded-[30px] min-w-[60%];
   }
+
   .post_details-delete_btn {
     @apply p-0 flex gap-3 hover:bg-transparent hover:text-light-1  text-light-1 small-medium lg:base-medium;
   }

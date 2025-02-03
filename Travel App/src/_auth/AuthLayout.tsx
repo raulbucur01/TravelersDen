@@ -1,4 +1,6 @@
 import { Outlet, Navigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { pageTransitionAnimation } from "@/lib/utils";
 
 const AuthLayout = () => {
   const isAuthenticated = false;
@@ -7,7 +9,10 @@ const AuthLayout = () => {
       {isAuthenticated ? (
         <Navigate to="/" />
       ) : (
-        <div className="relative h-screen w-screen">
+        <motion.div
+          {...pageTransitionAnimation}
+          className="relative h-screen w-screen"
+        >
           <img
             src="/assets/images/beach_wallpaper_auth.jpg"
             alt="Background"
@@ -19,7 +24,7 @@ const AuthLayout = () => {
               <Outlet />
             </div>
           </section>
-        </div>
+        </motion.div>
       )}
     </>
   );

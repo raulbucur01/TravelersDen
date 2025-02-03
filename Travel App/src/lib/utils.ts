@@ -1,6 +1,7 @@
 import { ISuggestionInfo } from "@/types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { MotionProps } from "framer-motion";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -247,4 +248,12 @@ export const extractAppwriteStorageFileIdFromUrl = (
 ): string | null => {
   const match = url.match(/files\/([^\/]+)\/(preview|view|download)/);
   return match ? match[1] : null;
+};
+
+// Define reusable motion settings
+export const pageTransitionAnimation: MotionProps = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1 },
+  exit: { opacity: 0 },
+  transition: { duration: 0.3 },
 };

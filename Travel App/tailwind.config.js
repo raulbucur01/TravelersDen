@@ -37,6 +37,7 @@ module.exports = {
         "dm-secondary": "#355B6E",
         "dm-accent": "#91EDDF",
         "dm-red": "#AE1E33",
+        "dm-red-2": "#DA2640",
 
         // alt
         "primary-500": "#877EFF",

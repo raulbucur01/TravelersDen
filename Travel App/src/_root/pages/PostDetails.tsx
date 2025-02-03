@@ -16,6 +16,7 @@ import MediaCarousel from "@/components/shared/MediaCarousel";
 import ItineraryDetails from "@/components/post/ItineraryDetails";
 import ExpandableText from "@/components/shared/ExpandableText";
 import { toast, useToast } from "@/hooks/use-toast";
+import CustomisableAlertDialog from "@/components/shared/CustomisableAlertDialog";
 
 const PostDetails = () => {
   const navigate = useNavigate();
@@ -127,20 +128,26 @@ const PostDetails = () => {
                         />
                       </Link>
 
-                      <Button
-                        onClick={handleDeletePost}
-                        variant="ghost"
-                        className={`ghost_details-delete_btn ${
-                          currentUser.userId !== postCreator.userId && "hidden"
-                        }`}
-                      >
-                        <img
-                          src="/assets/icons/delete.svg"
-                          alt="delete"
-                          width={24}
-                          height={24}
+                      {/* DELETE with CONFIRMATION */}
+                      {currentUser.userId === postCreator.userId && (
+                        <CustomisableAlertDialog
+                          trigger={
+                            <Button className="bg-transparent hover:bg-transparent">
+                              <img
+                                src="/assets/icons/delete.svg"
+                                alt="delete"
+                                width={24}
+                                height={24}
+                              />
+                            </Button>
+                          }
+                          title="Delete Post"
+                          description="Are you sure you want to delete this post? This action cannot be undone."
+                          cancelText="Cancel"
+                          actionText="Delete"
+                          onConfirm={handleDeletePost}
                         />
-                      </Button>
+                      )}
                     </div>
                   </div>
 

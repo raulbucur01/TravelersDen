@@ -14,19 +14,21 @@ import {
 } from "./_root/pages";
 import RootLayout from "./_root/RootLayout";
 import "./globals.css";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 
 const App = () => {
+  const location = useLocation();
+
   return (
     <main className="flex h-screen">
-      <Routes>
-        {/* public routes */}
+      <Routes key={location.pathname} location={location}>
+        {/* Public routes (No animation needed here) */}
         <Route element={<AuthLayout />}>
           <Route path="/sign-in" element={<SigninForm />} />
           <Route path="/sign-up" element={<SignupForm />} />
         </Route>
 
-        {/* private routes */}
+        {/* Private routes inside RootLayout (with animation) */}
         <Route element={<RootLayout />}>
           <Route index element={<Home />} />
           <Route path="/explore" element={<Explore />} />

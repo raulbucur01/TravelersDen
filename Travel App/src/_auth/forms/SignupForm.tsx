@@ -169,7 +169,7 @@ const SignupForm = () => {
               to="/sign-in"
               className="text-primary-500 text-small-semibold ml-1 hover:underline"
             >
-              Log in
+              Sign in
             </Link>
           </p>
         </form>

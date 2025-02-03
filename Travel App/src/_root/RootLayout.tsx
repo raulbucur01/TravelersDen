@@ -1,8 +1,10 @@
 import Bottombar from "@/components/shared/Bottombar";
 import LeftSidebar from "@/components/shared/LeftSidebar";
 import RightSidebar from "@/components/shared/RightSidebar";
+import { motion } from "framer-motion";
 import Topbar from "@/components/shared/Topbar";
 import { Outlet } from "react-router-dom";
+import { pageTransitionAnimation } from "@/lib/utils";
 
 const RootLayout = () => {
   return (
@@ -11,9 +13,12 @@ const RootLayout = () => {
 
       <LeftSidebar />
 
-      <section className="flex flex-1 h-full">
+      <motion.section
+        {...pageTransitionAnimation}
+        className="flex flex-1 h-full"
+      >
         <Outlet />
-      </section>
+      </motion.section>
       <Bottombar />
     </div>
   );
