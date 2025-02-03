@@ -21,12 +21,6 @@ import { Button } from "@/components/ui/button";
 import { SignupValidation } from "@/lib/validation";
 import Loader from "@/components/shared/Loader";
 import { useToast } from "@/hooks/use-toast";
-//import { useToast } from "@/hooks/use-toast";
-// import {
-//   useCreateUserAccount,
-//   useSignInAccount,
-// } from "@/lib/react-query/queriesAndMutations";
-//import { useUserContext } from "@/context/AuthContext";
 
 const SignupForm = () => {
   const { toast } = useToast();
