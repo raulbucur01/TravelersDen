@@ -415,8 +415,6 @@ export async function deletePost(
   toDeleteFromAppwrite: string[]
 ) {
   try {
-    console.log("Inside deletePost", postId, toDeleteFromAppwrite);
-
     // delete files from appwrite if any
     if (toDeleteFromAppwrite.length > 0) {
       const deletedFiles = await Promise.all(
@@ -452,7 +450,6 @@ export async function getRelatedItineraryMediaUrls(postId: string) {
     const response = await axios.get(
       API_BASE_URL + `/posts/${postId}/related-itinerary-media-urls`
     );
-    console.log("related media urls in api", response.data);
     return response.data;
   } catch (error) {
     console.log(error);

@@ -139,22 +139,42 @@ export const useDeletePost = () => {
       toDeleteFromAppwrite: string[];
     }) => deletePost(postId, toDeleteFromAppwrite),
 
-    onSuccess: async (data) => {
-      // Directly modify the cache to remove the deleted post
-      queryClient.setQueryData(
-        [QUERY_KEYS.GET_RECENT_POSTS],
-        (oldPosts: any[] | undefined) =>
-          oldPosts ? oldPosts.filter((post) => post.id !== data.postId) : []
-      );
-
-      // Refetch to ensure everything is up-to-date
-      await queryClient.invalidateQueries({
+    onMutate: async ({ postId }) => {
+      // Cancel outgoing queries to avoid race conditions
+      await queryClient.cancelQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
       });
 
-      // await queryClient.invalidateQueries({
-      //   queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
-      // });
+      // Get previous cache data
+      const previousPosts = queryClient.getQueryData([
+        QUERY_KEYS.GET_RECENT_POSTS,
+      ]);
+
+      // Optimistically update the UI
+      queryClient.setQueryData(
+        [QUERY_KEYS.GET_RECENT_POSTS],
+        (oldPosts: any[] | undefined) =>
+          oldPosts ? oldPosts.filter((post) => post.postId !== postId) : []
+      );
+
+      return { previousPosts }; // Store old cache in case we need to rollback
+    },
+
+    onError: (error, _, context) => {
+      // Rollback if the mutation fails
+      if (context?.previousPosts) {
+        queryClient.setQueryData(
+          [QUERY_KEYS.GET_RECENT_POSTS],
+          context.previousPosts
+        );
+      }
+    },
+
+    onSettled: async () => {
+      // Ensure the latest data is fetched
+      await queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+      });
     },
   });
 };

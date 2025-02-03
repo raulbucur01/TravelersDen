@@ -39,24 +39,19 @@ const PostDetails = () => {
   const separatedPostTags = post?.tags?.replace(/ /g, "").split(",") || [];
 
   const handleDeletePost = async () => {
+    navigate("/");
     let toDeleteFromAppwrite: string[] = post!.mediaUrls.map(
       (media) => media.url
     );
-
-    console.log("Base Media Urls", toDeleteFromAppwrite);
 
     if (post?.isItinerary) {
       const { data: relatedItineraryMediaUrls } =
         await refetchRelatedItineraryMediaUrls();
 
-      console.log("Related Media Urls", relatedItineraryMediaUrls);
-
       toDeleteFromAppwrite = [
         ...toDeleteFromAppwrite,
         ...relatedItineraryMediaUrls,
       ];
-
-      console.log("Base + Related Media Urls", toDeleteFromAppwrite);
     }
 
     const result = await deletePost({
@@ -68,8 +63,6 @@ const PostDetails = () => {
       return toast({
         title: "Failed to delete post, Please try again.",
       });
-
-    navigate("/");
   };
 
   return (
