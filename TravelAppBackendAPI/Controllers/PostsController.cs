@@ -105,6 +105,7 @@ namespace TravelAppBackendAPI.Controllers
                             StepNumber = step.StepNumber,
                             Latitude = step.Latitude,
                             Longitude = step.Longitude,
+                            Zoom = step.Zoom,
                             Price = step.Price,
                             Description = step.Description
                         };
@@ -252,6 +253,7 @@ namespace TravelAppBackendAPI.Controllers
                             StepNumber = step.StepNumber,
                             Latitude = step.Latitude,
                             Longitude = step.Longitude,
+                            Zoom = step.Zoom,
                             Price = step.Price,
                             Description = step.Description
                         };
@@ -604,6 +606,7 @@ namespace TravelAppBackendAPI.Controllers
                             StepNumber = ts.StepNumber,
                             Latitude = ts.Latitude,
                             Longitude = ts.Longitude,
+                            Zoom = ts.Zoom,
                             Price = ts.Price,
                             Description = ts.Description,
                             MediaUrls = ts.Media.Select(m => new

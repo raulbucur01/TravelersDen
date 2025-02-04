@@ -120,7 +120,6 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
         postId: post.postId,
         tags: values.tags ?? "", // Ensure tags is always a string
       };
-
       const updatedPost = await updatePost({
         ...formattedValues,
       });

@@ -1,8 +1,13 @@
+import { getZoomBasedOnType } from "@/lib/utils";
 import { ISuggestionInfo } from "@/types";
 
 type MapSearchSuggestionsProps = {
   suggestions: ISuggestionInfo[];
-  onSuggestionPicked: (latitude: number, longitude: number) => void;
+  onSuggestionPicked: (
+    latitude: number,
+    longitude: number,
+    zoom: number
+  ) => void;
 };
 
 const MapSearchSuggestions = ({
@@ -10,9 +15,11 @@ const MapSearchSuggestions = ({
   onSuggestionPicked,
 }: MapSearchSuggestionsProps) => {
   const handleSuggestionPicked = (index: number) => () => {
+    const zoom = getZoomBasedOnType(suggestions[index].type);
     onSuggestionPicked(
       suggestions[index].latitude,
-      suggestions[index].longitude
+      suggestions[index].longitude,
+      zoom
     );
   };
 

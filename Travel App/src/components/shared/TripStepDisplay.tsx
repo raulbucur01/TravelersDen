@@ -50,6 +50,7 @@ const TripStepDisplay = ({ tripSteps }: TripStepDisplayProps) => {
               height="100%"
               preselectedLatitude={tripStep.latitude}
               preselectedLongitude={tripStep.longitude}
+              preselectedZoom={tripStep.zoom}
             />
           </div>
         </div>

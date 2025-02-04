@@ -44,7 +44,7 @@ const LeftSidebar = () => {
           />
           <div className="flex flex-col">
             <p className="body-bold">{user.name}</p>
-            <p className="small-regular text-light-3">@{user.username}</p>
+            <p className="small-regular text-dm-light-3">@{user.username}</p>
           </div>
         </Link>
 
@@ -69,9 +69,9 @@ const LeftSidebar = () => {
                   <img
                     src={link.imgURL}
                     alt={link.label}
-                    className={`group-hover:invert-white ${
-                      isActive && "invert-white"
-                    }`}
+                    // className={`group-hover:invert-white ${
+                    //   isActive && "invert-white"
+                    // }`}
                   ></img>
                   {link.label}
                 </NavLink>

@@ -5,25 +5,24 @@
 namespace TravelAppBackendAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedMentionToComment : Migration
+    public partial class AddedZoomToTripSteps : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "Mention",
-                table: "Comments",
-                type: "nvarchar(50)",
-                nullable: true,
-                defaultValue: "");
+            migrationBuilder.AddColumn<double>(
+                name: "Zoom",
+                table: "TripSteps",
+                type: "float",
+                nullable: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Mention",
-                table: "Comments");
+                name: "Zoom",
+                table: "TripSteps");
         }
     }
 }

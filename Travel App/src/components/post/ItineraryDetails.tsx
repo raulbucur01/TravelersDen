@@ -2,6 +2,7 @@ import { useGetItineraryDetails } from "@/lib/react-query/queriesAndMutations";
 import Loader from "../shared/Loader";
 import AccommodationsDisplay from "../shared/AccommodationsDisplay";
 import TripStepDisplay from "../shared/TripStepDisplay";
+import TripSummaryDisplay from "../shared/TripSummaryDisplay";
 
 const ItineraryDetails = ({ id }: { id: string }) => {
   const { data: itineraryData, isPending: isGettingItineraryData } =
@@ -28,6 +29,16 @@ const ItineraryDetails = ({ id }: { id: string }) => {
         </h1>
         <div className="flex justify-center w-full">
           <TripStepDisplay tripSteps={itineraryData.tripSteps} />
+        </div>
+      </div>
+
+      {/* Trip Summary Section */}
+      <div className="flex flex-col gap-4">
+        <h1 className="text-2xl ml-10 font-semibold text-dm-light">
+          Trip Summary
+        </h1>
+        <div className="flex justify-center w-full">
+          <TripSummaryDisplay />
         </div>
       </div>
     </div>

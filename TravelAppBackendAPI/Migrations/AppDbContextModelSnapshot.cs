@@ -243,6 +243,9 @@ namespace TravelAppBackendAPI.Migrations
                     b.Property<int>("StepNumber")
                         .HasColumnType("int");
 
+                    b.Property<double?>("Zoom")
+                        .HasColumnType("float");
+
                     b.HasKey("TripStepId");
 
                     b.HasIndex("PostId");

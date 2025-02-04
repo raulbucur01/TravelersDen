@@ -67,7 +67,7 @@ const TripStepForm = ({
         setValue(`${fieldName}.${index}.price`, step.price.toString());
         setValue(`${fieldName}.${index}.longitude`, step.longitude);
         setValue(`${fieldName}.${index}.latitude`, step.latitude);
-        // setValue(`${fieldName}.${index}.files`, step.mediaUrls ?? []); // Ensure existing media is properly set
+        setValue(`${fieldName}.${index}.zoom`, step.zoom);
       });
     }
   }, []);
@@ -126,12 +126,6 @@ const TripStepForm = ({
       const updatedTripSteps = localTripSteps.filter((_, i) => i !== index);
       setLocalTripSteps(updatedTripSteps);
     }
-
-    // setNewTripStepFiles((prev) => {
-    //   const updated = { ...prev };
-    //   delete updated[index];
-    //   return updated;
-    // });
   };
 
   return (
@@ -234,9 +228,10 @@ const TripStepForm = ({
                     <Map
                       width="50vh"
                       height="50vh"
-                      onLocationPicked={(longitude, latitude) => {
+                      onLocationPicked={(longitude, latitude, zoom) => {
                         setValue(`${fieldName}.${index}.longitude`, longitude);
                         setValue(`${fieldName}.${index}.latitude`, latitude);
+                        setValue(`${fieldName}.${index}.zoom`, zoom);
                       }}
                       preselectedLongitude={
                         localTripSteps?.[index]?.longitude || undefined
@@ -244,6 +239,12 @@ const TripStepForm = ({
                       preselectedLatitude={
                         localTripSteps?.[index]?.latitude || undefined
                       }
+                      preselectedZoom={
+                        localTripSteps?.[index]?.zoom || undefined
+                      }
+                      onZoomChanged={(zoom) => {
+                        setValue(`${fieldName}.${index}.zoom`, zoom);
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

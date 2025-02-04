@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace TravelAppBackendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241217152655_upd")]
-    partial class upd
+    [Migration("20250204132425_AddedZoomToTripSteps")]
+    partial class AddedZoomToTripSteps
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -245,6 +245,9 @@ namespace TravelAppBackendAPI.Migrations
 
                     b.Property<int>("StepNumber")
                         .HasColumnType("int");
+
+                    b.Property<double?>("Zoom")
+                        .HasColumnType("float");
 
                     b.HasKey("TripStepId");
 

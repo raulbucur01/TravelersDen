@@ -19,7 +19,7 @@ import { extractAppwriteStorageFileIdFromUrl } from "@/lib/utils";
 
 const API_BASE_URL = apiConfig.backendApiUrl;
 const AI_API_BASE_URL = apiConfig.recommApiUrl;
-const TOMTOM_API_KEY = import.meta.env.VITE_TOMTOM_API_KEY;
+const TOMTOM_API_KEY = apiConfig.tomTomApiKey;
 
 // utility
 export const processFiles = async (files: File[]) => {
@@ -97,6 +97,27 @@ async function processPostFilesForUpdate(
   formattedMediaFiles = [...formattedMediaFiles, ...(newFiles as MediaUrl[])];
 
   return formattedMediaFiles;
+}
+
+async function deleteFilesFromAppwrite(fileUrls: string[]): Promise<boolean> {
+  if (fileUrls.length === 0) return true; // No files to delete
+
+  const deletedFiles = await Promise.all(
+    fileUrls.map(async (url) => {
+      const id = extractAppwriteStorageFileIdFromUrl(url);
+      try {
+        if (!id) return { id, success: false };
+
+        const deletionResult = await deleteFile(id);
+        return { id, success: deletionResult?.status === "ok" };
+      } catch (error) {
+        console.error(`Failed to delete file ${id}:`, error);
+        return { id, success: false };
+      }
+    })
+  );
+
+  return deletedFiles.every((file) => file.success);
 }
 
 // utility
@@ -259,27 +280,11 @@ export async function updateNormalPost(post: IUpdateNormalPost) {
     }
 
     // delete files from appwrite if any
-    if (post.deletedFiles.length > 0) {
-      const deletedFiles = await Promise.all(
-        post.deletedFiles.map(async (url) => {
-          const id = extractAppwriteStorageFileIdFromUrl(url);
-          try {
-            if (!id) return { id, success: false };
+    const allFilesSuccessfullyDeleted = await deleteFilesFromAppwrite(
+      post.deletedFiles
+    );
 
-            const deletionResult = await deleteFile(id);
-            if (deletionResult?.status === "ok") return { id, success: true };
-            return { id, success: false };
-          } catch (error) {
-            console.error(`Failed to delete file ${id}:`, error);
-            return { id, success: false };
-          }
-        })
-      );
-
-      const allSuccessful = deletedFiles.every((file) => file.success);
-
-      if (!allSuccessful) throw Error("Failed to delete files");
-    }
+    if (!allFilesSuccessfullyDeleted) throw Error("Failed to delete files");
 
     const response = await axios.put(
       API_BASE_URL + `/posts/normal/${post.postId}`,
@@ -346,27 +351,11 @@ export async function createItineraryPost(post: INewItineraryPost) {
 export async function updateItineraryPost(post: IUpdateItineraryPost) {
   try {
     // delete files from appwrite if any
-    if (post.toDeleteFromAppwrite.length > 0) {
-      const deletedFiles = await Promise.all(
-        post.toDeleteFromAppwrite.map(async (url) => {
-          const id = extractAppwriteStorageFileIdFromUrl(url);
-          try {
-            if (!id) return { id, success: false };
+    const allFilesSuccessfullyDeleted = await deleteFilesFromAppwrite(
+      post.toDeleteFromAppwrite
+    );
 
-            const deletionResult = await deleteFile(id);
-            if (deletionResult?.status === "ok") return { id, success: true };
-            return { id, success: false };
-          } catch (error) {
-            console.error(`Failed to delete file ${id}:`, error);
-            return { id, success: false };
-          }
-        })
-      );
-
-      const allSuccessful = deletedFiles.every((file) => file.success);
-
-      if (!allSuccessful) throw Error("Failed to delete files");
-    }
+    if (!allFilesSuccessfullyDeleted) throw Error("Failed to delete files");
 
     // add the new files to appwrite if needed
     const basefilesToSendToBackend = await processPostFilesForUpdate(
@@ -415,28 +404,11 @@ export async function deletePost(
   toDeleteFromAppwrite: string[]
 ) {
   try {
-    // delete files from appwrite if any
-    if (toDeleteFromAppwrite.length > 0) {
-      const deletedFiles = await Promise.all(
-        toDeleteFromAppwrite.map(async (url) => {
-          const id = extractAppwriteStorageFileIdFromUrl(url);
-          try {
-            if (!id) return { id, success: false };
+    const allFilesSuccessfullyDeleted = await deleteFilesFromAppwrite(
+      toDeleteFromAppwrite
+    );
 
-            const deletionResult = await deleteFile(id);
-            if (deletionResult?.status === "ok") return { id, success: true };
-            return { id, success: false };
-          } catch (error) {
-            console.error(`Failed to delete file ${id}:`, error);
-            return { id, success: false };
-          }
-        })
-      );
-
-      const allSuccessful = deletedFiles.every((file) => file.success);
-
-      if (!allSuccessful) throw Error("Failed to delete files");
-    }
+    if (!allFilesSuccessfullyDeleted) throw Error("Failed to delete files");
 
     const response = await axios.delete(API_BASE_URL + `/posts/${postId}`);
     return response.data;
@@ -602,6 +574,7 @@ export async function getItineraryDetails(postId: string): Promise<
       accommodations: IDisplayedAccommodation[];
     }>(API_BASE_URL + `/posts/${postId}/itinerary-details`);
 
+    console.log("In getItineraryDetails", response.data);
     return response.data;
   } catch (error) {
     console.log(error);

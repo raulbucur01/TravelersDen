@@ -137,6 +137,7 @@ export const ItineraryPostValidation = z.object({
           .max(6, { message: "You can upload up to 6 files only" }),
         longitude: z.number(),
         latitude: z.number(),
+        zoom: z.number(),
       })
     )
     .min(1, { message: "At least one trip step is required" }),

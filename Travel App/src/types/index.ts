@@ -46,6 +46,7 @@ export type ITripStep = {
   stepNumber: number;
   latitude: number;
   longitude: number;
+  zoom: number;
   price: number;
   description: string;
   files: File[];
@@ -128,6 +129,7 @@ export type IDisplayedTripStep = {
   stepNumber: number;
   latitude: number;
   longitude: number;
+  zoom: number;
   price: number;
   description: string;
   mediaUrls: { url: string; type: string }[];
@@ -185,6 +187,7 @@ export interface IComment {
 
 export interface ISuggestionInfo {
   poiName: string;
+  type: string;
   category: string;
   address: string;
   latitude: number;

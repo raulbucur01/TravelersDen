@@ -12,13 +12,20 @@ import { useDebounce } from "use-debounce";
 import { formatMapSearchSuggestions } from "@/lib/utils";
 import { createRoot } from "react-dom/client";
 import MapPopup from "./MapPopup";
+import { apiConfig } from "@/api/config";
 
 type MapProps = {
   width?: string;
   height?: string;
   preselectedLongitude?: number;
   preselectedLatitude?: number;
-  onLocationPicked?: (longitude: number, latitude: number) => void;
+  preselectedZoom?: number;
+  onLocationPicked?: (
+    longitude: number,
+    latitude: number,
+    zoom: number
+  ) => void;
+  onZoomChanged?: (zoom: number) => void;
 };
 
 const Map = ({
@@ -26,7 +33,9 @@ const Map = ({
   height = "90vh",
   preselectedLongitude = 24.79279,
   preselectedLatitude = 46.22141,
+  preselectedZoom = 15,
   onLocationPicked,
+  onZoomChanged,
 }: MapProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
@@ -36,13 +45,15 @@ const Map = ({
     isPending: isGettingSearchResults,
   } = useGetMapSearchResults(searchQuery);
 
-  const API_KEY = import.meta.env.VITE_TOMTOM_API_KEY;
+  const API_KEY = apiConfig.tomTomApiKey;
   const mapElement = useRef<HTMLDivElement | null>(null);
 
   const [selectedMapLongitude, setSelectedMapLongitude] =
     useState(preselectedLongitude);
   const [selectedMapLatitude, setSelectedMapLatitude] =
     useState(preselectedLatitude);
+  const [selectedMapZoom, setSelectedMapZoom] = useState(preselectedZoom);
+
   const [map, setMap] = useState<tt.Map | null>(null);
   const markerRef = useRef<tt.Marker | null>(null);
 
@@ -51,11 +62,22 @@ const Map = ({
 
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  const handleLocationPicked = (longitude: number, latitude: number) => {
+  useEffect(() => {
+    if (onZoomChanged) {
+      onZoomChanged(selectedMapZoom);
+    }
+  }, [selectedMapZoom]);
+
+  const handleLocationPicked = (
+    longitude: number,
+    latitude: number,
+    zoom: number
+  ) => {
     setSelectedMapLongitude(longitude);
     setSelectedMapLatitude(latitude);
+    setSelectedMapZoom(zoom);
     if (onLocationPicked) {
-      onLocationPicked(longitude, latitude);
+      onLocationPicked(longitude, latitude, zoom);
     }
   };
 
@@ -74,7 +96,7 @@ const Map = ({
       setIsFullscreen(false);
     }
   };
-
+  console.log(selectedMapZoom);
   useEffect(() => {
     if (mapElement.current) {
       const newMap = tt.map({
@@ -87,10 +109,15 @@ const Map = ({
         },
         container: mapElement.current,
         center: [selectedMapLongitude, selectedMapLatitude],
-        zoom: 15,
+        zoom: selectedMapZoom,
         // trackResize: true,
       });
       setMap(newMap);
+
+      // Update zoom state when user zooms in or out
+      newMap.on("zoomend", () => {
+        setSelectedMapZoom(newMap.getZoom());
+      });
 
       // Initialize the marker
       const initialMarker = new tt.Marker({
@@ -117,11 +144,11 @@ const Map = ({
           if (feature.id != 0 && feature.layer.id === "POI") {
             createPopup(newMap, feature);
 
+            console.log("Flying, zoom:", newMap.getZoom());
             newMap.flyTo({
               ...({
                 center: lngLat,
                 essential: true,
-                zoom: 15,
                 speed: 1.2,
               } as any),
             });
@@ -136,7 +163,7 @@ const Map = ({
             removePopup();
           }
 
-          handleLocationPicked(lngLat.lng, lngLat.lat);
+          handleLocationPicked(lngLat.lng, lngLat.lat, newMap.getZoom());
         });
 
         newMap.on("mouseenter", "POI", () => {
@@ -215,7 +242,11 @@ const Map = ({
     console.log("Search query:", searchQuery);
   };
 
-  const handleSuggestionPicked = (latitude: number, longitude: number) => {
+  const handleSuggestionPicked = (
+    latitude: number,
+    longitude: number,
+    zoom: number
+  ) => {
     removePopup();
     if (map) {
       // Update the map's center
@@ -224,8 +255,8 @@ const Map = ({
         ...({
           center: [longitude, latitude],
           essential: true, // Ensure smooth transitions
-          zoom: 15,
-          speed: 1.2,
+          zoom: zoom,
+          speed: 1.8,
         } as any),
       });
 
@@ -237,7 +268,7 @@ const Map = ({
 
       markerRef.current = newMarker;
 
-      handleLocationPicked(longitude, latitude);
+      handleLocationPicked(longitude, latitude, zoom);
     }
   };
 

@@ -17,6 +17,7 @@
         public int StepNumber { get; set; }
         public double? Latitude { get; set; }
         public double? Longitude { get; set; }
+        public double? Zoom { get; set; }
         public decimal? Price { get; set; }
         public string Description { get; set; }
         public List<FileDataDTO> Files { get; set; } // Media files for the step

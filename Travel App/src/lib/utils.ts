@@ -122,6 +122,7 @@ export const formatCommentCount = (count: number): string => {
 export const formatMapSearchSuggestions = (
   results: any[]
 ): ISuggestionInfo[] => {
+  console.log(results);
   return results
     .filter((item: any) => {
       // Keep only items with known types
@@ -140,6 +141,7 @@ export const formatMapSearchSuggestions = (
         case "POI":
           return {
             poiName: item.poi?.name,
+            type: item.type,
             category: item.poi?.categories?.join(", "),
             address: address || item.address?.freeformAddress,
             latitude: item.position?.lat,
@@ -150,6 +152,7 @@ export const formatMapSearchSuggestions = (
           if (item.entityType === "Municipality") {
             return {
               poiName: item.address?.municipality,
+              type: item.type,
               category: "Locality",
               address: item.address?.country,
               latitude: item.position?.lat,
@@ -160,6 +163,7 @@ export const formatMapSearchSuggestions = (
           if (item.entityType === "MunicipalitySubdivision") {
             return {
               poiName: item.address?.municipality,
+              type: item.type,
               category: "Locality",
               address: item.address?.country,
               latitude: item.position?.lat,
@@ -170,6 +174,7 @@ export const formatMapSearchSuggestions = (
           if (item.entityType === "Country") {
             return {
               poiName: item.address?.country,
+              type: item.type,
               category: "Country",
               address: "",
               latitude: item.position?.lat,
@@ -180,6 +185,7 @@ export const formatMapSearchSuggestions = (
           if (item.entityType === "Neighbourhood") {
             return {
               poiName: item.address?.neighbourhood,
+              type: item.type,
               category: "Neighbourhood",
               address: item.address?.freeformAddress,
               latitude: item.position?.lat,
@@ -189,6 +195,7 @@ export const formatMapSearchSuggestions = (
 
           return {
             poiName: item.address?.country,
+            type: item.type,
             category: "",
             address: item.address?.freeformAddress,
             latitude: item.position?.lat,
@@ -198,6 +205,7 @@ export const formatMapSearchSuggestions = (
         case "Street":
           return {
             poiName: item.address?.streetName,
+            type: item.type,
             category: "Street",
             address: item.address?.freeformAddress,
             latitude: item.position?.lat,
@@ -207,6 +215,7 @@ export const formatMapSearchSuggestions = (
         default:
           return {
             poiName: "",
+            type: "",
             category: "",
             address: "",
             latitude: 0,
@@ -214,6 +223,19 @@ export const formatMapSearchSuggestions = (
           };
       }
     });
+};
+
+export const getZoomBasedOnType = (type: string): number => {
+  switch (type) {
+    case "POI":
+      return 20;
+    case "Geography":
+      return 12;
+    case "Street":
+      return 17;
+    default:
+      return 10;
+  }
 };
 
 /**
