@@ -1,4 +1,4 @@
-import { ISuggestionInfo } from "@/types";
+import { IDisplayedTripStep, ISuggestionInfo } from "@/types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { MotionProps } from "framer-motion";
@@ -6,8 +6,6 @@ import { MotionProps } from "framer-motion";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-
-export const convertFileToUrl = (file: File) => URL.createObjectURL(file);
 
 export function formatDateString(dateString: string) {
   const options: Intl.DateTimeFormatOptions = {
@@ -96,6 +94,12 @@ export const formatLikeCount = (count: number): string => {
   return `${formattedCount}b Likes`;
 };
 
+/**
+ * Formats the comment count into a readable string with appropriate suffixes.
+ *
+ * @param {number} count - The number of comments.
+ * @returns {string} A formatted string representing the comment count.
+ */
 export const formatCommentCount = (count: number): string => {
   if (count < 0) return "0 Comments";
 
@@ -119,6 +123,12 @@ export const formatCommentCount = (count: number): string => {
   return `${formattedCount}b Comments`;
 };
 
+/**
+ * Formats search results into structured map search suggestions.
+ *
+ * @param {any[]} results - The raw search results from the map service.
+ * @returns {ISuggestionInfo[]} An array of formatted search suggestions.
+ */
 export const formatMapSearchSuggestions = (
   results: any[]
 ): ISuggestionInfo[] => {
@@ -225,6 +235,12 @@ export const formatMapSearchSuggestions = (
     });
 };
 
+/**
+ * Determines the zoom level based on the type of search suggestion selected.
+ *
+ * @param {string} type - The type of a searched suggestion (e.g., "POI", "Geography", "Street").
+ * @returns {number} The appropriate zoom level for the given type.
+ */
 export const getZoomBasedOnType = (type: string): number => {
   switch (type) {
     case "POI":
@@ -272,10 +288,54 @@ export const extractAppwriteStorageFileIdFromUrl = (
   return match ? match[1] : null;
 };
 
-// Define reusable motion settings
+/**
+ * Reusable page transition animation
+ *
+ */
 export const pageTransitionAnimation: MotionProps = {
   initial: { opacity: 0 },
   animate: { opacity: 1 },
   exit: { opacity: 0 },
   transition: { duration: 0.3 },
+};
+
+/**
+ * Calculates the geographical center of a set of coordinates.
+ *
+ * @param {[number, number][]} coordinates - An array of longitude and latitude pairs.
+ * @returns {[number, number]} The center point [longitude, latitude].
+ * @throws {Error} If no coordinates are provided.
+ */
+export const getCenterOfCoordinates = (
+  coordinates: [number, number][]
+): [number, number] => {
+  if (coordinates.length === 0) {
+    throw new Error("No coordinates provided");
+  }
+
+  const sum = coordinates.reduce(
+    (acc, [lng, lat]) => {
+      acc.lng += lng;
+      acc.lat += lat;
+      return acc;
+    },
+    { lng: 0, lat: 0 }
+  );
+
+  const centerLng = sum.lng / coordinates.length;
+  const centerLat = sum.lat / coordinates.length;
+
+  return [centerLng, centerLat];
+};
+
+/**
+ * Extracts all trip step coordinates from an itinerary post's trip steps.
+ *
+ * @param {IDisplayedTripStep[]} tripSteps - An array of trip steps.
+ * @returns {[number, number][]} An array of [longitude, latitude] pairs.
+ */
+export const getAllTripCoordinates = (
+  tripSteps: IDisplayedTripStep[]
+): [number, number][] => {
+  return tripSteps.map(({ longitude, latitude }) => [longitude, latitude]);
 };

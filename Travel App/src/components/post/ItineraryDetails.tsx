@@ -3,6 +3,7 @@ import Loader from "../shared/Loader";
 import AccommodationsDisplay from "../shared/AccommodationsDisplay";
 import TripStepDisplay from "../shared/TripStepDisplay";
 import TripSummaryDisplay from "../shared/TripSummaryDisplay";
+import { getAllTripCoordinates } from "@/lib/utils";
 
 const ItineraryDetails = ({ id }: { id: string }) => {
   const { data: itineraryData, isPending: isGettingItineraryData } =
@@ -13,7 +14,7 @@ const ItineraryDetails = ({ id }: { id: string }) => {
   }
 
   return (
-    <div className="flex flex-col gap-10">
+    <div className="flex flex-col gap-10 mb-10">
       {/* Accommodation Section */}
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl ml-10 font-semibold text-dm-light">
@@ -38,7 +39,7 @@ const ItineraryDetails = ({ id }: { id: string }) => {
           Trip Summary
         </h1>
         <div className="flex justify-center w-full">
-          <TripSummaryDisplay />
+          <TripSummaryDisplay tripSteps={itineraryData.tripSteps} />
         </div>
       </div>
     </div>

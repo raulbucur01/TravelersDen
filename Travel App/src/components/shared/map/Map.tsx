@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 
 import "@tomtom-international/web-sdk-maps/dist/maps.css";
 import * as tt from "@tomtom-international/web-sdk-maps";
+import ttServices from "@tomtom-international/web-sdk-services";
 
 import { useGetMapSearchResults } from "@/lib/react-query/queriesAndMutations";
 import { Input } from "../../ui/input";
@@ -9,7 +10,10 @@ import { Button } from "../../ui/button";
 import MapSearchSuggestions from "./MapSearchSuggestions";
 import { ISuggestionInfo } from "@/types";
 import { useDebounce } from "use-debounce";
-import { formatMapSearchSuggestions } from "@/lib/utils";
+import {
+  formatMapSearchSuggestions,
+  getCenterOfCoordinates,
+} from "@/lib/utils";
 import { createRoot } from "react-dom/client";
 import MapPopup from "./MapPopup";
 import { apiConfig } from "@/api/config";
@@ -20,6 +24,7 @@ type MapProps = {
   preselectedLongitude?: number;
   preselectedLatitude?: number;
   preselectedZoom?: number;
+  tripStepCoordinates?: [number, number][]; // for trip summary mode
   onLocationPicked?: (
     longitude: number,
     latitude: number,
@@ -34,6 +39,7 @@ const Map = ({
   preselectedLongitude = 24.79279,
   preselectedLatitude = 46.22141,
   preselectedZoom = 15,
+  tripStepCoordinates,
   onLocationPicked,
   onZoomChanged,
 }: MapProps) => {
@@ -96,7 +102,7 @@ const Map = ({
       setIsFullscreen(false);
     }
   };
-  console.log(selectedMapZoom);
+
   useEffect(() => {
     if (mapElement.current) {
       const newMap = tt.map({
@@ -108,9 +114,11 @@ const Map = ({
           trafficFlow: "2/flow_relative-dark",
         },
         container: mapElement.current,
-        center: [selectedMapLongitude, selectedMapLatitude],
+        // center of the map (the average of all coordinates if trip summary mode is on else selected location)
+        center: tripStepCoordinates
+          ? getCenterOfCoordinates(tripStepCoordinates)
+          : [selectedMapLongitude, selectedMapLatitude],
         zoom: selectedMapZoom,
-        // trackResize: true,
       });
       setMap(newMap);
 
@@ -119,16 +127,49 @@ const Map = ({
         setSelectedMapZoom(newMap.getZoom());
       });
 
-      // Initialize the marker
-      const initialMarker = new tt.Marker({
-        color: "#070C0D",
-      })
-        .setLngLat([selectedMapLongitude, selectedMapLatitude])
-        .addTo(newMap);
-      markerRef.current = initialMarker;
+      // Initialize the marker if we are not in trip summary mode
+      if (!tripStepCoordinates) {
+        // Initialize the marker
+        const initialMarker = new tt.Marker({
+          color: "#070C0D",
+        })
+          .setLngLat([selectedMapLongitude, selectedMapLatitude])
+          .addTo(newMap);
+        markerRef.current = initialMarker;
+      }
 
       // Add event listeners
       newMap.on("load", () => {
+        // initialize route if in trip summary mode
+        if (tripStepCoordinates && tripStepCoordinates.length > 0) {
+          // Fetch route from TomTom API
+          ttServices.services
+            .calculateRoute({
+              key: API_KEY,
+              traffic: false,
+              locations: tripStepCoordinates.map((coord) => coord.join(",")),
+            })
+            .then((response) => {
+              const geoJson = response.toGeoJson();
+              // Draw the route on the map
+              newMap.addLayer({
+                id: "route",
+                type: "line",
+                source: {
+                  type: "geojson",
+                  data: geoJson,
+                },
+                layout: { "line-join": "round", "line-cap": "round" },
+                paint: { "line-color": "#91EDDF", "line-width": 5 },
+              });
+
+              // Add markers at each waypoint
+              tripStepCoordinates.forEach(([lng, lat]) => {
+                new tt.Marker().setLngLat([lng, lat]).addTo(newMap);
+              });
+            });
+        }
+
         // map click event
         newMap.on("click", (event) => {
           setSuggestions([]);
@@ -278,7 +319,7 @@ const Map = ({
       <div
         ref={mapElement}
         style={{ width, height }}
-        className={`relative border border-dm-dark rounded-3xl`} // dynamic width and height
+        className={"relative"} // dynamic width and height
       >
         {/* Overlay: Search Box and Suggestions */}
         <div className="absolute top-4 left-4 z-10 bg-opacity-100">

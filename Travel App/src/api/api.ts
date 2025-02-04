@@ -569,12 +569,12 @@ export async function getItineraryDetails(postId: string): Promise<
   | undefined
 > {
   try {
+    console.log("In getItineraryDetails", postId);
     const response = await axios.get<{
       tripSteps: IDisplayedTripStep[];
       accommodations: IDisplayedAccommodation[];
     }>(API_BASE_URL + `/posts/${postId}/itinerary-details`);
 
-    console.log("In getItineraryDetails", response.data);
     return response.data;
   } catch (error) {
     console.log(error);
