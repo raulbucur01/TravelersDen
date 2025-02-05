@@ -15,8 +15,10 @@ import { Link } from "react-router-dom";
 import MediaCarousel from "@/components/shared/MediaCarousel";
 import ItineraryDetails from "@/components/post/ItineraryDetails";
 import ExpandableText from "@/components/shared/ExpandableText";
-import { toast, useToast } from "@/hooks/use-toast";
+import { toast } from "@/hooks/use-toast";
 import CustomisableAlertDialog from "@/components/shared/CustomisableAlertDialog";
+import { useEffect, useRef, useState } from "react";
+import { ChevronDownCircle, ChevronUpCircle } from "lucide-react";
 
 const PostDetails = () => {
   const navigate = useNavigate();
@@ -32,9 +34,53 @@ const PostDetails = () => {
   const { mutateAsync: deletePost, isPending: isDeletingPost } =
     useDeletePost();
 
+  // Inside your component
+  const scrollableContainerRef = useRef<HTMLDivElement>(null);
+  const [isAtTop, setIsAtTop] = useState(true);
+  const [isAtBottom, setIsAtBottom] = useState(false);
+  const SCROLL_TOP_THRESHOLD = 500; // Adjust this value as needed
+  const SCROLL_BOTTOM_THRESHOLD = 500; // Avoid flickering at the bottom
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollableContainerRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } =
+          scrollableContainerRef.current;
+
+        setIsAtTop(scrollTop <= SCROLL_TOP_THRESHOLD);
+        setIsAtBottom(
+          scrollTop + clientHeight >= scrollHeight - SCROLL_BOTTOM_THRESHOLD
+        );
+      }
+    };
+
+    const container = scrollableContainerRef.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+      handleScroll(); // Initialize state on mount
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
+
   if (isPostCreatorLoading || isGettingPost || isDeletingPost) {
     return <Loader />;
   }
+
+  const handleScrollToTop = () => {
+    scrollableContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleScrollToBottom = () => {
+    scrollableContainerRef.current?.scrollTo({
+      top: scrollableContainerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+  };
 
   // Convert tags into an array
   const separatedPostTags = post?.tags?.replace(/ /g, "").split(",") || [];
@@ -65,7 +111,7 @@ const PostDetails = () => {
         title: "Failed to delete post, Please try again.",
       });
   };
-
+  console.log("isAtTop:", isAtTop, "isAtBottom:", isAtBottom);
   return (
     <>
       {isGettingPost ? (
@@ -73,7 +119,21 @@ const PostDetails = () => {
       ) : (
         <div className="flex w-full px-5 md:px-14 gap-5">
           {/* Post Details Section */}
-          <div className="flex-1 overflow-scroll custom-scrollbar">
+          <div
+            ref={scrollableContainerRef}
+            className="relative flex-1 overflow-scroll custom-scrollbar"
+          >
+            {/* Scroll to Top Button */}
+            {!isAtTop && (
+              <button
+                onClick={handleScrollToTop}
+                className="sticky top-5 right-0 text-dm-dark-4 z-10"
+              >
+                <ChevronUpCircle />
+              </button>
+            )}
+
+            {/* Post Details Container */}
             <div className="post_details-container">
               <div className="post_details-card">
                 {/* Media Carousel */}
@@ -182,6 +242,16 @@ const PostDetails = () => {
 
             {/* Itinerary data if it is an itinerary post */}
             {post!.isItinerary && <ItineraryDetails id={post!.postId} />}
+
+            {/* Scroll to Bottom Button */}
+            {!isAtBottom && (
+              <button
+                onClick={handleScrollToBottom}
+                className="sticky bottom-5 left-0 text-dm-dark-4 z-10"
+              >
+                <ChevronDownCircle />
+              </button>
+            )}
 
             <CommentSection postId={post!.postId} />
           </div>

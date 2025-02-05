@@ -198,3 +198,5 @@ export type MediaUrl = {
   url: string;
   type: string;
 };
+
+export type TravelMode = "car" | "pedestrian" | "bus" | "bicycle";

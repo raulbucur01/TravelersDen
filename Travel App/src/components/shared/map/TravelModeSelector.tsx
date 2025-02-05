@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { ChevronUp, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-
-type TravelMode = "car" | "pedestrian" | "bus";
+import { TravelMode } from "@/types";
 
 type TravelModeSelectorProps = {
   travelMode: TravelMode;
@@ -15,12 +14,18 @@ const TravelModeSelector = ({
 }: TravelModeSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredOption, setHoveredOption] = useState<TravelMode | null>(null);
-  const options: TravelMode[] = ["pedestrian", "car", "bus"];
+  const options: TravelMode[] = ["pedestrian", "car", "bus", "bicycle"];
 
   return (
     <div className="relative w-[180px]">
+      {/* Travel Mode Label */}
+      <div className="inline-block px-2 py-1 rounded-tl-md rounded-tr-md bg-dm-dark text-dm-light text-sm font-medium">
+        Select travel mode
+      </div>
+
+      {/* Dropdown Toggle */}
       <div
-        className="w-full h-10 hover:bg-dm-secondary px-3 py-2 text-sm bg-dm-dark text-dm-light border border-input rounded-md flex items-center justify-between cursor-pointer"
+        className="w-full h-10 hover:bg-dm-secondary px-3 py-2 text-sm bg-dm-dark text-dm-light border-input rounded-bl-md rounded-br-md rounded-tr-md flex items-center justify-between cursor-pointer"
         onClick={() => setIsOpen((prev) => !prev)}
       >
         {travelMode.charAt(0).toUpperCase() + travelMode.slice(1)}
@@ -45,7 +50,7 @@ const TravelModeSelector = ({
                   onChange(mode);
                   setIsOpen(false);
                 }}
-                className={`px-3 py-2 text-sm cursor-pointer ${
+                className={`px-3 py-2 text-sm cursor-pointer rounded-md ${
                   hoveredOption === mode // Highlight only when hovered
                     ? "bg-dm-secondary"
                     : travelMode === mode && hoveredOption === null // Keep selected if not hovering

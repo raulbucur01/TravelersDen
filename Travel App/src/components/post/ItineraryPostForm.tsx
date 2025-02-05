@@ -265,7 +265,7 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
         />
 
         {action === "Create" ? (
-          <TripStepForm fieldName="tripSteps" />
+          <TripStepForm fieldName="tripSteps" action="Create" />
         ) : (
           <TripStepForm
             fieldName="tripSteps"

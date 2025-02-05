@@ -8,12 +8,9 @@ import { useGetMapSearchResults } from "@/lib/react-query/queriesAndMutations";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import MapSearchSuggestions from "./MapSearchSuggestions";
-import { ISuggestionInfo } from "@/types";
+import { ISuggestionInfo, TravelMode } from "@/types";
 import { useDebounce } from "use-debounce";
-import {
-  formatMapSearchSuggestions,
-  getCenterOfCoordinates,
-} from "@/lib/utils";
+import { formatMapSearchSuggestions } from "@/lib/utils";
 import { createRoot } from "react-dom/client";
 import MapPopup from "./MapPopup";
 import { apiConfig } from "@/api/config";
@@ -32,6 +29,7 @@ type MapProps = {
     zoom: number
   ) => void;
   onZoomChanged?: (zoom: number) => void;
+  mapUIMode?: "small" | "large";
 };
 
 const Map = ({
@@ -42,7 +40,8 @@ const Map = ({
   preselectedZoom = 15,
   tripStepCoordinates,
   onLocationPicked,
-  onZoomChanged,
+  onZoomChanged, // for update and create mode to keep the zoom state
+  mapUIMode,
 }: MapProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
@@ -52,83 +51,26 @@ const Map = ({
     isPending: isGettingSearchResults,
   } = useGetMapSearchResults(searchQuery);
 
+  // map
   const API_KEY = apiConfig.tomTomApiKey;
   const mapElement = useRef<HTMLDivElement | null>(null);
+  const [map, setMap] = useState<tt.Map | null>(null);
+  const markerRef = useRef<tt.Marker | null>(null);
 
+  // map state
   const [selectedMapLongitude, setSelectedMapLongitude] =
     useState(preselectedLongitude);
   const [selectedMapLatitude, setSelectedMapLatitude] =
     useState(preselectedLatitude);
   const [selectedMapZoom, setSelectedMapZoom] = useState(preselectedZoom);
 
-  const [map, setMap] = useState<tt.Map | null>(null);
-  const markerRef = useRef<tt.Marker | null>(null);
-
+  // other
   const [suggestions, setSuggestions] = useState<ISuggestionInfo[]>([]);
   const [popup, setPopup] = useState<tt.Popup | null>(null);
-
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [travelMode, setTravelMode] = useState<"car" | "pedestrian" | "bus">(
-    "car"
-  );
+  const [travelMode, setTravelMode] = useState<TravelMode>("car");
 
-  useEffect(() => {
-    if (onZoomChanged) {
-      onZoomChanged(selectedMapZoom);
-    }
-  }, [selectedMapZoom]);
-
-  const handleLocationPicked = (
-    longitude: number,
-    latitude: number,
-    zoom: number
-  ) => {
-    setSelectedMapLongitude(longitude);
-    setSelectedMapLatitude(latitude);
-    setSelectedMapZoom(zoom);
-    if (onLocationPicked) {
-      onLocationPicked(longitude, latitude, zoom);
-    }
-  };
-
-  const handleFullscreenToggle = (e: any) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!document.fullscreenElement) {
-      // Request fullscreen
-      if (mapElement.current) {
-        mapElement.current.requestFullscreen();
-      }
-      setIsFullscreen(true);
-    } else {
-      // Exit fullscreen
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
-
-  const handleTravelModeChange = (mode: "car" | "pedestrian" | "bus") => {
-    console.log("Travel mode changed to:", mode);
-    setTravelMode(mode);
-  };
-
-  const removeLayer = () => {
-    if (!map?.getLayer("route")) {
-      return;
-    }
-    map.removeLayer("route");
-    map.removeSource("route");
-  };
-
-  const performRecalculateRouteRequest = () => {
-    console.log("Entering performRecalculateRouteRequest");
-    // removeLayer();
-  };
-
-  useEffect(() => {
-    performRecalculateRouteRequest();
-  }, [travelMode]);
-
+  // map initialization
   useEffect(() => {
     if (mapElement.current) {
       const newMap = tt.map({
@@ -257,6 +199,98 @@ const Map = ({
     }
   }, []);
 
+  // for update and create mode to keep the zoom state
+  useEffect(() => {
+    if (onZoomChanged) {
+      onZoomChanged(selectedMapZoom);
+    }
+  }, [selectedMapZoom]);
+
+  const handleLocationPicked = (
+    longitude: number,
+    latitude: number,
+    zoom: number
+  ) => {
+    setSelectedMapLongitude(longitude);
+    setSelectedMapLatitude(latitude);
+    setSelectedMapZoom(zoom);
+    if (onLocationPicked) {
+      onLocationPicked(longitude, latitude, zoom);
+    }
+  };
+
+  const handleFullscreenToggle = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!document.fullscreenElement) {
+      // Request fullscreen
+      if (mapElement.current) {
+        mapElement.current.requestFullscreen();
+      }
+      setIsFullscreen(true);
+    } else {
+      // Exit fullscreen
+      document.exitFullscreen();
+      setIsFullscreen(false);
+    }
+  };
+
+  // for travel mode change
+  const handleTravelModeChange = (mode: TravelMode) => {
+    setTravelMode(mode);
+    if (tripStepCoordinates && map) {
+      performRecalculateRouteRequest();
+    }
+  };
+
+  const removeLayer = () => {
+    if (!map?.getLayer("route")) {
+      return;
+    }
+    map.removeLayer("route");
+    map.removeSource("route");
+  };
+
+  const performRecalculateRouteRequest = () => {
+    console.log("Entering performRecalculateRouteRequest");
+    removeLayer();
+
+    // Create a bounding box with the trip coordinates
+    const bounds = new tt.LngLatBounds();
+    tripStepCoordinates!.forEach(([lng, lat]) => bounds.extend([lng, lat]));
+
+    // Fit the map to the bounding box
+    map!.fitBounds(bounds, {
+      padding: 50, // Optional padding
+      linear: true,
+      maxZoom: 14, // Prevents zooming in too much
+    });
+
+    // Fetch route from TomTom API
+    ttServices.services
+      .calculateRoute({
+        key: API_KEY,
+        traffic: false,
+        locations: tripStepCoordinates!.map((coord) => coord.join(",")),
+        travelMode: travelMode,
+      })
+      .then((response) => {
+        const geoJson = response.toGeoJson();
+        // Draw the route on the map
+        map!.addLayer({
+          id: "route",
+          type: "line",
+          source: {
+            type: "geojson",
+            data: geoJson,
+          },
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: { "line-color": "#91EDDF", "line-width": 5 },
+        });
+      });
+  };
+  // (end) for travel mode change
+
   const createPopup = (mapInstance: tt.Map, feature: any) => {
     removePopup(); // Remove any existing popup
     const popupContainer = document.createElement("div");
@@ -347,6 +381,8 @@ const Map = ({
       markerRef.current = newMarker;
 
       handleLocationPicked(longitude, latitude, zoom);
+
+      if (mapUIMode === "small") setSuggestions([]);
     }
   };
 
@@ -413,12 +449,14 @@ const Map = ({
         </div>
 
         {/* Travel mode selector overlay*/}
-        <div className="absolute bottom-4 left-4 z-10">
-          <TravelModeSelector
-            travelMode={travelMode}
-            onChange={handleTravelModeChange}
-          />
-        </div>
+        {tripStepCoordinates && tripStepCoordinates.length > 0 && (
+          <div className="absolute bottom-4 left-4 z-10">
+            <TravelModeSelector
+              travelMode={travelMode}
+              onChange={handleTravelModeChange}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

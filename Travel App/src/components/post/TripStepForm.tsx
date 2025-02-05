@@ -228,6 +228,7 @@ const TripStepForm = ({
                     <Map
                       width="50vh"
                       height="50vh"
+                      mapUIMode="small"
                       onLocationPicked={(longitude, latitude, zoom) => {
                         setValue(`${fieldName}.${index}.longitude`, longitude);
                         setValue(`${fieldName}.${index}.latitude`, latitude);
