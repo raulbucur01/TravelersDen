@@ -164,7 +164,6 @@ const Map = ({
           if (feature.id != 0 && feature.layer.id === "POI") {
             createPopup(newMap, feature);
 
-            console.log("Flying, zoom:", newMap.getZoom());
             newMap.flyTo({
               ...({
                 center: lngLat,
@@ -252,7 +251,6 @@ const Map = ({
   };
 
   const performRecalculateRouteRequest = () => {
-    console.log("Entering performRecalculateRouteRequest");
     removeLayer();
 
     // Create a bounding box with the trip coordinates

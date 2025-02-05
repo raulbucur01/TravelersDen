@@ -569,7 +569,6 @@ export async function getItineraryDetails(postId: string): Promise<
   | undefined
 > {
   try {
-    console.log("In getItineraryDetails", postId);
     const response = await axios.get<{
       tripSteps: IDisplayedTripStep[];
       accommodations: IDisplayedAccommodation[];

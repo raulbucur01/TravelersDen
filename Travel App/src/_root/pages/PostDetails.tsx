@@ -42,6 +42,8 @@ const PostDetails = () => {
   const SCROLL_BOTTOM_THRESHOLD = 500; // Avoid flickering at the bottom
 
   useEffect(() => {
+    if (!post?.isItinerary) return;
+
     const handleScroll = () => {
       if (scrollableContainerRef.current) {
         const { scrollTop, scrollHeight, clientHeight } =
@@ -111,7 +113,6 @@ const PostDetails = () => {
         title: "Failed to delete post, Please try again.",
       });
   };
-  console.log("isAtTop:", isAtTop, "isAtBottom:", isAtBottom);
   return (
     <>
       {isGettingPost ? (
@@ -124,7 +125,7 @@ const PostDetails = () => {
             className="relative flex-1 overflow-scroll custom-scrollbar"
           >
             {/* Scroll to Top Button */}
-            {!isAtTop && (
+            {post?.isItinerary && !isAtTop && (
               <button
                 onClick={handleScrollToTop}
                 className="sticky top-5 right-0 text-dm-dark-4 z-10"
@@ -244,7 +245,7 @@ const PostDetails = () => {
             {post!.isItinerary && <ItineraryDetails id={post!.postId} />}
 
             {/* Scroll to Bottom Button */}
-            {!isAtBottom && (
+            {post?.isItinerary && !isAtBottom && (
               <button
                 onClick={handleScrollToBottom}
                 className="sticky bottom-5 left-0 text-dm-dark-4 z-10"

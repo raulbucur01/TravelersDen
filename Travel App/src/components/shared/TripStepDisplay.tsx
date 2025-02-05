@@ -12,7 +12,7 @@ const TripStepDisplay = ({ tripSteps }: TripStepDisplayProps) => {
     <div className="ml-10 mr-10 w-[87%]">
       {tripSteps.map((tripStep, index) => (
         <div
-          className="flex flex-col lg:flex-row border border-dm-dark p-4 rounded-md mb-10 mt-5 relative"
+          className="flex flex-col lg:flex-row border lg:h-[390px] border-dm-dark p-4 rounded-md mb-10 mt-5 relative"
           key={index}
         >
           {/* Left: Step Number */}
