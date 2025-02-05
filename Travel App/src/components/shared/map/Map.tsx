@@ -17,6 +17,7 @@ import {
 import { createRoot } from "react-dom/client";
 import MapPopup from "./MapPopup";
 import { apiConfig } from "@/api/config";
+import TravelModeSelector from "./TravelModeSelector";
 
 type MapProps = {
   width?: string;
@@ -67,6 +68,9 @@ const Map = ({
   const [popup, setPopup] = useState<tt.Popup | null>(null);
 
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [travelMode, setTravelMode] = useState<"car" | "pedestrian" | "bus">(
+    "car"
+  );
 
   useEffect(() => {
     if (onZoomChanged) {
@@ -103,6 +107,28 @@ const Map = ({
     }
   };
 
+  const handleTravelModeChange = (mode: "car" | "pedestrian" | "bus") => {
+    console.log("Travel mode changed to:", mode);
+    setTravelMode(mode);
+  };
+
+  const removeLayer = () => {
+    if (!map?.getLayer("route")) {
+      return;
+    }
+    map.removeLayer("route");
+    map.removeSource("route");
+  };
+
+  const performRecalculateRouteRequest = () => {
+    console.log("Entering performRecalculateRouteRequest");
+    // removeLayer();
+  };
+
+  useEffect(() => {
+    performRecalculateRouteRequest();
+  }, [travelMode]);
+
   useEffect(() => {
     if (mapElement.current) {
       const newMap = tt.map({
@@ -115,9 +141,7 @@ const Map = ({
         },
         container: mapElement.current,
         // center of the map (the average of all coordinates if trip summary mode is on else selected location)
-        center: tripStepCoordinates
-          ? getCenterOfCoordinates(tripStepCoordinates)
-          : [selectedMapLongitude, selectedMapLatitude],
+        center: [selectedMapLongitude, selectedMapLatitude],
         zoom: selectedMapZoom,
       });
       setMap(newMap);
@@ -142,6 +166,19 @@ const Map = ({
       newMap.on("load", () => {
         // initialize route if in trip summary mode
         if (tripStepCoordinates && tripStepCoordinates.length > 0) {
+          // Create a bounding box with the trip coordinates
+          const bounds = new tt.LngLatBounds();
+          tripStepCoordinates.forEach(([lng, lat]) =>
+            bounds.extend([lng, lat])
+          );
+
+          // Fit the map to the bounding box
+          newMap.fitBounds(bounds, {
+            padding: 50, // Optional padding
+            linear: true,
+            maxZoom: 14, // Prevents zooming in too much
+          });
+
           // Fetch route from TomTom API
           ttServices.services
             .calculateRoute({
@@ -374,9 +411,16 @@ const Map = ({
             )}
           </Button>
         </div>
+
+        {/* Travel mode selector overlay*/}
+        <div className="absolute bottom-4 left-4 z-10">
+          <TravelModeSelector
+            travelMode={travelMode}
+            onChange={handleTravelModeChange}
+          />
+        </div>
       </div>
     </div>
   );
 };
-
 export default Map;

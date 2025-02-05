@@ -1,5 +1,3 @@
-import React from "react";
-
 interface MapPopupProps {
   name: string;
   category: string;
