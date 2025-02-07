@@ -132,7 +132,6 @@ export const formatCommentCount = (count: number): string => {
 export const formatMapSearchSuggestions = (
   results: any[]
 ): ISuggestionInfo[] => {
-  console.log(results);
   return results
     .filter((item: any) => {
       // Keep only items with known types

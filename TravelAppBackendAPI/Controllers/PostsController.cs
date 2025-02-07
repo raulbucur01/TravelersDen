@@ -1,6 +1,8 @@
 ﻿using Azure.Core;
+using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Runtime.Intrinsics.Arm;
 using TravelAppBackendAPI.DTOs;
 using TravelAppBackendAPI.Models;
@@ -392,7 +394,7 @@ namespace TravelAppBackendAPI.Controllers
                 // Fetch the most recent 20 posts, ordered by CreatedAt in descending order, without including User or Media
                 var recentPosts = await _context.Posts
                     .OrderByDescending(p => p.CreatedAt) // Order by CreatedAt in descending order
-                    .Take(20) // Limit to the most recent 20 posts
+                    .Take(10) // Limit to the most recent 20 posts
                     .Select(p => new
                     {
                         PostId = p.PostId,
@@ -646,6 +648,68 @@ namespace TravelAppBackendAPI.Controllers
             {
                 // Log the error and return a generic error response
                 return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
+        [HttpPost("import")]
+        public IActionResult ImportPosts()
+        {
+            try
+            {
+                _context.Database.SetCommandTimeout(180); // Timeout in seconds
+
+                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "posts.csv");
+
+                if (!System.IO.File.Exists(filePath))
+                    return NotFound("CSV file not found!");
+
+                using (var reader = new StreamReader(filePath))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+                {
+                    var posts = csv.GetRecords<PostCsvModel>().ToList();
+
+                    // Convert CSV data to Post entities
+                    var newPosts = posts.Select(p =>
+                    {
+                        string generatedPostId = Guid.NewGuid().ToString();
+
+                        return new Post
+                        {
+                            PostId = generatedPostId,
+                            UserId = "674b191b001951acb483",
+                            Caption = p.Caption.Length > 2200 ? p.Caption.Substring(0, 2200) : p.Caption,
+                            Body = p.Body.Length > 2200 ? p.Body.Substring(0, 2200) : p.Body,
+                            Location = p.Location,
+                            Tags = p.Tags,
+                            CreatedAt = DateTime.UtcNow,
+                            LikesCount = 0,
+                            IsItinerary = false,
+                            Media = new List<PostMedia>
+                        {
+                            new PostMedia
+                            {
+                                MediaId = Guid.NewGuid().ToString(),
+                                PostId = generatedPostId,
+                                AppwriteFileUrl = "https://cloud.appwrite.io/v1/storage/buckets/679e6e110026b5d8c68c/files/67a217ca003d22c9b4b8/preview?width=2000&height=2000&gravity=top&quality=100&project=6740c57e0035d48d554d",
+                                MediaType = "Photo"
+                            }
+                        }
+                        };
+                    }).ToList();
+
+                    // Add to DB
+                    _context.Posts.AddRange(newPosts);
+                    _context.SaveChanges();
+                }
+
+                return Ok("✅ CSV imported successfully!");
+            }
+            catch (Exception ex)
+            {
+                // Log the inner exception details
+                Console.WriteLine($"Error: {ex.Message}");
+                Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+                return StatusCode(500, $"❌ Error: {ex.Message}");
             }
         }
 

@@ -3,7 +3,6 @@ import Loader from "../shared/Loader";
 import AccommodationsDisplay from "../shared/AccommodationsDisplay";
 import TripStepDisplay from "../shared/TripStepDisplay";
 import TripSummaryDisplay from "../shared/TripSummaryDisplay";
-import { getAllTripCoordinates } from "@/lib/utils";
 
 const ItineraryDetails = ({ id }: { id: string }) => {
   const { data: itineraryData, isPending: isGettingItineraryData } =
