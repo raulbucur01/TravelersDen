@@ -19,6 +19,7 @@ import { toast } from "@/hooks/use-toast";
 import CustomisableAlertDialog from "@/components/shared/CustomisableAlertDialog";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDownCircle, ChevronUpCircle } from "lucide-react";
+import SimilarPosts from "@/components/shared/SimilarPosts";
 
 const PostDetails = () => {
   const navigate = useNavigate();
@@ -118,7 +119,7 @@ const PostDetails = () => {
       {isGettingPost ? (
         <Loader />
       ) : (
-        <div className="flex w-full px-5 md:px-14 gap-5">
+        <div className="flex w-full pl-5 md:pl-10 gap-10">
           {/* Post Details Section */}
           <div
             ref={scrollableContainerRef}
@@ -258,10 +259,11 @@ const PostDetails = () => {
           </div>
 
           {/* Similar Posts Section */}
-          <div className="hidden xl:block w-1/3 max-w-sm">
-            <h2 className="text-lg font-semibold text-dm-light">
+          <div className="hidden xl:block w-1/3 max-w-md overflow-y-auto custom-scrollbar">
+            <h1 className="base-medium lg:body-bold text-dm-light ml-1 mt-2">
               Similar Posts
-            </h2>
+            </h1>
+            <SimilarPosts postId={post!.postId} />
           </div>
         </div>
       )}
