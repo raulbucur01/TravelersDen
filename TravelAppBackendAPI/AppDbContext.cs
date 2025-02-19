@@ -15,9 +15,19 @@ public class AppDbContext : DbContext
     public DbSet<Accommodation> Accommodations { get; set; }
     public DbSet<TripStep> TripSteps { get; set; }
     public DbSet<TripStepMedia> TripStepMedia { get; set; }
+    public DbSet<PostChange> PostChanges { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<PostChange>()
+            .HasKey(pc => pc.ChangeId);
+
+        modelBuilder.Entity<PostChange>()
+       .HasOne(pc => pc.Post)
+       .WithMany() // No navigation property in Post
+       .HasForeignKey(pc => pc.PostId)
+       .OnDelete(DeleteBehavior.NoAction); // If a post is deleted, delete its changes too
+
         // Composite keys for Likes and Saves
         modelBuilder.Entity<Likes>()
             .HasKey(l => new { l.UserId, l.PostId });
@@ -158,5 +168,72 @@ public class AppDbContext : DbContext
                 .HasForeignKey(tsm => tsm.TripStepId)
                 .OnDelete(DeleteBehavior.Cascade); // Delete media when trip step is deleted
         });
+    }
+
+    public override int SaveChanges()
+    {
+        TrackPostChanges();
+        return base.SaveChanges();
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        TrackPostChanges();
+        return await base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void TrackPostChanges()
+    {
+        var changes = new List<PostChange>();
+        var utcNow = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<Post>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                changes.Add(new PostChange
+                {
+                    ChangeId = Guid.NewGuid().ToString(),
+                    PostId = entry.Entity.PostId,
+                    ChangeType = "INSERT",
+                    ChangeTime = utcNow,
+                    Processed = false
+                });
+            }
+            else if (entry.State == EntityState.Modified)
+            {
+                changes.Add(new PostChange
+                {
+                    ChangeId = Guid.NewGuid().ToString(),
+                    PostId = entry.Entity.PostId,
+                    ChangeType = "UPDATE",
+                    ChangeTime = utcNow,
+                    Processed = false
+                });
+            }
+            else if (entry.State == EntityState.Deleted)
+            {
+                // ✅ First insert into PostChanges BEFORE the post is deleted
+                var postChange = new PostChange
+                {
+                    ChangeId = Guid.NewGuid().ToString(),
+                    PostId = entry.Entity.PostId,
+                    ChangeType = "DELETE",
+                    ChangeTime = utcNow,
+                    Processed = false
+                };
+
+                // Directly add the change
+                PostChanges.Add(postChange);
+
+                // ✅ Mark the Post entry as Unchanged so it doesn’t get deleted yet
+                entry.State = EntityState.Unchanged;
+            }
+        }
+
+        if (changes.Any())
+        {
+            PostChanges.AddRange(changes);
+        }
     }
 }
