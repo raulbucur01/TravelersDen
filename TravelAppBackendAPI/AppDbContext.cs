@@ -16,17 +16,21 @@ public class AppDbContext : DbContext
     public DbSet<TripStep> TripSteps { get; set; }
     public DbSet<TripStepMedia> TripStepMedia { get; set; }
     public DbSet<PostChange> PostChanges { get; set; }
+    public DbSet<DeletedPost> DeletedPosts { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<PostChange>()
-            .HasKey(pc => pc.ChangeId);
+           .HasKey(pc => pc.ChangeId);
+
+        modelBuilder.Entity<DeletedPost>()
+           .HasKey(dp => dp.DeletionId);
 
         modelBuilder.Entity<PostChange>()
-       .HasOne(pc => pc.Post)
-       .WithMany() // No navigation property in Post
-       .HasForeignKey(pc => pc.PostId)
-       .OnDelete(DeleteBehavior.NoAction); // If a post is deleted, delete its changes too
+           .HasOne(pc => pc.Post)
+           .WithMany()
+           .HasForeignKey(pc => pc.PostId)
+           .OnDelete(DeleteBehavior.Cascade); 
 
         // Composite keys for Likes and Saves
         modelBuilder.Entity<Likes>()
@@ -185,6 +189,7 @@ public class AppDbContext : DbContext
     private void TrackPostChanges()
     {
         var changes = new List<PostChange>();
+        var deletions = new List<DeletedPost>();
         var utcNow = DateTime.UtcNow;
 
         foreach (var entry in ChangeTracker.Entries<Post>())
@@ -202,38 +207,60 @@ public class AppDbContext : DbContext
             }
             else if (entry.State == EntityState.Modified)
             {
-                changes.Add(new PostChange
+                // Overwrite the existing update log (if any)
+                // or change from INSERT to UPDATE if updating an inserted post
+                var existingUpdate = PostChanges
+                    .FirstOrDefault(pc => pc.PostId == entry.Entity.PostId && pc.ChangeType == "UPDATE");
+
+                var existingInsert = PostChanges
+                    .FirstOrDefault(pc => pc.PostId == entry.Entity.PostId && pc.ChangeType == "INSERT");
+
+                if (existingInsert != null)
                 {
-                    ChangeId = Guid.NewGuid().ToString(),
-                    PostId = entry.Entity.PostId,
-                    ChangeType = "UPDATE",
-                    ChangeTime = utcNow,
-                    Processed = false
-                });
+                    existingInsert.ChangeType = "UPDATE";
+                    existingInsert.ChangeTime = utcNow; // Just update the timestamp
+                    existingInsert.Processed = false;   // Reset processed flag
+                }
+
+                if (existingUpdate != null)
+                {
+                    existingUpdate.ChangeTime = utcNow; // Just update the timestamp
+                    existingUpdate.Processed = false;   // Reset processed flag
+                }
+                
+                if (existingInsert == null && existingUpdate == null)
+                {
+                    // If no existing update log, create a new one
+                    PostChanges.Add(new PostChange
+                    {
+                        ChangeId = Guid.NewGuid().ToString(),
+                        PostId = entry.Entity.PostId,
+                        ChangeType = "UPDATE",
+                        ChangeTime = utcNow,
+                        Processed = false
+                    });
+                }
             }
             else if (entry.State == EntityState.Deleted)
             {
-                // ✅ First insert into PostChanges BEFORE the post is deleted
-                var postChange = new PostChange
+                deletions.Add(new DeletedPost
                 {
-                    ChangeId = Guid.NewGuid().ToString(),
+                    DeletionId = Guid.NewGuid().ToString(),
                     PostId = entry.Entity.PostId,
-                    ChangeType = "DELETE",
-                    ChangeTime = utcNow,
+                    DeleteTime = utcNow,
                     Processed = false
-                };
-
-                // Directly add the change
-                PostChanges.Add(postChange);
-
-                // ✅ Mark the Post entry as Unchanged so it doesn’t get deleted yet
-                entry.State = EntityState.Unchanged;
+                });
             }
         }
 
         if (changes.Any())
         {
             PostChanges.AddRange(changes);
+        }
+
+        if (deletions.Any())
+        {
+            DeletedPosts.AddRange(deletions);
         }
     }
 }
