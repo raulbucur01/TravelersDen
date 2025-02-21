@@ -201,41 +201,49 @@ public class AppDbContext : DbContext
                     ChangeId = Guid.NewGuid().ToString(),
                     PostId = entry.Entity.PostId,
                     ChangeType = "INSERT",
+                    Caption = entry.Entity.Caption,
+                    Body = entry.Entity.Body,
                     ChangeTime = utcNow,
                     Processed = false
                 });
             }
             else if (entry.State == EntityState.Modified)
             {
-                // Overwrite the existing update log (if any)
-                // or change from INSERT to UPDATE if updating an inserted post
                 var existingUpdate = PostChanges
                     .FirstOrDefault(pc => pc.PostId == entry.Entity.PostId && pc.ChangeType == "UPDATE");
 
                 var existingInsert = PostChanges
                     .FirstOrDefault(pc => pc.PostId == entry.Entity.PostId && pc.ChangeType == "INSERT");
 
+                // if update exists for that postid then update that
+                if (existingUpdate != null)
+                {
+                    existingUpdate.Caption = entry.Entity.Caption;
+                    existingUpdate.Body = entry.Entity.Body;
+                    existingUpdate.ChangeTime = utcNow; 
+                    existingUpdate.Processed = false; 
+                }
+
+                // if insert exists for that postid then change ChangeType to UPDATE and update the rest
                 if (existingInsert != null)
                 {
                     existingInsert.ChangeType = "UPDATE";
-                    existingInsert.ChangeTime = utcNow; // Just update the timestamp
-                    existingInsert.Processed = false;   // Reset processed flag
+                    existingInsert.Caption = entry.Entity.Caption;
+                    existingInsert.Body = entry.Entity.Body;
+                    existingInsert.ChangeTime = utcNow;
+                    existingInsert.Processed = false; 
                 }
 
-                if (existingUpdate != null)
-                {
-                    existingUpdate.ChangeTime = utcNow; // Just update the timestamp
-                    existingUpdate.Processed = false;   // Reset processed flag
-                }
-                
+                // if there is no insert/update for that post id then just add a new update log
                 if (existingInsert == null && existingUpdate == null)
                 {
-                    // If no existing update log, create a new one
                     PostChanges.Add(new PostChange
                     {
                         ChangeId = Guid.NewGuid().ToString(),
                         PostId = entry.Entity.PostId,
                         ChangeType = "UPDATE",
+                        Caption = entry.Entity.Caption,
+                        Body = entry.Entity.Body,
                         ChangeTime = utcNow,
                         Processed = false
                     });
