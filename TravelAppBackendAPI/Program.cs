@@ -1,8 +1,15 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics;
+using TravelAppBackendAPI.Models;
+using TravelAppBackendAPI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Bind FastAPI settings
+builder.Services.Configure<FastApiSettings>(builder.Configuration.GetSection("FastApiSettings"));
+
+builder.Services.AddHttpClient<FastApiService>();
 
 // Add services to the container.
 builder.Services.AddControllers();

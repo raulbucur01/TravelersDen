@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Runtime.Intrinsics.Arm;
 using TravelAppBackendAPI.DTOs;
 using TravelAppBackendAPI.Models;
+using TravelAppBackendAPI.Services;
 
 namespace TravelAppBackendAPI.Controllers
 {
@@ -14,10 +15,12 @@ namespace TravelAppBackendAPI.Controllers
     public class PostsController : Controller
     {
         private readonly AppDbContext _context; // Your DbContext
+        private readonly FastApiService _fastApiService;
 
-        public PostsController(AppDbContext context)
+        public PostsController(AppDbContext context, FastApiService fastApiService)
         {
             _context = context;
+            _fastApiService = fastApiService;
         }
 
         [HttpPost("normal")]
@@ -643,6 +646,27 @@ namespace TravelAppBackendAPI.Controllers
 
                 // Return the itinerary details
                 return Ok(itineraryDetails);
+            }
+            catch (Exception ex)
+            {
+                // Log the error and return a generic error response
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
+
+        [HttpGet("{id}/similar-posts")]
+        public async Task<IActionResult> GetSimilarPosts(string id)
+        {
+            try
+            {
+                var similarPosts = await _fastApiService.GetSimilarPostsAsync(id);
+
+                if (similarPosts == null)
+                {
+                    return NotFound("No similar posts found.");
+                }
+
+                return Ok(similarPosts);
             }
             catch (Exception ex)
             {
