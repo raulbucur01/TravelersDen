@@ -1,15 +1,16 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Diagnostics;
-using TravelAppBackendAPI.Models;
-using TravelAppBackendAPI.Services;
-using System.Net.Http.Headers;
+using BackendAPI.Models;
+using BackendAPI.Services;
+using Appwrite;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Security.Claims;
+using Appwrite.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add authentication with JWT Bearer
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -18,45 +19,63 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             OnMessageReceived = async context =>
             {
                 var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-                Console.WriteLine("\n TOKEN: \n");
-                Console.WriteLine(token);
 
-                if (!string.IsNullOrEmpty(token))
+                if (string.IsNullOrEmpty(token))
                 {
-                    using var client = new HttpClient();
-                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                    Console.WriteLine(token);
-                    client.DefaultRequestHeaders.Add("X-Appwrite-Project", "6740c57e0035d48d554d");
-                    client.DefaultRequestHeaders.Add("X-Appwrite-Key", "standard_e1278d91a4cc9c9a9ba417957758cfd942e09d4096ec3f729c62c4d136c67332f98de184137829e7984130bd150af67a979228f0efe1acdb687293bacf2c4e69bbe32e3d20d618039ec2baad6eade43b158a44d15bd0858a6a5bf78bd96d365e35efe82d91a134b0f7b9feeef4ca790dbba9e77b85c51908bc750a23a7a918d2");
+                    context.NoResult();
+                    return;
+                }
 
-                    var response = await client.GetAsync("https://cloud.appwrite.io/v1/users");
+                try
+                {
+                    var appwriteEndpoint = builder.Configuration["Appwrite:Endpoint"];
+                    var appwriteProjectId = builder.Configuration["Appwrite:ProjectId"];
 
-                    if (response.IsSuccessStatusCode)
+                    if (string.IsNullOrEmpty(appwriteEndpoint) || string.IsNullOrEmpty(appwriteProjectId))
                     {
-                        var userData = await response.Content.ReadAsStringAsync();
+                        throw new InvalidOperationException("Appwrite configuration values (Endpoint or ProjectId) are missing in appsettings.json.");
+                    }
 
-                        var identity = new ClaimsIdentity(JwtBearerDefaults.AuthenticationScheme);
-                        identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, "appwrite_user")); // Add Appwrite user ID if needed
+                    var client = new Client()
+                        .SetEndpoint(appwriteEndpoint)
+                        .SetProject(appwriteProjectId)
+                        .SetJWT(token);
 
-                        var principal = new ClaimsPrincipal(identity);
-                        context.Principal = principal;
+                    var account = new Account(client);
+                    var user = await account.Get();
+
+                    if (user != null)
+                    {
+                        var claims = new List<System.Security.Claims.Claim>
+                        {
+                            new System.Security.Claims.Claim("UserId", user.Id),
+                            new System.Security.Claims.Claim("Email", user.Email)
+                        };
+
+                        var identity = new System.Security.Claims.ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
+                        context.Principal = new System.Security.Claims.ClaimsPrincipal(identity);
                         context.Success();
                     }
                     else
                     {
-                        context.Fail("Invalid Token");
+                        context.Fail("Invalid token");
                     }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Token validation error: " + ex.Message);
+                    context.Fail("Invalid token");
                 }
             }
         };
-        options.RequireHttpsMetadata = false;
-        options.SaveToken = true;
+
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = false,
             ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = false
+            ValidateLifetime = false,
+            ValidateIssuerSigningKey = false,
+            SignatureValidator = (token, _) => new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(token) // Bypass default JWT validation
         };
     });
 

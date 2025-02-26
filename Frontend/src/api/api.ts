@@ -763,11 +763,11 @@ async function test() {
   const token = await getJWT();
   console.log(token);
 
-  const response = await axios.get(API_BASE_URL + "/users/test", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  // const response = await axios.get(API_BASE_URL + "/users/test", {
+  //   headers: {
+  //     Authorization: `Bearer ${token}`,
+  //   },
+  // });
 
-  console.log(response.data);
+  // console.log(response.data);
 }

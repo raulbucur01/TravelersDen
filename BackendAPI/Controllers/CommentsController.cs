@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using TravelAppBackendAPI.DTOs;
-using TravelAppBackendAPI.Models;
+using BackendAPI.DTOs;
+using BackendAPI.Models;
 
-namespace TravelAppBackendAPI.Controllers
+namespace BackendAPI.Controllers
 {
     [ApiController]
     [Route("comments")]

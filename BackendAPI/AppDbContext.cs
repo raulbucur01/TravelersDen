@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TravelAppBackendAPI.Models;
+using BackendAPI.Models;
 
 public class AppDbContext : DbContext
 {

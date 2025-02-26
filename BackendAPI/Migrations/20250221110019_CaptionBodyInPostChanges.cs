@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace TravelAppBackendAPI.Migrations
+namespace BackendAPI.Migrations
 {
     /// <inheritdoc />
     public partial class CaptionBodyInPostChanges : Migration

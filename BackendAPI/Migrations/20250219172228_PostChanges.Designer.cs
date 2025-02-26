@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace TravelAppBackendAPI.Migrations
+namespace BackendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20250219172228_PostChanges")]

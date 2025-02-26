@@ -1,4 +1,4 @@
-﻿namespace TravelAppBackendAPI.Models
+﻿namespace BackendAPI.Models
 {
     public class CommentLike
     {

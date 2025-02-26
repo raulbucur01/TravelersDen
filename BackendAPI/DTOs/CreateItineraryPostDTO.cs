@@ -1,4 +1,4 @@
-﻿namespace TravelAppBackendAPI.DTOs
+﻿namespace BackendAPI.DTOs
 {
     public class CreateItineraryPostDTO
     {

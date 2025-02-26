@@ -7,11 +7,11 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Globalization;
 using System.Runtime.Intrinsics.Arm;
-using TravelAppBackendAPI.DTOs;
-using TravelAppBackendAPI.Models;
-using TravelAppBackendAPI.Services;
+using BackendAPI.DTOs;
+using BackendAPI.Models;
+using BackendAPI.Services;
 
-namespace TravelAppBackendAPI.Controllers
+namespace BackendAPI.Controllers
 {
     [ApiController]
     [Route("posts")]
@@ -392,7 +392,6 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
-        [Authorize]
         [HttpGet("recent-posts")]
         public async Task<IActionResult> GetRecentPosts()
         {

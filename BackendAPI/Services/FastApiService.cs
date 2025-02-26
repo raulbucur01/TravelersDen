@@ -3,10 +3,10 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
-using TravelAppBackendAPI.DTOs;
-using TravelAppBackendAPI.Models;
+using BackendAPI.DTOs;
+using BackendAPI.Models;
 
-namespace TravelAppBackendAPI.Services
+namespace BackendAPI.Services
 {
     public class FastApiService
     {

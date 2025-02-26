@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace TravelAppBackendAPI.Models
+namespace BackendAPI.Models
 {
     [Index(nameof(CreatedAt), IsDescending = new[] { true })]
     public class Post

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using TravelAppBackendAPI.Models;
-using TravelAppBackendAPI; // Assuming this is where your DbContext is
+using BackendAPI.Models;
+using BackendAPI; // Assuming this is where your DbContext is
 using Microsoft.EntityFrameworkCore;
-using TravelAppBackendAPI.DTOs;
+using BackendAPI.DTOs;
 using Microsoft.AspNetCore.Authorization;
 
-namespace TravelAppBackendAPI.Controllers
+namespace BackendAPI.Controllers
 {
     [ApiController]
     [Route("users")]

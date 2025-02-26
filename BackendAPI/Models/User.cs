@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace TravelAppBackendAPI.Models
+namespace BackendAPI.Models
 {
     public class User
     {
