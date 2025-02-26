@@ -41,7 +41,7 @@ namespace TravelAppBackendAPI.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"Error fetching similar posts: {ex.Message}");
+                throw new Exception($"Error: {ex.Message}");
             }
         }
     }

@@ -114,6 +114,7 @@ const PostDetails = () => {
         title: "Failed to delete post, Please try again.",
       });
   };
+
   return (
     <>
       {isGettingPost ? (
@@ -220,18 +221,24 @@ const PostDetails = () => {
                     <h1 className="base-medium lg:body-bold text-dm-light mb-4">
                       {post!.caption}
                     </h1>
-                    <ExpandableText
-                      text={post!.body}
-                      maxLength={250}
-                      className="whitespace-pre-line overflow-hidden"
-                    />
-                    <ul className="flex gap-1 mt-2 self-center">
-                      {separatedPostTags.map((tag: string) => (
-                        <li key={tag} className="text-dm-dark-4">
-                          #{tag}
-                        </li>
-                      ))}
-                    </ul>
+
+                    <div className="flex flex-col flex-grow">
+                      <ExpandableText
+                        text={post!.body}
+                        maxLength={250}
+                        className="whitespace-pre-line overflow-hidden"
+                      />
+                    </div>
+
+                    {separatedPostTags[0] && (
+                      <ul className="flex gap-1 mt-2 self-start">
+                        {separatedPostTags.map((tag: string) => (
+                          <li key={tag} className="text-dm-dark-4">
+                            #{tag}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
 
                   {/* Post Stats */}

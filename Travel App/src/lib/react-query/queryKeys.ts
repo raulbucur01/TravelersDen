@@ -22,6 +22,7 @@ export enum QUERY_KEYS {
   GET_COMMENT_LIKE_COUNT = "getCommentLikeCount",
   GET_ITINERARY_DETAILS = "getItineraryDetails",
   GET_RELATED_ITINERARY_MEDIA_URLS = "getRelatedItineraryMediaUrls",
+  GET_SIMILAR_POSTS = "getSimilarPosts",
 
   //  SEARCH KEYS
   SEARCH_POSTS = "getSearchPosts",

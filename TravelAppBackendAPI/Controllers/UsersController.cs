@@ -3,6 +3,7 @@ using TravelAppBackendAPI.Models;
 using TravelAppBackendAPI; // Assuming this is where your DbContext is
 using Microsoft.EntityFrameworkCore;
 using TravelAppBackendAPI.DTOs;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TravelAppBackendAPI.Controllers
 {
@@ -77,6 +78,21 @@ namespace TravelAppBackendAPI.Controllers
 
                 // Return the user's data
                 return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                // Handle unexpected errors
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [Authorize]
+        [HttpGet("test")]
+        public async Task<IActionResult> TestAuthorization()
+        {
+            try
+            {
+                return Ok("Entered endpoint and returned!");
             }
             catch (Exception ex)
             {

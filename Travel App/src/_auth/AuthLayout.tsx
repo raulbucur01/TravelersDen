@@ -1,9 +1,10 @@
 import { Outlet, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { pageTransitionAnimation } from "@/lib/utils";
+import { useUserContext } from "@/context/AuthContext";
 
 const AuthLayout = () => {
-  const isAuthenticated = false;
+  const { isAuthenticated } = useUserContext();
   return (
     <>
       {isAuthenticated ? (

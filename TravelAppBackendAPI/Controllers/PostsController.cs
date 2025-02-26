@@ -1,7 +1,10 @@
 ﻿using Azure.Core;
 using CsvHelper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Globalization;
 using System.Runtime.Intrinsics.Arm;
 using TravelAppBackendAPI.DTOs;
@@ -389,6 +392,7 @@ namespace TravelAppBackendAPI.Controllers
             }
         }
 
+        [Authorize]
         [HttpGet("recent-posts")]
         public async Task<IActionResult> GetRecentPosts()
         {
@@ -659,12 +663,59 @@ namespace TravelAppBackendAPI.Controllers
         {
             try
             {
-                var similarPosts = await _fastApiService.GetSimilarPostsAsync(id);
+                var similarPostsResponse = await _fastApiService.GetSimilarPostsAsync(id);
 
-                if (similarPosts == null)
+                if (similarPostsResponse == null)
                 {
                     return NotFound("No similar posts found.");
                 }
+
+                var similarPostIds = similarPostsResponse.SimilarPostIds;
+
+                // If no similar posts found yet, then return randomly
+                if (!similarPostIds.Any())
+                {
+                    int totalCount = await _context.Posts.CountAsync();
+                    int skip = new Random().Next(0, Math.Max(1, totalCount - 5));  // Pick a random starting point
+
+                    var randomPosts = await _context.Posts
+                        .OrderBy(p => p.PostId)
+                        .Skip(skip)
+                        .Take(5)
+                        .Select(p => new
+                        {
+                            PostId = p.PostId,
+                            UserId = p.UserId,
+                            Caption = p.Caption,
+                            Body = p.Body,
+                            MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
+                            Location = p.Location,
+                            Tags = p.Tags,
+                            CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"),
+                            LikesCount = p.LikesCount,
+                            IsItinerary = p.IsItinerary,
+                        })
+                        .ToListAsync();
+
+                    return Ok(randomPosts);
+                }
+
+                var similarPosts = await _context.Posts
+                    .Where(p => similarPostIds.Contains(p.PostId))
+                    .Select(p => new 
+                    {
+                        PostId = p.PostId,
+                        UserId = p.UserId,
+                        Caption = p.Caption,
+                        Body = p.Body,
+                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
+                        Location = p.Location,
+                        Tags = p.Tags,
+                        CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
+                        LikesCount = p.LikesCount,
+                        IsItinerary = p.IsItinerary,
+                    })
+                    .ToListAsync();
 
                 return Ok(similarPosts);
             }

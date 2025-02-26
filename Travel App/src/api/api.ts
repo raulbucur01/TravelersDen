@@ -18,7 +18,6 @@ import axios from "axios";
 import { extractAppwriteStorageFileIdFromUrl } from "@/lib/utils";
 
 const API_BASE_URL = apiConfig.backendApiUrl;
-const AI_API_BASE_URL = apiConfig.recommApiUrl;
 const TOMTOM_API_KEY = apiConfig.tomTomApiKey;
 
 // utility
@@ -225,6 +224,8 @@ export async function signInAccount(user: { email: string; password: string }) {
       user.email,
       user.password
     );
+
+    if (session) test();
 
     return session;
   } catch (error) {
@@ -469,11 +470,26 @@ export async function deleteFile(fileId: string) {
   }
 }
 
+export async function getSimilarPosts(postId: string) {
+  try {
+    const response = await axios.get(
+      API_BASE_URL + `/posts/${postId}/similar-posts`
+    );
+
+    if (!response) throw Error;
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export async function getRecentPosts() {
   try {
     const response = await axios.get(API_BASE_URL + "/posts/recent-posts");
 
     if (!response) throw Error;
+
     return response.data;
   } catch (error) {
     console.log(error);
@@ -738,38 +754,20 @@ export async function getMapSearchResults(query: string) {
   }
 }
 
-// AI
-export async function getPostRecommendations(userId: number) {
-  try {
-    const response = await axios.get(
-      AI_API_BASE_URL + `/getPostRecommendations/${userId}`
-    );
-    return response.data;
-  } catch (error) {
-    console.log(error);
-  }
+async function getJWT() {
+  const jwt = await account.createJWT();
+  return jwt.jwt;
 }
 
-export async function getSimilarUsers(userId: number) {
-  try {
-    const response = await axios.get(
-      AI_API_BASE_URL + `/getSimilarUsers/${userId}`
-    );
+async function test() {
+  const token = await getJWT();
+  console.log(token);
 
-    return response.data;
-  } catch (error) {
-    console.log(error);
-  }
-}
+  const response = await axios.get(API_BASE_URL + "/users/test", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-export async function evaluateHateSpeech(text: string) {
-  try {
-    const response = await axios.post(AI_API_BASE_URL + "/evaluateHateSpeech", {
-      text: text,
-    });
-
-    return response.data;
-  } catch (error) {
-    console.log(error);
-  }
+  console.log(response.data);
 }

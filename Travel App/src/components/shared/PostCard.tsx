@@ -78,7 +78,7 @@ const PostCard = ({ post }: PostCardProps) => {
         <div className="small-medium lg:base-medium py-5">
           <ExpandableText
             text={post.caption}
-            maxLength={47}
+            maxLength={130}
             className="whitespace-pre-line overflow-hidden"
           />
           <ul className="flex gap-1 mt-2">

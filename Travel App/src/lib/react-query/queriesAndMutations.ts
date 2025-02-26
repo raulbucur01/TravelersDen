@@ -35,6 +35,7 @@ import {
   updateItineraryPost,
   deletePost,
   getRelatedItineraryMediaUrls,
+  getSimilarPosts,
 } from "../../api/api";
 import {
   INewItineraryPost,
@@ -286,6 +287,13 @@ export const useGetRecentPosts = () => {
   return useQuery({
     queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
     queryFn: getRecentPosts,
+  });
+};
+
+export const useGetSimilarPosts = (postId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_SIMILAR_POSTS, postId],
+    queryFn: () => getSimilarPosts(postId),
   });
 };
 
