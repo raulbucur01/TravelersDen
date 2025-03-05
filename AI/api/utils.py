@@ -112,9 +112,41 @@ def get_similarity_between_posts(
     return similarity_score
 
 
+def normalize_similarity_matrix(
+    matrix: pd.DataFrame, new_ids: list = None
+) -> pd.DataFrame:
+    """
+    Normalizes the similarity matrix to a 0-1 range using the global min and max values.
+
+    Args:
+        matrix (pd.DataFrame): The similarity matrix.
+        new_ids (list, optional): If provided, only normalizes the specified rows and columns.
+
+    Returns:
+        pd.DataFrame: The normalized similarity matrix.
+    """
+    # Calculate global min and max values
+    min_val = matrix.min().min()
+    max_val = matrix.max().max()
+    epsilon = 1e-9  # Prevent division by zero
+
+    if new_ids:
+        # Normalize only the specified rows and columns using the global min/max
+        matrix.loc[new_ids] = (matrix.loc[new_ids] - min_val) / (
+            max_val - min_val + epsilon
+        )
+        matrix[new_ids] = (matrix[new_ids] - min_val) / (max_val - min_val + epsilon)
+    else:
+        # Normalize the entire matrix using the global min/max
+        matrix = (matrix - min_val) / (max_val - min_val + epsilon)
+
+    return matrix
+
+
 # get_similarity_between_posts(
 #     "11d04796-eb9c-4b04-bd5b-a5fcd3898248", "fa23b1aa-3c25-42ef-ac1f-d2082ead5461"
 # )
 # df94b0ec-0483-44d0-bc6a-7aaad48de273
 # remove_post_from_similarity_matrix("776d2d4d-1de7-4e89-b10d-cb54dd707e1b")
 # remove_post_from_similarity_matrix("79285e3b-5e28-441c-a553-bf2acef2efb3")
+# update_posts_csv_from_db()
