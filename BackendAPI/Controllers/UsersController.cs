@@ -86,19 +86,18 @@ namespace BackendAPI.Controllers
             }
         }
 
-        [Authorize]
-        [HttpGet("test")]
-        public async Task<IActionResult> TestAuthorization()
-        {
-            try
-            {
-                return Ok("Entered endpoint and returned!");
-            }
-            catch (Exception ex)
-            {
-                // Handle unexpected errors
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
+        //[HttpGet("test")]
+        //public async Task<IActionResult> TestAuthorization()
+        //{
+        //    try
+        //    {
+        //        return Ok("Entered endpoint and returned!");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Handle unexpected errors
+        //        return StatusCode(500, $"Internal server error: {ex.Message}");
+        //    }
+        //}
     }
 }

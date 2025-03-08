@@ -7,6 +7,7 @@ using Appwrite;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Appwrite.Services;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = async context =>
             {
-                var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+                //var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+                var token = context.Request.Cookies["AppwriteJWT"];
+                Console.WriteLine("\n\n\n TOKEN: " + token + "\n\n\n");
 
                 if (string.IsNullOrEmpty(token))
                 {
@@ -79,7 +83,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build());
 
 // Bind FastAPI settings
 builder.Services.Configure<FastApiSettings>(builder.Configuration.GetSection("FastApiSettings"));
@@ -95,8 +102,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", policy =>
     {
         policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175")  // Frontend URL
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+            .AllowCredentials()      
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 

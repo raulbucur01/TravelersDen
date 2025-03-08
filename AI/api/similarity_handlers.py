@@ -31,7 +31,7 @@ path_tfidf_matrix = "../api/data/tfidf_matrix.npz"
 
 # SBERT paths
 path_similarity_matrix_sbert = "../api/data/posts_similarity_matrix_SBERT.csv"
-path_sbert_model = "../api/data/sbert_model.pkl"
+path_sbert_model = "../api/data/sbert_model"
 path_sbert_matrix = "../api/data/sbert_matrix.npz"
 
 
@@ -93,10 +93,6 @@ def initialize_SBERT_post_similarity_startpoint():
             print("⚠️ No posts found. Initialization skipped.")
             return
 
-        # # Save posts to CSV
-        # df.to_csv(path_posts, index=False)
-        # print(f"✅ CSV updated successfully: {path_posts}")
-
         # Combine Caption and Body for text analysis
         df["text"] = df["Caption"].fillna("") + " " + df["Body"].fillna("")
 
@@ -107,8 +103,8 @@ def initialize_SBERT_post_similarity_startpoint():
         sbert_matrix = sbert_model.encode(df["text"].tolist(), show_progress_bar=True)
 
         # Save the SBERT model
-        joblib.dump(sbert_model, path_sbert_model)
-        print(f"✅ SBERT model saved at {path_sbert_model}")
+        # sbert_model.save(path_sbert_model)
+        # print(f"✅ SBERT model saved at {path_sbert_model}")
 
         # Save the SBERT matrix
         np.savez_compressed(path_sbert_matrix, sbert_matrix)
@@ -234,12 +230,8 @@ def handle_unprocessed_inserted_posts(updated_posts_to_add=None):
 
     ## Assign similarity values
     for i, new_id in enumerate(new_post_ids):
-        df_similarity_matrix_tfidf.loc[new_id, all_post_ids] = new_similarities[
-            i, : len(all_post_ids)
-        ]
-        df_similarity_matrix_tfidf.loc[all_post_ids, new_id] = new_similarities[
-            i, : len(all_post_ids)
-        ]
+        df_similarity_matrix_tfidf.loc[new_id, all_post_ids] = new_similarities[i, :]
+        df_similarity_matrix_tfidf.loc[all_post_ids, new_id] = new_similarities[i, :]
 
     # Save updated similarity matrix
     df_similarity_matrix_tfidf.to_csv(path_similarity_matrix_tfidf)
@@ -420,10 +412,10 @@ def handle_unprocessed_updated_posts():
         # Assign new similarity values
         for i, updated_id in enumerate(updated_post_ids):
             df_similarity_matrix_tfidf.loc[updated_id, all_post_ids] = (
-                updated_similarities[i, : len(all_post_ids)]
+                updated_similarities[i, :]
             )
             df_similarity_matrix_tfidf.loc[all_post_ids, updated_id] = (
-                updated_similarities[i, : len(all_post_ids)]
+                updated_similarities[i, :]
             )
 
         # Save updated similarity matrix
@@ -613,3 +605,4 @@ def update_similarity_for_posts():
 # initialize_TFIDF_post_similarity_startpoint()
 # initialize_SBERT_post_similarity_startpoint()
 # initialize_combined_similarity_redis_startpoint()
+# handle_unprocessed_inserted_posts()

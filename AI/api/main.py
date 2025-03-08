@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from apscheduler.schedulers.background import BackgroundScheduler
 from contextlib import asynccontextmanager
 import redis

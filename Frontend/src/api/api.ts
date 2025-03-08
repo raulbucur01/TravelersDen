@@ -118,8 +118,112 @@ async function deleteFilesFromAppwrite(fileUrls: string[]): Promise<boolean> {
 
   return deletedFiles.every((file) => file.success);
 }
-
 // utility
+
+// ~~~~~~~~~~~~~~~~~~ SIGN IN & SIGN OUT with JWT Handling ~~~~~~~~~~~~~~~~~~
+// Axios instance with base URL
+// When you make a request using axios or fetch, and the withCredentials flag is enabled,
+// the browser automatically includes the cookie in a header if the request's domain matches the cookie's domain
+const apiClient = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+});
+
+window.addEventListener("load", async () => {
+  try {
+    const storedSession = localStorage.getItem("cookieFallback");
+    if (storedSession === "[]") {
+      return; // Exit early if no stored session (avoids unnecessary request)
+    }
+
+    // Check if an active session exists
+    const session = await account.getSession("current");
+
+    if (!session) {
+      return; // Exit early if no active session
+    }
+
+    const jwt = await account.createJWT();
+    if (!jwt?.jwt) throw new Error("Failed to get JWT.");
+
+    const payload = JSON.parse(atob(jwt.jwt.split(".")[1]));
+    const exp = payload.exp * 1000;
+
+    await apiClient.post("/auth/set-cookie", {
+      token: jwt.jwt,
+      expiration: exp,
+    });
+
+    setTimeout(refreshJWT, exp - Date.now() - 60000);
+  } catch (error) {
+    console.error("Auto-refresh JWT error:", error);
+  }
+});
+
+async function refreshJWT() {
+  try {
+    console.log("Refreshing JWT...");
+    const jwt = await account.createJWT();
+    if (!jwt?.jwt) throw new Error("Failed to refresh JWT.");
+
+    const payload = JSON.parse(atob(jwt.jwt.split(".")[1]));
+    const exp = payload.exp * 1000;
+
+    await apiClient.post("/auth/set-cookie", {
+      token: jwt.jwt,
+      expiration: exp,
+    });
+
+    setTimeout(refreshJWT, exp - Date.now() - 60000);
+  } catch (error) {
+    console.error("JWT refresh error:", error);
+  }
+}
+
+export async function signInAccount(user: { email: string; password: string }) {
+  try {
+    const session = await account.createEmailPasswordSession(
+      user.email,
+      user.password
+    );
+
+    if (!session) throw new Error("Failed to create session.");
+
+    const jwt = await account.createJWT();
+
+    if (!jwt) throw new Error("Failed to create JWT.");
+
+    const payload = JSON.parse(atob(jwt.jwt.split(".")[1]));
+    const exp = payload.exp * 1000; // Convert expiration to milliseconds
+
+    await apiClient.post("/auth/set-cookie", {
+      token: jwt.jwt,
+      expiration: exp,
+    });
+
+    setTimeout(refreshJWT, exp - Date.now() - 60000);
+
+    return session;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function signOutAccount() {
+  try {
+    const session = await account.deleteSession("current");
+
+    if (!session) throw Error;
+
+    await apiClient.post("/auth/logout");
+
+    return session;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// ~~~~~~~~~~~~~~~~~~ SIGN IN & SIGN OUT with JWT Handling ~~~~~~~~~~~~~~~~~~
 
 export async function createUserAccount(user: INewUser) {
   try {
@@ -159,8 +263,8 @@ export async function saveUserToDB(user: {
   username: string;
 }) {
   try {
-    const response = await axios.post(
-      API_BASE_URL + "/users",
+    const response = await apiClient.post(
+      "/users",
       {
         userID: user.id,
         email: user.email,
@@ -210,7 +314,7 @@ export async function getCurrentUser() {
 
 export async function getUserById(id: string | undefined) {
   try {
-    const response = await axios.get(API_BASE_URL + `/users/${id}`);
+    const response = await apiClient.get(`/users/${id}`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -218,37 +322,12 @@ export async function getUserById(id: string | undefined) {
   }
 }
 
-export async function signInAccount(user: { email: string; password: string }) {
-  try {
-    const session = await account.createEmailPasswordSession(
-      user.email,
-      user.password
-    );
-
-    if (session) test();
-
-    return session;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-export async function signOutAccount() {
-  try {
-    const session = await account.deleteSession("current");
-
-    return session;
-  } catch (error) {
-    console.log(error);
-  }
-}
-
 export async function createNormalPost(post: INewNormalPost) {
   try {
     const mainFiles = await processFiles(post.files);
 
-    const response = await axios.post(
-      API_BASE_URL + "/posts/normal",
+    const response = await apiClient.post(
+      "/posts/normal",
       {
         userID: post.userId,
         caption: post.caption,
@@ -287,8 +366,8 @@ export async function updateNormalPost(post: IUpdateNormalPost) {
 
     if (!allFilesSuccessfullyDeleted) throw Error("Failed to delete files");
 
-    const response = await axios.put(
-      API_BASE_URL + `/posts/normal/${post.postId}`,
+    const response = await apiClient.put(
+      `/posts/normal/${post.postId}`,
       {
         caption: post.caption,
         body: post.body,
@@ -324,8 +403,8 @@ export async function createItineraryPost(post: INewItineraryPost) {
       })
     );
 
-    const response = await axios.post(
-      API_BASE_URL + "/posts/itinerary",
+    const response = await apiClient.post(
+      "/posts/itinerary",
       {
         userID: post.userId,
         caption: post.caption,
@@ -376,8 +455,8 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
       });
     }
 
-    const response = await axios.put(
-      API_BASE_URL + `/posts/itinerary/${post.postId}`,
+    const response = await apiClient.put(
+      `/posts/itinerary/${post.postId}`,
       {
         caption: post.caption,
         body: post.body,
@@ -411,7 +490,7 @@ export async function deletePost(
 
     if (!allFilesSuccessfullyDeleted) throw Error("Failed to delete files");
 
-    const response = await axios.delete(API_BASE_URL + `/posts/${postId}`);
+    const response = await apiClient.delete(`/posts/${postId}`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -420,8 +499,8 @@ export async function deletePost(
 
 export async function getRelatedItineraryMediaUrls(postId: string) {
   try {
-    const response = await axios.get(
-      API_BASE_URL + `/posts/${postId}/related-itinerary-media-urls`
+    const response = await apiClient.get(
+      `/posts/${postId}/related-itinerary-media-urls`
     );
     return response.data;
   } catch (error) {
@@ -472,9 +551,7 @@ export async function deleteFile(fileId: string) {
 
 export async function getSimilarPosts(postId: string) {
   try {
-    const response = await axios.get(
-      API_BASE_URL + `/posts/${postId}/similar-posts`
-    );
+    const response = await apiClient.get(`/posts/${postId}/similar-posts`);
 
     if (!response) throw Error;
 
@@ -486,7 +563,7 @@ export async function getSimilarPosts(postId: string) {
 
 export async function getRecentPosts() {
   try {
-    const response = await axios.get(API_BASE_URL + "/posts/recent-posts");
+    const response = await apiClient.get("/posts/recent-posts");
 
     if (!response) throw Error;
 
@@ -498,7 +575,7 @@ export async function getRecentPosts() {
 
 export async function likePost(userId: string, postId: string) {
   try {
-    const response = await axios.post(API_BASE_URL + "/posts/like", {
+    const response = await apiClient.post("/posts/like", {
       userId: userId,
       postId: postId,
     });
@@ -510,8 +587,8 @@ export async function likePost(userId: string, postId: string) {
 
 export async function unlikePost(userId: string, postId: string) {
   try {
-    const response = await axios.delete(
-      API_BASE_URL + `/posts/unlike/${userId}/${postId}`
+    const response = await apiClient.delete(
+      `/posts/unlike/${userId}/${postId}`
     );
     return response.data;
   } catch (error) {
@@ -521,7 +598,7 @@ export async function unlikePost(userId: string, postId: string) {
 
 export async function savePost(userId: string, postId: string) {
   try {
-    const response = await axios.post(API_BASE_URL + "/posts/save", {
+    const response = await apiClient.post("/posts/save", {
       userId: userId,
       postId: postId,
     });
@@ -533,8 +610,8 @@ export async function savePost(userId: string, postId: string) {
 
 export async function unsavePost(userId: string, postId: string) {
   try {
-    const response = await axios.delete(
-      API_BASE_URL + `/posts/unsave/${userId}/${postId}`
+    const response = await apiClient.delete(
+      `/posts/unsave/${userId}/${postId}`
     );
     return response.data;
   } catch (error) {
@@ -544,9 +621,7 @@ export async function unsavePost(userId: string, postId: string) {
 
 export async function getPostLikedBy(postId: string) {
   try {
-    const response = await axios.get(
-      API_BASE_URL + `/posts/${postId}/liked-by`
-    );
+    const response = await apiClient.get(`/posts/${postId}/liked-by`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -555,9 +630,7 @@ export async function getPostLikedBy(postId: string) {
 
 export async function getPostSavedBy(postId: string) {
   try {
-    const response = await axios.get(
-      API_BASE_URL + `/posts/${postId}/saved-by`
-    );
+    const response = await apiClient.get(`/posts/${postId}/saved-by`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -568,9 +641,7 @@ export async function getPostById(
   postId: string
 ): Promise<IBasePost | undefined> {
   try {
-    const response = await axios.get<IBasePost>(
-      API_BASE_URL + `/posts/${postId}`
-    );
+    const response = await apiClient.get<IBasePost>(`/posts/${postId}`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -585,10 +656,10 @@ export async function getItineraryDetails(postId: string): Promise<
   | undefined
 > {
   try {
-    const response = await axios.get<{
+    const response = await apiClient.get<{
       tripSteps: IDisplayedTripStep[];
       accommodations: IDisplayedAccommodation[];
-    }>(API_BASE_URL + `/posts/${postId}/itinerary-details`);
+    }>(`/posts/${postId}/itinerary-details`);
 
     return response.data;
   } catch (error) {
@@ -598,9 +669,7 @@ export async function getItineraryDetails(postId: string): Promise<
 
 export async function getPostLikeCount(postId: string) {
   try {
-    const response = await axios.get(
-      API_BASE_URL + `/posts/${postId}/like-count`
-    );
+    const response = await apiClient.get(`/posts/${postId}/like-count`);
     return response?.data?.likesCount ?? 0;
   } catch (error) {
     console.log(error);
@@ -612,9 +681,7 @@ export async function getCommentsForPost(
   postId: string
 ): Promise<IComment[] | []> {
   try {
-    const response = await axios.get<IComment[]>(
-      API_BASE_URL + `/comments/${postId}`
-    );
+    const response = await apiClient.get<IComment[]>(`/comments/${postId}`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -647,7 +714,7 @@ export async function createComment({
       mentionedUserId: mentionedUserId || null,
     };
 
-    const response = await axios.post(API_BASE_URL + "/comments", commentData);
+    const response = await apiClient.post("/comments", commentData);
     return response.data;
   } catch (error) {
     console.error(error);
@@ -672,8 +739,8 @@ export async function editComment({
       mentionedUserId: mentionedUserId || null,
     };
 
-    const response = await axios.put(
-      API_BASE_URL + `/comments/${commentId}`,
+    const response = await apiClient.put(
+      `/comments/${commentId}`,
       editedCommentData
     );
 
@@ -685,9 +752,7 @@ export async function editComment({
 
 export async function deleteComment(commentId: string) {
   try {
-    const response = await axios.delete(
-      API_BASE_URL + `/comments/${commentId}`
-    );
+    const response = await apiClient.delete(`/comments/${commentId}`);
 
     return response.data;
   } catch (error) {
@@ -697,9 +762,7 @@ export async function deleteComment(commentId: string) {
 
 export async function getCommentLikedBy(commentId: string) {
   try {
-    const response = await axios.get(
-      API_BASE_URL + `/comments/${commentId}/liked-by`
-    );
+    const response = await apiClient.get(`/comments/${commentId}/liked-by`);
 
     return response.data;
   } catch (error) {
@@ -709,7 +772,7 @@ export async function getCommentLikedBy(commentId: string) {
 
 export async function likeComment(userId: string, commentId: string) {
   try {
-    const response = await axios.post(API_BASE_URL + "/comments/like", {
+    const response = await apiClient.post("/comments/like", {
       userId: userId,
       commentId: commentId,
     });
@@ -721,8 +784,8 @@ export async function likeComment(userId: string, commentId: string) {
 
 export async function unlikeComment(userId: string, commentId: string) {
   try {
-    const response = await axios.delete(
-      API_BASE_URL + `/comments/unlike/${userId}/${commentId}`
+    const response = await apiClient.delete(
+      `/comments/unlike/${userId}/${commentId}`
     );
     return response.data;
   } catch (error) {
@@ -732,9 +795,7 @@ export async function unlikeComment(userId: string, commentId: string) {
 
 export async function getCommentLikeCount(commentId: string) {
   try {
-    const response = await axios.get(
-      API_BASE_URL + `/comments/${commentId}/like-count`
-    );
+    const response = await apiClient.get(`/comments/${commentId}/like-count`);
     return response?.data?.likesCount ?? 0;
   } catch (error) {
     console.log(error);
@@ -752,22 +813,4 @@ export async function getMapSearchResults(query: string) {
   } catch (error) {
     console.log(error);
   }
-}
-
-async function getJWT() {
-  const jwt = await account.createJWT();
-  return jwt.jwt;
-}
-
-async function test() {
-  const token = await getJWT();
-  console.log(token);
-
-  // const response = await axios.get(API_BASE_URL + "/users/test", {
-  //   headers: {
-  //     Authorization: `Bearer ${token}`,
-  //   },
-  // });
-
-  // console.log(response.data);
 }

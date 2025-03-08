@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
 import { useSignOutAccount } from "@/lib/react-query/queriesAndMutations";
-import { useUserContext } from "@/context/AuthContext";
+import { INITIAL_USER, useUserContext } from "@/context/AuthContext";
 import { sidebarLinks } from "@/constants";
 import { INavLink } from "@/types";
 import { ModeToggle } from "../ModeToggle";
@@ -10,7 +10,7 @@ import { ModeToggle } from "../ModeToggle";
 const LeftSidebar = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { user } = useUserContext();
+  const { user, setUser, setIsAuthenticated } = useUserContext();
   const {
     mutateAsync: signOut,
     isSuccess,
@@ -18,7 +18,11 @@ const LeftSidebar = () => {
   } = useSignOutAccount();
 
   useEffect(() => {
-    if (isSuccess) navigate(0);
+    if (isSuccess) {
+      setUser(INITIAL_USER);
+      setIsAuthenticated(false);
+      navigate("/sign-in", { replace: true });
+    }
   }, [isSuccess]);
 
   return (
