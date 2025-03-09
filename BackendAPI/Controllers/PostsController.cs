@@ -670,6 +670,11 @@ namespace BackendAPI.Controllers
                 }
 
                 var similarPostIds = similarPostsResponse.SimilarPostIds;
+                foreach (var item in similarPostIds)
+                {
+                    Console.WriteLine("\n\n Similar id: " + item);
+                }
+                Console.WriteLine(id);
 
                 // If no similar posts found yet, then return randomly
                 if (!similarPostIds.Any())
@@ -678,6 +683,7 @@ namespace BackendAPI.Controllers
                     int skip = new Random().Next(0, Math.Max(1, totalCount - 5));  // Pick a random starting point
 
                     var randomPosts = await _context.Posts
+                        .Where(p => p.PostId != id)
                         .OrderBy(p => p.PostId)
                         .Skip(skip)
                         .Take(5)

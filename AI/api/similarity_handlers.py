@@ -35,6 +35,37 @@ path_sbert_model = "../api/data/sbert_model"
 path_sbert_matrix = "../api/data/sbert_matrix.npz"
 
 
+def update_redis_with_similarities(
+    post_ids, tfidf_sim_matrix: pd.DataFrame, sbert_sim_matrix: pd.DataFrame
+):
+    pipeline = redis_client.pipeline()
+    for post_id in post_ids:
+        post_id = str(post_id)  # Ensure post_id is a string (UUID)
+
+        # Compute combined similarity for this post
+        combined_sim = (
+            WEIGHT_TFIDF * tfidf_sim_matrix.loc[post_id]
+            + WEIGHT_SBERT * sbert_sim_matrix.loc[post_id]
+        )
+
+        # Convert to NumPy arrays for faster operations
+        combined_sim_values = combined_sim.values
+        post_ids_array = np.array(combined_sim.index)
+
+        # Mask to exclude the current post_id
+        mask = post_ids_array != post_id
+        filtered_similarities = combined_sim_values[mask]
+        filtered_post_ids = post_ids_array[mask]
+
+        # Get Top-N most similar posts
+        top_indices = np.argpartition(-filtered_similarities, TOP_N)[:TOP_N]
+        similar_posts = filtered_post_ids[top_indices].tolist()
+
+        # Store in Redis
+        pipeline.set(f"similar:{post_id}", ",".join(map(str, similar_posts)))
+    pipeline.execute()
+
+
 def initialize_TFIDF_post_similarity_startpoint():
     """Initialize the TF-IDF model and matrix, then compute and save the similarity matrix."""
 
@@ -127,7 +158,7 @@ def initialize_SBERT_post_similarity_startpoint():
         print(f"❌ Error initializing SBERT similarity system: {e}")
 
 
-def initialize_combined_similarity_redis_startpoint(weight_tfidf=0.5, weight_sbert=0.5):
+def initialize_combined_similarity_redis_startpoint():
     """Compute and store Top-N similar posts using weighted TF-IDF + SBERT similarity in Redis."""
 
     try:
@@ -135,9 +166,9 @@ def initialize_combined_similarity_redis_startpoint(weight_tfidf=0.5, weight_sbe
         redis_client.flushall()
 
         # Load posts from the database
-        df = fetch_posts_from_db()
+        df_posts = fetch_posts_from_db()
 
-        if df is None or df.empty:
+        if df_posts is None or df_posts.empty:
             print("⚠️ No posts found. Initialization skipped.")
             return
 
@@ -146,25 +177,11 @@ def initialize_combined_similarity_redis_startpoint(weight_tfidf=0.5, weight_sbe
         sbert_sim_matrix = pd.read_csv(path_similarity_matrix_sbert, index_col=0)
 
         # Ensure matrices are aligned (same post IDs and order)
-        post_ids = df["PostId"].astype(str).tolist()
+        post_ids = df_posts["PostId"].astype(str).tolist()
         tfidf_sim_matrix = tfidf_sim_matrix.loc[post_ids, post_ids]
         sbert_sim_matrix = sbert_sim_matrix.loc[post_ids, post_ids]
 
-        # Compute Top-N similar posts per post using the combined formula
-        for post_id in post_ids:
-            post_id = str(post_id)  # Ensure post_id is a string (UUID)
-
-            # Compute combined similarity for this post only
-            combined_sim = (
-                weight_tfidf * tfidf_sim_matrix.loc[post_id]
-                + weight_sbert * sbert_sim_matrix.loc[post_id]
-            )
-
-            # Get Top-N most similar posts (excluding itself)
-            similar_posts = combined_sim.drop(post_id).nlargest(TOP_N).index.tolist()
-
-            # Store in Redis
-            redis_client.set(f"similar:{post_id}", ",".join(map(str, similar_posts)))
+        update_redis_with_similarities(post_ids, tfidf_sim_matrix, sbert_sim_matrix)
 
         print("✅ Top combined similarities for each post stored in Redis!")
 
@@ -277,21 +294,9 @@ def handle_unprocessed_inserted_posts(updated_posts_to_add=None):
 
     ## ====================== COMBINED SIMILARITIES REDIS ====================== ##
 
-    pipeline = redis_client.pipeline()
-    for post_id in new_post_ids:
-        # Get combined similarities for new post
-        combined_sim = (
-            WEIGHT_TFIDF * df_similarity_matrix_tfidf.loc[post_id]
-            + WEIGHT_SBERT * df_similarity_matrix_sbert.loc[post_id]
-        )
-
-        # Get Top-N most similar posts (excluding itself)
-        top_similar = combined_sim.drop(post_id).nlargest(TOP_N).index.tolist()
-
-        # Update Redis
-        pipeline.set(f"similar:{post_id}", ",".join(map(str, top_similar)))
-
-    pipeline.execute()
+    update_redis_with_similarities(
+        new_post_ids, df_similarity_matrix_tfidf, df_similarity_matrix_sbert
+    )
 
     if updated_posts_to_add:
         print(
@@ -453,6 +458,7 @@ def handle_unprocessed_updated_posts():
                 updated_similarities_sbert[i, :]
             )
 
+        # Only normalize for updated posts
         df_similarity_matrix_sbert = normalize_similarity_matrix(
             df_similarity_matrix_sbert, updated_post_ids
         )
@@ -460,20 +466,9 @@ def handle_unprocessed_updated_posts():
 
         # =================== COMBINED SIMILARITIES REDIS =================== #
 
-        pipeline = redis_client.pipeline()
-        for post_id in df_updated_posts["PostId"]:
-            combined_sim = (
-                WEIGHT_TFIDF * df_similarity_matrix_tfidf.loc[post_id]
-                + WEIGHT_SBERT * df_similarity_matrix_sbert.loc[post_id]
-            )
-
-            # Get Top-N most similar posts (excluding itself)
-            top_similar = combined_sim.drop(post_id).nlargest(TOP_N).index.tolist()
-
-            # Update Redis
-            pipeline.set(f"similar:{post_id}", ",".join(map(str, top_similar)))
-
-        pipeline.execute()
+        update_redis_with_similarities(
+            updated_post_ids, df_similarity_matrix_tfidf, df_similarity_matrix_sbert
+        )
 
         print(
             f"✅ UPDATE: Updated {len(updated_posts)} posts and recomputed similarity matrix!"
@@ -558,24 +553,9 @@ def handle_unprocessed_deleted_posts():
     for post_id in deleted_post_ids:
         pipeline.delete(f"similar:{post_id}")
 
-    # Update combined similarities for remaining posts
-    for post_id in df_existing_posts["PostId"]:
-        combined_sim = (
-            WEIGHT_TFIDF * df_similarity_matrix_tfidf.loc[post_id]
-            + WEIGHT_SBERT * df_similarity_matrix_sbert.loc[post_id]
-        )
-
-        # Get Top-N similar posts (excluding any deleted ones)
-        top_similar = (
-            combined_sim.drop(deleted_post_ids, errors="ignore")
-            .nlargest(TOP_N)
-            .index.tolist()
-        )
-
-        # Update Redis
-        pipeline.set(f"similar:{post_id}", ",".join(map(str, top_similar)))
-
-    pipeline.execute()
+    update_redis_with_similarities(
+        all_post_ids, df_similarity_matrix_tfidf, df_similarity_matrix_sbert
+    )
 
     print(
         f"✅ DELETE: Deleted {len(deleted_post_ids)} posts from dataset, similarity matrix, and Redis."

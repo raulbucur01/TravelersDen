@@ -19,10 +19,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = async context =>
             {
-                //var token = context.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
                 var token = context.Request.Cookies["AppwriteJWT"];
-                Console.WriteLine("\n\n\n TOKEN: " + token + "\n\n\n");
+                //Console.WriteLine("\n\n\n TOKEN: " + token + "\n\n\n");
 
                 if (string.IsNullOrEmpty(token))
                 {
