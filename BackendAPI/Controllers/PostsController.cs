@@ -393,14 +393,16 @@ namespace BackendAPI.Controllers
         }
 
         [HttpGet("recent-posts")]
-        public async Task<IActionResult> GetRecentPosts()
+        public async Task<IActionResult> GetRecentPosts(int page = 1, int pageSize = 10)
         {
             try
             {
-                // Fetch the most recent 20 posts, ordered by CreatedAt in descending order, without including User or Media
+                var totalPosts = await _context.Posts.CountAsync();
+
                 var recentPosts = await _context.Posts
                     .OrderByDescending(p => p.CreatedAt) // Order by CreatedAt in descending order
-                    .Take(10) // Limit to the most recent 20 posts
+                    .Skip((page - 1) * pageSize) // Skip posts from previous pages
+                    .Take(pageSize) // Take only the requested number of posts
                     .Select(p => new
                     {
                         PostId = p.PostId,
@@ -416,8 +418,10 @@ namespace BackendAPI.Controllers
                     })
                     .ToListAsync();
 
+                bool hasMore = (page * pageSize) < totalPosts; // Check if there are more posts to fetch
+
                 // Return the list of posts as a response
-                return Ok(recentPosts);
+                return Ok(new { posts = recentPosts, hasMore });
             }
             catch (Exception ex)
             {

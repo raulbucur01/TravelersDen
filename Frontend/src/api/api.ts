@@ -561,9 +561,14 @@ export async function getSimilarPosts(postId: string) {
   }
 }
 
-export async function getRecentPosts() {
+export async function getRecentPosts({ pageParam = 1 }) {
   try {
-    const response = await apiClient.get("/posts/recent-posts");
+    const response = await apiClient.get("/posts/recent-posts", {
+      params: {
+        page: pageParam,
+        pageSize: 10,
+      },
+    });
 
     if (!response) throw Error;
 
