@@ -1,5 +1,5 @@
 import { useUserContext } from "@/context/AuthContext";
-import { useGetCommentsForPost } from "@/lib/react-query/queriesAndMutations";
+import { useGetCommentsForPost } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "../shared/Loader";
 import Comment from "./Comment";
 import CommentForm from "./CommentForm";

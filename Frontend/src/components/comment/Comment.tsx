@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import CommentForm from "./CommentForm";
 import { formatToRelativeDate } from "@/lib/utils";
-import { useDeleteComment } from "@/lib/react-query/queriesAndMutations";
+import { useDeleteComment } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "../shared/Loader";
 import CommentStats from "./CommentStats";
 

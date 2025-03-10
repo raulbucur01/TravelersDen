@@ -1,11 +1,11 @@
 import Loader from "@/components/shared/Loader";
 import PostCard from "@/components/shared/PostCard";
-import { useGetRecentPosts } from "@/lib/react-query/queriesAndMutations";
+import { useGetRecentPosts } from "@/api/tanstack-query/queriesAndMutations";
 import { IBasePost } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { QUERY_KEYS } from "@/lib/react-query/queryKeys";
+import { QUERY_KEYS } from "@/api/tanstack-query/queryKeys";
 
 const Home = () => {
   const queryClient = useQueryClient();

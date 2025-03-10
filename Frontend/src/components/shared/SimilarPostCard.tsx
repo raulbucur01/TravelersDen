@@ -1,24 +1,8 @@
 import { IBasePost, MediaUrl } from "@/types";
 import MediaSlideshow from "./MediaSlideshow";
 import { Link } from "react-router-dom";
-import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
+import { useGetUserById } from "@/api/tanstack-query/queriesAndMutations";
 import { formatToRelativeDate } from "@/lib/utils";
-
-// Convert testMediaUrls to MediaUrl format
-const testMedia: MediaUrl[] = [
-  {
-    url: "https://cloud.appwrite.io/v1/storage/buckets/679e6e110026b5d8c68c/files/67ab339000194a9ac975/view?project=6740c57e0035d48d554d&mode=admin",
-    type: "Photo",
-  },
-  {
-    url: "https://cloud.appwrite.io/v1/storage/buckets/679e6e110026b5d8c68c/files/67a3847a000ecd714363/view?project=6740c57e0035d48d554d&mode=admin",
-    type: "Photo",
-  },
-  {
-    url: "https://cloud.appwrite.io/v1/storage/buckets/679e6e110026b5d8c68c/files/67ab3390001952721da5/view?project=6740c57e0035d48d554d&mode=admin",
-    type: "Photo",
-  },
-];
 
 type SimilarPostCardProps = {
   post: IBasePost;

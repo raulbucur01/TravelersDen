@@ -4,7 +4,7 @@ import { useUserContext } from "@/context/AuthContext";
 import {
   useGetRecentPosts,
   useGetSimilarPosts,
-} from "@/lib/react-query/queriesAndMutations";
+} from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "./Loader";
 import SimilarPostCard from "./SimilarPostCard";
 

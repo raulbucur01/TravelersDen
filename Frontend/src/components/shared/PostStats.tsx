@@ -6,7 +6,7 @@ import {
   useUnlikePost,
   useSavePost,
   useGetPostLikeCount,
-} from "@/lib/react-query/queriesAndMutations";
+} from "@/api/tanstack-query/queriesAndMutations";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { IBasePost } from "@/types";

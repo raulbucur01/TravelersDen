@@ -19,7 +19,7 @@ import { NormalPostValidation } from "@/lib/validation";
 import {
   useCreateNormalPost,
   useUpdateNormalPost,
-} from "@/lib/react-query/queriesAndMutations";
+} from "@/api/tanstack-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { IBasePost } from "@/types";

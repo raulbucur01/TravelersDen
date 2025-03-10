@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import {
   useCreateComment,
   useEditComment,
-} from "@/lib/react-query/queriesAndMutations";
+} from "@/api/tanstack-query/queriesAndMutations";
 
 type CommentFormProps = {
   currentUserId: string;

@@ -4,7 +4,7 @@ import "@tomtom-international/web-sdk-maps/dist/maps.css";
 import * as tt from "@tomtom-international/web-sdk-maps";
 import ttServices from "@tomtom-international/web-sdk-services";
 
-import { useGetMapSearchResults } from "@/lib/react-query/queriesAndMutations";
+import { useGetMapSearchResults } from "@/api/tanstack-query/queriesAndMutations";
 import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import MapSearchSuggestions from "./MapSearchSuggestions";

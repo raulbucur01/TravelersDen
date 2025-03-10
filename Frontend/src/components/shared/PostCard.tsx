@@ -3,9 +3,8 @@ import { formatToRelativeDate } from "@/lib/utils";
 import { useUserContext } from "@/context/AuthContext";
 import PostStats from "./PostStats";
 import { IBasePost } from "@/types";
-import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
+import { useGetUserById } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "./Loader";
-import { useState } from "react";
 import MediaCarousel from "./MediaCarousel";
 import ExpandableText from "./ExpandableText";
 

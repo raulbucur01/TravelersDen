@@ -1,7 +1,7 @@
 import ItineraryPostForm from "@/components/post/ItineraryPostForm";
 import NormalPostForm from "@/components/post/NormalPostForm";
 import Loader from "@/components/shared/Loader";
-import { useGetPostById } from "@/lib/react-query/queriesAndMutations";
+import { useGetPostById } from "@/api/tanstack-query/queriesAndMutations";
 import { useParams } from "react-router-dom";
 
 const UpdatePost = () => {

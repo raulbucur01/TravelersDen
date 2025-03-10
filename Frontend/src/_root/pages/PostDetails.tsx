@@ -4,12 +4,12 @@ import {
   useDeletePost,
   useGetPostById,
   useGetRelatedItineraryMediaUrls,
-} from "@/lib/react-query/queriesAndMutations";
+} from "@/api/tanstack-query/queriesAndMutations";
 import { useNavigate, useParams } from "react-router-dom";
 import CommentSection from "@/components/comment/CommentSection";
 import PostStats from "@/components/shared/PostStats";
 import { Button } from "@/components/ui/button";
-import { useGetUserById } from "@/lib/react-query/queriesAndMutations";
+import { useGetUserById } from "@/api/tanstack-query/queriesAndMutations";
 import { formatToRelativeDate } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import MediaCarousel from "@/components/shared/MediaCarousel";

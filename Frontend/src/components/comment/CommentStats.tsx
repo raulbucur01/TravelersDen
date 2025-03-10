@@ -3,7 +3,7 @@ import {
   useUnlikeComment,
   useGetCommentLikedBy,
   useGetCommentLikeCount,
-} from "@/lib/react-query/queriesAndMutations";
+} from "@/api/tanstack-query/queriesAndMutations";
 import { IComment, ICommentReply } from "@/types";
 import { useEffect, useState } from "react";
 import Loader from "../shared/Loader";

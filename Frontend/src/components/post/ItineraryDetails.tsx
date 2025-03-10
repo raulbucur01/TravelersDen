@@ -1,8 +1,8 @@
-import { useGetItineraryDetails } from "@/lib/react-query/queriesAndMutations";
+import { useGetItineraryDetails } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "../shared/Loader";
-import AccommodationsDisplay from "../shared/AccommodationsDisplay";
-import TripStepDisplay from "../shared/TripStepDisplay";
-import TripSummaryDisplay from "../shared/TripSummaryDisplay";
+import AccommodationsDisplay from "./AccommodationsDisplay";
+import TripStepDisplay from "./TripStepDisplay";
+import TripSummaryDisplay from "./TripSummaryDisplay";
 
 const ItineraryDetails = ({ id }: { id: string }) => {
   const { data: itineraryData, isPending: isGettingItineraryData } =

@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { SigninValidation } from "@/lib/validation";
 import Loader from "@/components/shared/Loader";
 import { useToast } from "@/hooks/use-toast";
-import { useSignInAccount } from "@/lib/react-query/queriesAndMutations";
+import { useSignInAccount } from "@/api/tanstack-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 
 const SigninForm = () => {
