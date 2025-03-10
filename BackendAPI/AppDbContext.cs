@@ -17,9 +17,29 @@ public class AppDbContext : DbContext
     public DbSet<TripStepMedia> TripStepMedia { get; set; }
     public DbSet<PostChange> PostChanges { get; set; }
     public DbSet<DeletedPost> DeletedPosts { get; set; }
+    public DbSet<Follows> Follows { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // follows
+        modelBuilder.Entity<Follows>()
+            .HasKey(f => new { f.UserIdFollowing, f.UserIdFollowed });
+
+        modelBuilder.Entity<Follows>()
+            .HasOne(f => f.FollowingUser)
+            .WithMany()
+            .HasForeignKey(f => f.UserIdFollowing)
+            .HasConstraintName("FK_Follows_UserIDFollowing")
+            .OnDelete(DeleteBehavior.Restrict); // handled at delete in code
+
+        modelBuilder.Entity<Follows>()
+            .HasOne(f => f.FollowedUser)
+            .WithMany()
+            .HasForeignKey(f => f.UserIdFollowed)
+            .HasConstraintName("FK_Follows_UserIDFollowed")
+            .OnDelete(DeleteBehavior.Restrict); // handled at delete in code
+
+
         modelBuilder.Entity<PostChange>()
            .HasKey(pc => pc.ChangeId);
 

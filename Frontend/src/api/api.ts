@@ -819,3 +819,61 @@ export async function getMapSearchResults(query: string) {
     console.log(error);
   }
 }
+
+export async function deleteUser(userId: string) {
+  try {
+    const response = await apiClient.delete(`/users/${userId}`);
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function follow(userIdFollowing: string, userIdFollowed: string) {
+  try {
+    const response = await apiClient.post("/users/follow", {
+      userIdFollowing: userIdFollowing,
+      userIdFollowed: userIdFollowed,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function unfollow(
+  userIdUnfollowing: string,
+  userIdFollowed: string
+) {
+  try {
+    const response = await apiClient.delete(
+      `/users/unfollow/${userIdUnfollowing}/${userIdFollowed}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getFollowers(userId: string) {
+  try {
+    // to do
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getFollowing(userId: string) {
+  try {
+    // to do
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}

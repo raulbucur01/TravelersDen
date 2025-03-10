@@ -488,7 +488,7 @@ namespace BackendAPI.Controllers
                 post.LikesCount++; // Increment the LikesCount
                 await _context.SaveChangesAsync();
 
-                return Ok(newLike);
+                return Ok(new { newLike.PostId });
             }
             catch (Exception ex)
             {
@@ -522,7 +522,7 @@ namespace BackendAPI.Controllers
                 post.LikesCount--; 
                 await _context.SaveChangesAsync();
 
-                return Ok("Post unliked successfully.");
+                return Ok(new { postId });
             }
             catch (Exception ex)
             {
@@ -545,7 +545,7 @@ namespace BackendAPI.Controllers
                 _context.Saves.Add(newSave);
                 await _context.SaveChangesAsync();
 
-                return Ok(newSave);
+                return Ok(new { newSave.PostId });
             }
             catch (Exception ex)
             {
@@ -571,7 +571,7 @@ namespace BackendAPI.Controllers
                 _context.Saves.Remove(saveRecord);
                 await _context.SaveChangesAsync();
 
-                return Ok("Post unsaved successfully.");
+                return Ok(new { postId });
             }
             catch (Exception ex)
             {

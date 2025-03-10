@@ -11,80 +11,80 @@ using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add authentication with JWT Bearer
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = async context =>
-            {
-                var token = context.Request.Cookies["AppwriteJWT"];
-                //Console.WriteLine("\n\n\n TOKEN: " + token + "\n\n\n");
+//// Add authentication with JWT Bearer
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddJwtBearer(options =>
+//    {
+//        options.Events = new JwtBearerEvents
+//        {
+//            OnMessageReceived = async context =>
+//            {
+//                var token = context.Request.Cookies["AppwriteJWT"];
+//                //Console.WriteLine("\n\n\n TOKEN: " + token + "\n\n\n");
 
-                if (string.IsNullOrEmpty(token))
-                {
-                    context.NoResult();
-                    return;
-                }
+//                if (string.IsNullOrEmpty(token))
+//                {
+//                    context.NoResult();
+//                    return;
+//                }
 
-                try
-                {
-                    var appwriteEndpoint = builder.Configuration["Appwrite:Endpoint"];
-                    var appwriteProjectId = builder.Configuration["Appwrite:ProjectId"];
+//                try
+//                {
+//                    var appwriteEndpoint = builder.Configuration["Appwrite:Endpoint"];
+//                    var appwriteProjectId = builder.Configuration["Appwrite:ProjectId"];
 
-                    if (string.IsNullOrEmpty(appwriteEndpoint) || string.IsNullOrEmpty(appwriteProjectId))
-                    {
-                        throw new InvalidOperationException("Appwrite configuration values (Endpoint or ProjectId) are missing in appsettings.json.");
-                    }
+//                    if (string.IsNullOrEmpty(appwriteEndpoint) || string.IsNullOrEmpty(appwriteProjectId))
+//                    {
+//                        throw new InvalidOperationException("Appwrite configuration values (Endpoint or ProjectId) are missing in appsettings.json.");
+//                    }
 
-                    var client = new Client()
-                        .SetEndpoint(appwriteEndpoint)
-                        .SetProject(appwriteProjectId)
-                        .SetJWT(token);
+//                    var client = new Client()
+//                        .SetEndpoint(appwriteEndpoint)
+//                        .SetProject(appwriteProjectId)
+//                        .SetJWT(token);
 
-                    var account = new Account(client);
-                    var user = await account.Get();
+//                    var account = new Account(client);
+//                    var user = await account.Get();
 
-                    if (user != null)
-                    {
-                        var claims = new List<System.Security.Claims.Claim>
-                        {
-                            new System.Security.Claims.Claim("UserId", user.Id),
-                            new System.Security.Claims.Claim("Email", user.Email)
-                        };
+//                    if (user != null)
+//                    {
+//                        var claims = new List<System.Security.Claims.Claim>
+//                        {
+//                            new System.Security.Claims.Claim("UserId", user.Id),
+//                            new System.Security.Claims.Claim("Email", user.Email)
+//                        };
 
-                        var identity = new System.Security.Claims.ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
-                        context.Principal = new System.Security.Claims.ClaimsPrincipal(identity);
-                        context.Success();
-                    }
-                    else
-                    {
-                        context.Fail("Invalid token");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Token validation error: " + ex.Message);
-                    context.Fail("Invalid token");
-                }
-            }
-        };
+//                        var identity = new System.Security.Claims.ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
+//                        context.Principal = new System.Security.Claims.ClaimsPrincipal(identity);
+//                        context.Success();
+//                    }
+//                    else
+//                    {
+//                        context.Fail("Invalid token");
+//                    }
+//                }
+//                catch (Exception ex)
+//                {
+//                    Console.WriteLine("Token validation error: " + ex.Message);
+//                    context.Fail("Invalid token");
+//                }
+//            }
+//        };
 
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = false,
-            ValidateIssuerSigningKey = false,
-            SignatureValidator = (token, _) => new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(token) // Bypass default JWT validation
-        };
-    });
+//        options.TokenValidationParameters = new TokenValidationParameters
+//        {
+//            ValidateIssuer = false,
+//            ValidateAudience = false,
+//            ValidateLifetime = false,
+//            ValidateIssuerSigningKey = false,
+//            SignatureValidator = (token, _) => new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(token) // Bypass default JWT validation
+//        };
+//    });
 
-builder.Services.AddAuthorizationBuilder()
-    .SetFallbackPolicy(new AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build());
+//builder.Services.AddAuthorizationBuilder()
+//    .SetFallbackPolicy(new AuthorizationPolicyBuilder()
+//        .RequireAuthenticatedUser()
+//        .Build());
 
 // Bind FastAPI settings
 builder.Services.Configure<FastApiSettings>(builder.Configuration.GetSection("FastApiSettings"));

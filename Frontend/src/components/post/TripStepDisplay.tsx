@@ -1,7 +1,7 @@
 import { IDisplayedTripStep } from "@/types";
-import ExpandableText from "./ExpandableText";
-import Map from "./map/Map";
-import MediaCarousel from "./MediaCarousel";
+import ExpandableText from "../shared/ExpandableText";
+import Map from "../shared/map/Map";
+import MediaCarousel from "../shared/MediaCarousel";
 
 type TripStepDisplayProps = {
   tripSteps: IDisplayedTripStep[];
