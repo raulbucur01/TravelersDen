@@ -858,9 +858,20 @@ export async function unfollow(
   }
 }
 
-export async function getFollowers(userId: string) {
+export async function getFollowers({
+  userId,
+  pageParam = 1,
+}: {
+  userId: string;
+  pageParam?: number;
+}) {
   try {
-    // to do
+    const response = await apiClient.get(`/users/${userId}/followers`, {
+      params: {
+        page: pageParam,
+        pageSize: 10,
+      },
+    });
 
     return response.data;
   } catch (error) {
@@ -868,10 +879,32 @@ export async function getFollowers(userId: string) {
   }
 }
 
-export async function getFollowing(userId: string) {
+export async function getFollowing({
+  userId,
+  pageParam = 1,
+}: {
+  userId: string;
+  pageParam?: number;
+}) {
   try {
-    // to do
+    const response = await apiClient.get(`/users/${userId}/following`, {
+      params: {
+        page: pageParam,
+        pageSize: 10,
+      },
+    });
 
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function IsFollowing(userId1: string, userId2: string) {
+  try {
+    const response = await apiClient.get(
+      `/users/${userId1}/is-following/${userId2}`
+    );
     return response.data;
   } catch (error) {
     console.log(error);

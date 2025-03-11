@@ -36,6 +36,11 @@ import {
   deletePost,
   getRelatedItineraryMediaUrls,
   getSimilarPosts,
+  getFollowers,
+  getFollowing,
+  follow,
+  unfollow,
+  IsFollowing,
 } from "../api";
 import {
   INewItineraryPost,
@@ -293,6 +298,8 @@ export const useUnsavePost = () => {
 export const useGetRecentPosts = () => {
   return useInfiniteQuery({
     queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
+    // React Query automatically calls the queryFn with an object containing pageParam,
+    // so the function signature needs to match:
     queryFn: ({ pageParam = 1 }) => getRecentPosts({ pageParam }),
     initialPageParam: 1, // It sets the first page number. React Query uses this as the starting pageParam.
 
@@ -485,5 +492,79 @@ export const useGetMapSearchResults = (query: string) => {
     queryKey: [QUERY_KEYS.GET_MAP_SEARCH_RESULTS, query],
     queryFn: () => getMapSearchResults(query),
     enabled: false,
+  });
+};
+
+export const useGetFollowers = (userId: string) => {
+  return useInfiniteQuery({
+    queryKey: [QUERY_KEYS.GET_FOLLOWERS, userId],
+    queryFn: ({ pageParam = 1 }) => getFollowers({ userId, pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.hasMore ? allPages.length + 1 : undefined;
+    },
+  });
+};
+
+export const useGetFollowing = (userId: string) => {
+  return useInfiniteQuery({
+    queryKey: [QUERY_KEYS.GET_FOLLOWING, userId],
+    queryFn: ({ pageParam = 1 }) => getFollowing({ userId, pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.hasMore ? allPages.length + 1 : undefined;
+    },
+  });
+};
+
+export const useFollow = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userIdFollowing,
+      userIdFollowed,
+    }: {
+      userIdFollowing: string;
+      userIdFollowed: string;
+    }) => follow(userIdFollowing, userIdFollowed),
+    onSuccess: (data) => {
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_FOLLOWING, data.userIdFollowing],
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_FOLLOWERS, data.userIdFollowed],
+      });
+    },
+  });
+};
+
+export const useUnfollow = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      userIdUnfollowing,
+      userIdFollowed,
+    }: {
+      userIdUnfollowing: string;
+      userIdFollowed: string;
+    }) => unfollow(userIdUnfollowing, userIdFollowed),
+    onSuccess: (data) => {
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_FOLLOWING, data.userIdUnfollowing],
+      });
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_FOLLOWERS, data.userIdFollowed],
+      });
+    },
+  });
+};
+
+export const useIsFollowing = (userId1: string, userId2: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_IS_FOLLOWING, userId1, userId2],
+    queryFn: () => IsFollowing(userId1, userId2),
+    enabled: !!userId1 && !!userId2, // Ensures query runs only when both user IDs are provided
   });
 };

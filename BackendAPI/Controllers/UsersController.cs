@@ -109,7 +109,7 @@ namespace BackendAPI.Controllers
         }
 
         [HttpGet("{id}/followers")]
-        public async Task<IActionResult> GetFollowers(string id, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetFollowers(string id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
@@ -122,7 +122,6 @@ namespace BackendAPI.Controllers
                     .Take(pageSize)
                     .Select(f => new
                     {
-                        f.UserIdFollowing,
                         f.FollowingUser.UserId,
                         f.FollowingUser.Name,
                         f.FollowingUser.Username,
@@ -141,7 +140,7 @@ namespace BackendAPI.Controllers
         }
 
         [HttpGet("{id}/following")]
-        public async Task<IActionResult> GetFollowing(string id, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> GetFollowing(string id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
@@ -154,7 +153,6 @@ namespace BackendAPI.Controllers
                     .Take(pageSize)
                     .Select(f => new
                     {
-                        f.UserIdFollowed,
                         f.FollowedUser.UserId,
                         f.FollowedUser.Name,
                         f.FollowedUser.Username,
@@ -195,7 +193,7 @@ namespace BackendAPI.Controllers
                 followedUser.FollowerCount++; // Increment the FollowerCount
                 await _context.SaveChangesAsync();
 
-                return Ok("User followed successfully.");
+                return Ok(new {createFollowDTO.UserIdFollowing, createFollowDTO.UserIdFollowed});
             }
             catch (Exception ex)
             {
@@ -229,7 +227,23 @@ namespace BackendAPI.Controllers
                 user.FollowerCount--;
                 await _context.SaveChangesAsync();
 
-                return Ok("User unfollowed successfully.");
+                return Ok(new {userIdUnfollowing, userIdFollowed});
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id1}/is-following/{id2}")]
+        public async Task<IActionResult> IsFollowing(string id1, string id2)
+        {
+            try
+            {
+                bool isFollowing = await _context.Follows
+                    .AnyAsync(f => f.UserIdFollowing == id1 && f.UserIdFollowed == id2);
+
+                return Ok(new { isFollowing });
             }
             catch (Exception ex)
             {

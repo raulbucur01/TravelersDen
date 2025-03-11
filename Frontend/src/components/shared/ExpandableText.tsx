@@ -21,22 +21,24 @@ const ExpandableText = ({
     setIsExpanded((prev) => !prev);
   };
 
-  // Determine the text to display based on the state
-  const displayText = isExpanded
-    ? text
-    : text.length > maxLength
-    ? text.substring(0, maxLength) + "..."
-    : text;
+  const processedText = isExpanded
+    ? text.split("\n")
+    : text.substring(0, maxLength).split("\n");
 
   return (
-    <p
+    <div
       className={className}
       style={{
         maxWidth: maxCharsPerLine ? `${maxCharsPerLine}ch` : "auto",
-        overflowWrap: "break-word", // Ensure words break if they exceed max width
+        overflowWrap: "break-word",
       }}
     >
-      {displayText}
+      {processedText.map((line, index) => (
+        <p key={index}>
+          {line}
+          {index < processedText.length - 1 && <br />}
+        </p>
+      ))}
       {text.length > maxLength && (
         <button
           onClick={(e) => toggleExpanded(e)}
@@ -45,7 +47,7 @@ const ExpandableText = ({
           {isExpanded ? "less" : "more"}
         </button>
       )}
-    </p>
+    </div>
   );
 };
 
