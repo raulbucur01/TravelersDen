@@ -539,11 +539,17 @@ export const useFollow = () => {
       userIdFollowed: string;
     }) => follow(userIdFollowing, userIdFollowed),
     onSuccess: (data) => {
-      queryClient.refetchQueries({
+      queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_FOLLOWING, data.userIdFollowing],
       });
-      queryClient.refetchQueries({
+      queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_FOLLOWERS, data.userIdFollowed],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_USER_BY_ID, data.userIdFollowing],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_USER_BY_ID, data.userIdFollowed],
       });
     },
   });
@@ -561,11 +567,17 @@ export const useUnfollow = () => {
       userIdFollowed: string;
     }) => unfollow(userIdUnfollowing, userIdFollowed),
     onSuccess: (data) => {
-      queryClient.refetchQueries({
+      queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_FOLLOWING, data.userIdUnfollowing],
       });
-      queryClient.refetchQueries({
+      queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_FOLLOWERS, data.userIdFollowed],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_USER_BY_ID, data.userIdUnfollowing],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_USER_BY_ID, data.userIdFollowed],
       });
     },
   });
