@@ -9,7 +9,12 @@ import {
 } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "../shared/Loader";
 import { Button } from "../ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Dialog, DialogTrigger } from "../ui/dialog";
+import CustomizableDialog from "../shared/CustomizableDialog";
+import { Label } from "../ui/label";
+import { Input } from "../ui/input";
+import { Textarea } from "../ui/textarea";
 
 const ProfileHeader = ({ userId }: { userId: string }) => {
   const { user: currentUser } = useUserContext();
@@ -20,12 +25,26 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [profileInfo, setProfileInfo] = useState({
+    name: user?.name || "",
+    username: user?.username || "",
+    bio: user?.bio || "",
+  });
 
   useEffect(() => {
     if (followStatus !== undefined) {
       setIsFollowing(followStatus.isFollowing);
     }
   }, [followStatus]);
+
+  const handleCancel = () => {
+    // Reset to original user data when cancel is clicked
+    setProfileInfo({
+      name: user?.name || "",
+      username: user?.username || "",
+      bio: user?.bio || "",
+    });
+  };
 
   const handleFollowToggle = async () => {
     if (loading) return;
@@ -62,9 +81,18 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
     // TODO: Implement dialog logic
   };
 
-  if (isGettingUser) return <Loader />;
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setProfileInfo((prev) => ({ ...prev, [name]: value }));
+  };
 
-  console.log(user);
+  const handleUpdateProfile = () => {
+    console.log("Update profile");
+  };
+
+  if (isGettingUser) return <Loader />;
 
   return (
     <div className="flex w-full max-w-2xl mx-auto h-full items-center gap-x-8 p-8">
@@ -84,13 +112,62 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
           </div>
 
           {currentUser.userId === userId ? (
-            <Button
-              className={
-                "px-6 py-2 text-lg rounded-lg font-medium transition bg-dm-dark-3 hover:bg-dm-secondary text-dm-light"
+            <CustomizableDialog
+              trigger={
+                <Button
+                  className={
+                    "px-6 py-2 text-lg rounded-lg font-medium transition bg-dm-dark-3 hover:bg-dm-secondary text-dm-light"
+                  }
+                >
+                  Edit Profile
+                </Button>
               }
+              title="Edit Profile"
+              description="Make changes to your profile here."
+              cancelText="Cancel"
+              actionText="Update"
+              onConfirm={handleUpdateProfile}
+              onClose={handleCancel}
             >
-              Edit Profile
-            </Button>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Name
+                  </Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={profileInfo.name}
+                    onChange={handleInputChange}
+                    className="col-span-3 shad-input"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="username" className="text-right">
+                    Username
+                  </Label>
+                  <Input
+                    id="username"
+                    name="username"
+                    value={profileInfo.username}
+                    onChange={handleInputChange}
+                    className="col-span-3 shad-input"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="bio" className="text-right">
+                    Bio
+                  </Label>
+                  <Textarea
+                    id="bio"
+                    name="bio"
+                    value={profileInfo.bio}
+                    onChange={handleInputChange}
+                    className="col-span-3 p-2 shad-textarea custom-scrollbar"
+                  />
+                </div>
+              </div>
+            </CustomizableDialog>
           ) : (
             <Button
               onClick={handleFollowToggle}

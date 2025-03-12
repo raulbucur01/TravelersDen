@@ -16,7 +16,7 @@ import MediaCarousel from "@/components/shared/MediaCarousel";
 import ItineraryDetails from "@/components/post/ItineraryDetails";
 import ExpandableText from "@/components/shared/ExpandableText";
 import { toast } from "@/hooks/use-toast";
-import CustomisableAlertDialog from "@/components/shared/CustomisableAlertDialog";
+import CustomizableAlertDialog from "@/components/shared/CustomizableAlertDialog";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDownCircle, ChevronUpCircle } from "lucide-react";
 import SimilarPosts from "@/components/shared/SimilarPosts";
@@ -193,7 +193,7 @@ const PostDetails = () => {
 
                       {/* DELETE with CONFIRMATION */}
                       {currentUser.userId === postCreator.userId && (
-                        <CustomisableAlertDialog
+                        <CustomizableAlertDialog
                           trigger={
                             <Button className="bg-transparent hover:bg-transparent">
                               <img

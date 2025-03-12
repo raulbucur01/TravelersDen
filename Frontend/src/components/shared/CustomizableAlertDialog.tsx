@@ -9,10 +9,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { ReactNode } from "react";
 
-interface CustomisableAlertDialogProps {
+interface CustomizableAlertDialogProps {
   trigger?: string | ReactNode;
   title?: string;
   description?: string;
@@ -21,14 +20,14 @@ interface CustomisableAlertDialogProps {
   onConfirm?: () => void;
 }
 
-const CustomisableAlertDialog = ({
+const CustomizableAlertDialog = ({
   trigger,
   title,
   description,
   cancelText = "Cancel",
   actionText = "Continue",
   onConfirm,
-}: CustomisableAlertDialogProps) => {
+}: CustomizableAlertDialogProps) => {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
@@ -55,4 +54,4 @@ const CustomisableAlertDialog = ({
   );
 };
 
-export default CustomisableAlertDialog;
+export default CustomizableAlertDialog;
