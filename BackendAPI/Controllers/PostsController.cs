@@ -61,6 +61,15 @@ namespace BackendAPI.Controllers
                     _context.PostMedia.Add(postMedia);
                 }
 
+                // increment user post count
+                var userCreating = await _context.Users.FindAsync(postDto.UserId);
+
+                if (userCreating == null) {
+                    return NotFound("User creating not found. Can't update post count!");
+                }
+
+                userCreating.PostCount++;
+
                 await _context.SaveChangesAsync();
 
                 return StatusCode(200, "Post Created");
@@ -149,6 +158,16 @@ namespace BackendAPI.Controllers
                     _context.TripSteps.AddRange(tripStepList);
                     _context.TripStepMedia.AddRange(tripStepMediaList);
                     _context.Accommodations.AddRange(accommodationList);
+
+                    // increment user post count
+                    var userCreating = await _context.Users.FindAsync(postDto.UserId);
+
+                    if (userCreating == null)
+                    {
+                        return NotFound("User creating not found. Can't update post count!");
+                    }
+
+                    userCreating.PostCount++;
 
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
@@ -321,10 +340,20 @@ namespace BackendAPI.Controllers
                     return NotFound(new { Message = "Post not found." });
                 }
 
+                // decrement user post count
+                var userDeleting = await _context.Users.FindAsync(post.UserId);
+
+                if (userDeleting == null)
+                {
+                    return NotFound("User deleting not found. Can't update post count!");
+                }
+
+                userDeleting.PostCount--;
+
                 _context.Posts.Remove(post);
                 await _context.SaveChangesAsync();
 
-                return Ok(new { PostId = id });
+                return Ok(new { PostId = id, userDeleting.UserId });
             }
             catch (Exception ex)
             {

@@ -158,8 +158,17 @@ export const useDeletePost = () => {
       // Optimistically update the UI
       queryClient.setQueryData(
         [QUERY_KEYS.GET_RECENT_POSTS],
-        (oldPosts: any[] | undefined) =>
-          oldPosts ? oldPosts.filter((post) => post.postId !== postId) : []
+        (oldData: any) => {
+          if (!oldData || !oldData.pages) return oldData;
+
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page: any) => ({
+              ...page,
+              posts: page.posts.filter((post: any) => post.postId !== postId),
+            })),
+          };
+        }
       );
 
       return { previousPosts }; // Store old cache in case we need to rollback
@@ -308,6 +317,7 @@ export const useGetRecentPosts = () => {
     // lastPage → Data returned from the last API call.
     // allPages → An array of all previously fetched pages.
     getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage) return undefined;
       return lastPage.hasMore ? allPages.length + 1 : undefined;
     },
   });

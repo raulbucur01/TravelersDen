@@ -484,13 +484,18 @@ export async function deletePost(
   toDeleteFromAppwrite: string[]
 ) {
   try {
+    console.log("In delete post");
+
     const allFilesSuccessfullyDeleted = await deleteFilesFromAppwrite(
       toDeleteFromAppwrite
     );
 
+    console.log("In delete post again");
+
     if (!allFilesSuccessfullyDeleted) throw Error("Failed to delete files");
 
     const response = await apiClient.delete(`/posts/${postId}`);
+
     return response.data;
   } catch (error) {
     console.log(error);

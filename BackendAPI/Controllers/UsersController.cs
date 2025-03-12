@@ -70,6 +70,9 @@ namespace BackendAPI.Controllers
                         ImageUrl = u.ImageUrl,
                         City = u.City ?? "",
                         Country = u.Country ?? "",
+                        FollowerCount = u.FollowerCount,
+                        FollowingCount = u.FollowingCount,
+                        PostCount = u.PostCount,
                     })
                     .FirstOrDefaultAsync();
 
@@ -184,13 +187,21 @@ namespace BackendAPI.Controllers
 
                 _context.Follows.Add(newFollow);
 
-                var followedUser = await _context.Users.FindAsync(createFollowDTO.UserIdFollowed);
-                if (followedUser == null)
+                var users = await _context.Users
+                .Where(u => u.UserId == createFollowDTO.UserIdFollowing || u.UserId == createFollowDTO.UserIdFollowed)
+                .ToListAsync();
+
+                var userFollowing = users.FirstOrDefault(u => u.UserId == createFollowDTO.UserIdFollowing);
+                var userFollowed = users.FirstOrDefault(u => u.UserId == createFollowDTO.UserIdFollowed);
+
+                if (userFollowing == null || userFollowed == null)
                 {
-                    return NotFound("FollowedUser not found.");
+                    return NotFound("One or both users not found.");
                 }
 
-                followedUser.FollowerCount++; // Increment the FollowerCount
+                userFollowed.FollowerCount++;
+                userFollowing.FollowingCount++;
+
                 await _context.SaveChangesAsync();
 
                 return Ok(new {createFollowDTO.UserIdFollowing, createFollowDTO.UserIdFollowed});
@@ -218,13 +229,21 @@ namespace BackendAPI.Controllers
                 // Remove the follow from the database
                 _context.Follows.Remove(followRecord);
 
-                var user = await _context.Users.FindAsync(userIdFollowed);
-                if (user == null)
+                var users = await _context.Users
+                .Where(u => u.UserId == userIdUnfollowing || u.UserId == userIdFollowed)
+                .ToListAsync();
+
+                var userUnfollowing = users.FirstOrDefault(u => u.UserId == userIdUnfollowing);
+                var userFollowed = users.FirstOrDefault(u => u.UserId == userIdFollowed);
+
+                if (userUnfollowing == null || userFollowed == null)
                 {
-                    return NotFound("User not found.");
+                    return NotFound("One or both users not found.");
                 }
 
-                user.FollowerCount--;
+                userFollowed.FollowerCount--;
+                userUnfollowing.FollowingCount--;
+
                 await _context.SaveChangesAsync();
 
                 return Ok(new {userIdUnfollowing, userIdFollowed});

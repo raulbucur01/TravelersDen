@@ -64,6 +64,8 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
 
   if (isGettingUser) return <Loader />;
 
+  console.log(user);
+
   return (
     <div className="flex w-full max-w-2xl mx-auto h-full items-center gap-x-8 p-8">
       <img
@@ -107,19 +109,19 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
         <div className="flex gap-6 text-dm-light text-lg">
           <p>
             <span className="font-semibold text-dm-light-3">
-              {formatCount(1000)}
+              {formatCount(user.postCount || 0)}
             </span>{" "}
             Posts
           </p>
           <p className="cursor-pointer" onClick={handleOpenFollowersDialog}>
             <span className="font-semibold text-dm-light-3">
-              {formatCount(10000)}
+              {formatCount(user.followerCount || 0)}
             </span>{" "}
             Followers
           </p>
           <p className="cursor-pointer" onClick={handleOpenFollowingDialog}>
             <span className="font-semibold text-dm-light-3">
-              {formatCount(123)}
+              {formatCount(user.followingCount || 0)}
             </span>{" "}
             Following
           </p>

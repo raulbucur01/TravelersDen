@@ -17,6 +17,8 @@ namespace BackendAPI.Models
         public string? City { get; set; }
         public string? Country { get; set; }
         public int FollowerCount { get; set; }
+        public int FollowingCount { get; set; }
+        public int PostCount { get; set; }
 
         public ICollection<Comment> Comments { get; set; } = new List<Comment>(); // Navigation to comments
     }
