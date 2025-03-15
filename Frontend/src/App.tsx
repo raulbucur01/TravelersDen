@@ -15,6 +15,7 @@ import {
 import RootLayout from "./_root/RootLayout";
 import "./globals.css";
 import { Routes, Route, useLocation } from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
 
 const App = () => {
   const location = useLocation();
@@ -41,6 +42,8 @@ const App = () => {
           <Route path="/update-post/:id" element={<UpdatePost />} />
         </Route>
       </Routes>
+
+      <Toaster />
     </main>
   );
 };

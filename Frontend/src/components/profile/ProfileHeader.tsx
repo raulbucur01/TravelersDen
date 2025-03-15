@@ -6,30 +6,53 @@ import {
   useGetUserById,
   useIsFollowing,
   useUnfollow,
+  useUpdateUser,
 } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "../shared/Loader";
 import { Button } from "../ui/button";
-import { useEffect, useRef, useState } from "react";
-import { Dialog, DialogTrigger } from "../ui/dialog";
+import { useEffect, useState } from "react";
 import CustomizableDialog from "../shared/CustomizableDialog";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
+import { IUpdateUserProfile } from "@/types";
+import { useToast } from "@/hooks/use-toast";
+import ProfilePictureChanger from "./ProfilePictureChanger";
 
 const ProfileHeader = ({ userId }: { userId: string }) => {
-  const { user: currentUser } = useUserContext();
+  const { user: currentUser, setUser } = useUserContext();
+  const { toast } = useToast();
   const { data: user, isPending: isGettingUser } = useGetUserById(userId);
   const { data: followStatus } = useIsFollowing(currentUser.userId, userId);
   const { mutateAsync: follow } = useFollow();
   const { mutateAsync: unfollow } = useUnfollow();
+  const { mutateAsync: updateUser, isPending: isUpdatingUser } =
+    useUpdateUser();
 
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [profileInfo, setProfileInfo] = useState({
+  const [profileInfo, setProfileInfo] = useState<IUpdateUserProfile>(() => ({
+    userId: userId,
     name: user?.name || "",
     username: user?.username || "",
     bio: user?.bio || "",
-  });
+    updatedImageFile: null,
+    previousImageUrl: user?.imageUrl,
+  }));
+
+  // Wait for user data before setting profileInfo
+  useEffect(() => {
+    if (user) {
+      setProfileInfo({
+        userId: userId,
+        name: user.name || "",
+        username: user.username || "",
+        bio: user.bio || "",
+        updatedImageFile: null,
+        previousImageUrl: user.imageUrl,
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (followStatus !== undefined) {
@@ -40,9 +63,12 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
   const handleCancel = () => {
     // Reset to original user data when cancel is clicked
     setProfileInfo({
+      userId: userId,
       name: user?.name || "",
       username: user?.username || "",
       bio: user?.bio || "",
+      updatedImageFile: null,
+      previousImageUrl: user?.imageUrl,
     });
   };
 
@@ -88,11 +114,46 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
     setProfileInfo((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleUpdateProfile = () => {
-    console.log("Update profile");
+  const handleUpdateProfile = async () => {
+    try {
+      const userUpdated = await updateUser({
+        ...profileInfo,
+      });
+
+      if (!userUpdated) {
+        return toast({
+          title: "Error",
+          description: "Failed to update user",
+          variant: "destructive",
+        });
+      }
+
+      // Update the authenticated user with new details
+      setUser((prevUser) => ({
+        ...prevUser,
+        ...profileInfo,
+        imageUrl: userUpdated.imageUrl, // Merge updated fields
+      }));
+
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast({
+        title: "Error",
+        description: "Something went wrong",
+        variant: "destructive",
+      });
+    }
   };
 
-  if (isGettingUser) return <Loader />;
+  const handleImageChange = (file: File | null) => {
+    setProfileInfo((prev) => ({ ...prev, updatedImageFile: file }));
+  };
+
+  if (isGettingUser || isUpdatingUser) return <Loader />;
 
   return (
     <div className="flex w-full max-w-2xl mx-auto h-full items-center gap-x-8 p-8">
@@ -129,6 +190,10 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
               onConfirm={handleUpdateProfile}
               onClose={handleCancel}
             >
+              <ProfilePictureChanger
+                currentImage={user.imageUrl}
+                onImageChange={handleImageChange}
+              />
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="name" className="text-right">

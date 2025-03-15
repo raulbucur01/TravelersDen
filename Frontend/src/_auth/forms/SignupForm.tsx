@@ -51,6 +51,7 @@ const SignupForm = () => {
     if (!newUser) {
       return toast({
         title: "Sign Up failed, Please try again.",
+        variant: "destructive",
       });
     }
 
@@ -62,6 +63,7 @@ const SignupForm = () => {
     if (!session) {
       return toast({
         title: "Sign Up failed, Please try again.",
+        variant: "destructive",
       });
     }
 
@@ -73,6 +75,7 @@ const SignupForm = () => {
     } else {
       return toast({
         title: "Sign Up failed, Please try again.",
+        variant: "destructive",
       });
     }
   }

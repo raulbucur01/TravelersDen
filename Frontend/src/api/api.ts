@@ -10,6 +10,7 @@ import {
   INewUser,
   IUpdateItineraryPost,
   IUpdateNormalPost,
+  IUpdateUserProfile,
   MediaUrl,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
@@ -127,6 +128,9 @@ async function deleteFilesFromAppwrite(fileUrls: string[]): Promise<boolean> {
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 window.addEventListener("load", async () => {
@@ -263,21 +267,13 @@ export async function saveUserToDB(user: {
   username: string;
 }) {
   try {
-    const response = await apiClient.post(
-      "/users",
-      {
-        userID: user.id,
-        email: user.email,
-        name: user.name,
-        imageUrl: user.imageUrl,
-        username: user.username,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await apiClient.post("/users", {
+      userID: user.id,
+      email: user.email,
+      name: user.name,
+      imageUrl: user.imageUrl,
+      username: user.username,
+    });
 
     return response.data;
   } catch (error) {
@@ -326,22 +322,14 @@ export async function createNormalPost(post: INewNormalPost) {
   try {
     const mainFiles = await processFiles(post.files);
 
-    const response = await apiClient.post(
-      "/posts/normal",
-      {
-        userID: post.userId,
-        caption: post.caption,
-        body: post.body,
-        location: post.location,
-        tags: post.tags,
-        files: mainFiles,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await apiClient.post("/posts/normal", {
+      userID: post.userId,
+      caption: post.caption,
+      body: post.body,
+      location: post.location,
+      tags: post.tags,
+      files: mainFiles,
+    });
 
     return response.data;
   } catch (error) {
@@ -366,22 +354,14 @@ export async function updateNormalPost(post: IUpdateNormalPost) {
 
     if (!allFilesSuccessfullyDeleted) throw Error("Failed to delete files");
 
-    const response = await apiClient.put(
-      `/posts/normal/${post.postId}`,
-      {
-        caption: post.caption,
-        body: post.body,
-        location: post.location,
-        tags: post.tags,
-        newFiles: newFiles,
-        deletedFiles: post.deletedFiles,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await apiClient.put(`/posts/normal/${post.postId}`, {
+      caption: post.caption,
+      body: post.body,
+      location: post.location,
+      tags: post.tags,
+      newFiles: newFiles,
+      deletedFiles: post.deletedFiles,
+    });
 
     return response.data;
   } catch (error) {
@@ -403,24 +383,16 @@ export async function createItineraryPost(post: INewItineraryPost) {
       })
     );
 
-    const response = await apiClient.post(
-      "/posts/itinerary",
-      {
-        userID: post.userId,
-        caption: post.caption,
-        body: post.body,
-        location: post.location,
-        tags: post.tags,
-        files: mainFiles,
-        tripSteps: tripSteps,
-        accommodations: post.accommodations,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await apiClient.post("/posts/itinerary", {
+      userID: post.userId,
+      caption: post.caption,
+      body: post.body,
+      location: post.location,
+      tags: post.tags,
+      files: mainFiles,
+      tripSteps: tripSteps,
+      accommodations: post.accommodations,
+    });
 
     return response.data;
   } catch (error) {
@@ -455,23 +427,15 @@ export async function updateItineraryPost(post: IUpdateItineraryPost) {
       });
     }
 
-    const response = await apiClient.put(
-      `/posts/itinerary/${post.postId}`,
-      {
-        caption: post.caption,
-        body: post.body,
-        location: post.location,
-        tags: post.tags,
-        files: basefilesToSendToBackend,
-        tripSteps: tripStepsToSendToBackend,
-        accommodations: post.accommodations,
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const response = await apiClient.put(`/posts/itinerary/${post.postId}`, {
+      caption: post.caption,
+      body: post.body,
+      location: post.location,
+      tags: post.tags,
+      files: basefilesToSendToBackend,
+      tripSteps: tripStepsToSendToBackend,
+      accommodations: post.accommodations,
+    });
 
     return response.data;
   } catch (error) {
@@ -828,6 +792,67 @@ export async function getMapSearchResults(query: string) {
 export async function deleteUser(userId: string) {
   try {
     const response = await apiClient.delete(`/users/${userId}`);
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function updateUser(profileInfo: IUpdateUserProfile) {
+  try {
+    const updateResponse = await account.updateName(profileInfo.name);
+
+    if (!updateResponse) {
+      throw new Error("Failed to update name in appwrite account");
+    }
+
+    let imageUrl = profileInfo.previousImageUrl; // Default to current image URL
+
+    // CASE 1: No new image & previous image was an initials avatar -> Generate new initials avatar
+    if (
+      !profileInfo.updatedImageFile &&
+      profileInfo.previousImageUrl.includes("avatar")
+    ) {
+      const avatarUrl = avatars.getInitials(profileInfo.name);
+
+      if (!avatarUrl) throw new Error("Failed to generate avatar URL");
+
+      imageUrl = avatarUrl.href;
+    }
+
+    // CASE 2: New image selected
+    if (profileInfo.updatedImageFile) {
+      // If previous image was NOT an avatar, delete it first
+      if (!profileInfo.previousImageUrl.includes("avatar")) {
+        const id = extractAppwriteStorageFileIdFromUrl(
+          profileInfo.previousImageUrl
+        );
+
+        if (!id) throw new Error("Failed to extract file id from URL");
+
+        const deletionResult = await deleteFile(id);
+
+        if (!deletionResult)
+          throw new Error("Failed to delete file from Appwrite");
+      }
+
+      // Upload new image
+      const uploadedFile = await uploadFile(profileInfo.updatedImageFile);
+
+      if (!uploadedFile) throw new Error("Failed to upload file to Appwrite");
+
+      imageUrl = getFilePreview(uploadedFile.$id)?.href ?? "";
+    }
+
+    const response = await apiClient.put(`/users/${profileInfo.userId}`, {
+      name: profileInfo.name,
+      username: profileInfo.username,
+      bio: profileInfo.bio,
+      imageUrl,
+    });
+
+    if (!response) throw new Error("Failed to update user");
 
     return response.data;
   } catch (error) {

@@ -45,7 +45,8 @@ const SigninForm = () => {
 
     if (!session) {
       return toast({
-        title: "Sign Up failed, Please try again.",
+        title: "Sign In failed, Please try again.",
+        variant: "destructive",
       });
     }
 
@@ -56,7 +57,8 @@ const SigninForm = () => {
       navigate("/");
     } else {
       return toast({
-        title: "Sign Up failed, Please try again.",
+        title: "Sign In failed, Please try again.",
+        variant: "destructive",
       });
     }
   }

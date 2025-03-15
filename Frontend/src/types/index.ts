@@ -194,6 +194,15 @@ export interface ISuggestionInfo {
   longitude: number;
 }
 
+export type IUpdateUserProfile = {
+  userId: string;
+  name: string;
+  username: string;
+  bio: string;
+  updatedImageFile: File | null;
+  previousImageUrl: string;
+};
+
 export type MediaUrl = {
   url: string;
   type: string;

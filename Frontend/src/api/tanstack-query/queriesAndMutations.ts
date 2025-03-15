@@ -41,11 +41,13 @@ import {
   follow,
   unfollow,
   IsFollowing,
+  updateUser,
 } from "../api";
 import {
   INewItineraryPost,
   INewNormalPost,
   INewUser,
+  IUpdateUserProfile,
   IUpdateItineraryPost,
   IUpdateNormalPost,
 } from "@/types";
@@ -588,5 +590,17 @@ export const useIsFollowing = (userId1: string, userId2: string) => {
     queryKey: [QUERY_KEYS.GET_IS_FOLLOWING, userId1, userId2],
     queryFn: () => IsFollowing(userId1, userId2),
     enabled: !!userId1 && !!userId2, // Ensures query runs only when both user IDs are provided
+  });
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (profileInfo: IUpdateUserProfile) => updateUser(profileInfo),
+    onSuccess: (data) => {
+      queryClient.refetchQueries({
+        queryKey: [QUERY_KEYS.GET_USER_BY_ID, data.userId],
+      });
+    },
   });
 };

@@ -50,6 +50,34 @@ namespace BackendAPI.Controllers
             }
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(string id, UpdateUserDTO updateUserDto)
+        {
+            try
+            {
+                var user = await _context.Users.FindAsync(id);
+
+                if (user == null) {
+                    return NotFound(new { Message = "User not found." });
+                }
+
+                user.Name = updateUserDto.Name;
+                user.Username = updateUserDto.Username;
+                user.Bio = updateUserDto.Bio;
+                user.ImageUrl = updateUserDto.ImageUrl;
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { UserId = id, updateUserDto.ImageUrl });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
+                // Handle any errors
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetUserById(string id)
         {
@@ -64,6 +92,7 @@ namespace BackendAPI.Controllers
                         Name = u.Name,
                         Username = u.Username,
                         Email = u.Email,
+                        Bio = u.Bio,
                         Gender = u.Gender ?? "",
                         Age = u.Age ?? 0,
                         Interests = u.Interests ?? "",
