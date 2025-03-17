@@ -507,7 +507,17 @@ export const useGetMapSearchResults = (query: string) => {
   });
 };
 
-export const useGetFollowers = (userId: string) => {
+export const useGetUserConnections = (
+  userId: string,
+  type: "followers" | "following",
+  enabled: boolean
+) => {
+  return type === "followers"
+    ? useGetFollowers(userId, enabled)
+    : useGetFollowing(userId, enabled);
+};
+
+export const useGetFollowers = (userId: string, enabled: boolean) => {
   return useInfiniteQuery({
     queryKey: [QUERY_KEYS.GET_FOLLOWERS, userId],
     queryFn: ({ pageParam = 1 }) => getFollowers({ userId, pageParam }),
@@ -515,10 +525,11 @@ export const useGetFollowers = (userId: string) => {
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.hasMore ? allPages.length + 1 : undefined;
     },
+    enabled,
   });
 };
 
-export const useGetFollowing = (userId: string) => {
+export const useGetFollowing = (userId: string, enabled: boolean) => {
   return useInfiniteQuery({
     queryKey: [QUERY_KEYS.GET_FOLLOWING, userId],
     queryFn: ({ pageParam = 1 }) => getFollowing({ userId, pageParam }),
@@ -526,6 +537,7 @@ export const useGetFollowing = (userId: string) => {
     getNextPageParam: (lastPage, allPages) => {
       return lastPage.hasMore ? allPages.length + 1 : undefined;
     },
+    enabled,
   });
 };
 

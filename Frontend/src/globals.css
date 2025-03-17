@@ -287,7 +287,7 @@ body {
 
   /* Left sidebar */
   .leftsidebar {
-    @apply hidden md:flex px-6 py-10 flex-col justify-between max-w-[290px] min-w-[290px] bg-lm-secondary dark:bg-dm-dark;
+    @apply hidden md:flex px-6 py-10 flex-col justify-between w-[300px] bg-lm-secondary dark:bg-dm-dark;
   }
 
   .leftsidebar-link {

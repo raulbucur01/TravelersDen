@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Camera } from "lucide-react";
 
 interface ProfilePictureChangerProps {
   currentImage: string;
@@ -20,12 +21,7 @@ const ProfilePictureChanger = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <img
-        src={preview || "/assets/icons/profile-placeholder.svg"}
-        alt="Profile Preview"
-        className="h-24 w-24 rounded-full object-cover border border-dm-light-3"
-      />
+    <div className="relative w-40 h-40">
       <input
         type="file"
         accept="image/*"
@@ -33,11 +29,17 @@ const ProfilePictureChanger = ({
         className="hidden"
         id="profile-pic-upload"
       />
-      <label
-        htmlFor="profile-pic-upload"
-        className="cursor-pointer px-4 py-2 bg-dm-dark-3 text-white rounded-lg hover:bg-dm-dark-4"
-      >
-        Choose Image
+      {/* Clickable Image */}
+      <label htmlFor="profile-pic-upload" className="cursor-pointer relative">
+        <img
+          src={preview || "/assets/icons/profile-placeholder.svg"}
+          alt="Profile Preview"
+          className="w-40 h-40 rounded-full object-cover border border-dm-secondary"
+        />
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full opacity-0 hover:opacity-100 transition-opacity">
+          <Camera className="text-white w-10 h-10" />
+        </div>
       </label>
     </div>
   );

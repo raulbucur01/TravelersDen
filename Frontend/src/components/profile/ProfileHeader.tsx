@@ -18,6 +18,7 @@ import { Textarea } from "../ui/textarea";
 import { IUpdateUserProfile } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import ProfilePictureChanger from "./ProfilePictureChanger";
+import UserListDialog from "./UserListDialog";
 
 const ProfileHeader = ({ userId }: { userId: string }) => {
   const { user: currentUser, setUser } = useUserContext();
@@ -39,6 +40,8 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
     updatedImageFile: null,
     previousImageUrl: user?.imageUrl,
   }));
+  const [followerListDialogOpen, setFollowerListDialogOpen] = useState(false);
+  const [followingListDialogOpen, setFollowingListDialogOpen] = useState(false);
 
   // Wait for user data before setting profileInfo
   useEffect(() => {
@@ -153,6 +156,11 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
     setProfileInfo((prev) => ({ ...prev, updatedImageFile: file }));
   };
 
+  useEffect(() => {
+    console.log("Follower List Dialog Open:", followerListDialogOpen);
+    console.log("Following List Dialog Open:", followingListDialogOpen);
+  }, [followerListDialogOpen, followingListDialogOpen]);
+
   if (isGettingUser || isUpdatingUser) return <Loader />;
 
   return (
@@ -172,6 +180,7 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
             <p className="text-dm-light-3 text-lg">@{user.username}</p>
           </div>
 
+          {/* Edit Profile Button if current user is the profile owner or follow button otherwise */}
           {currentUser.userId === userId ? (
             <CustomizableDialog
               trigger={
@@ -190,15 +199,16 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
               onConfirm={handleUpdateProfile}
               onClose={handleCancel}
             >
-              <ProfilePictureChanger
-                currentImage={user.imageUrl}
-                onImageChange={handleImageChange}
-              />
-              <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">
-                    Name
-                  </Label>
+              <div className="flex flex-col items-center justify-center w-full">
+                <ProfilePictureChanger
+                  currentImage={user.imageUrl}
+                  onImageChange={handleImageChange}
+                />
+              </div>
+
+              <div className="grid gap-5 py-4">
+                <div className="grid items-center gap-4">
+                  <Label htmlFor="name">Name</Label>
                   <Input
                     id="name"
                     name="name"
@@ -207,10 +217,8 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
                     className="col-span-3 shad-input"
                   />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="username" className="text-right">
-                    Username
-                  </Label>
+                <div className="grid items-center gap-4">
+                  <Label htmlFor="username">Username</Label>
                   <Input
                     id="username"
                     name="username"
@@ -219,10 +227,8 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
                     className="col-span-3 shad-input"
                   />
                 </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="bio" className="text-right">
-                    Bio
-                  </Label>
+                <div className="grid items-center gap-4">
+                  <Label htmlFor="bio">Bio</Label>
                   <Textarea
                     id="bio"
                     name="bio"
@@ -255,18 +261,48 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
             </span>{" "}
             Posts
           </p>
-          <p className="cursor-pointer" onClick={handleOpenFollowersDialog}>
-            <span className="font-semibold text-dm-light-3">
-              {formatCount(user.followerCount || 0)}
-            </span>{" "}
-            Followers
-          </p>
-          <p className="cursor-pointer" onClick={handleOpenFollowingDialog}>
-            <span className="font-semibold text-dm-light-3">
-              {formatCount(user.followingCount || 0)}
-            </span>{" "}
-            Following
-          </p>
+
+          {/* Follower count with dialog */}
+          <UserListDialog
+            trigger={
+              <p
+                className="cursor-pointer"
+                onClick={() => setFollowerListDialogOpen(true)}
+              >
+                <span className="font-semibold text-dm-light-3">
+                  {formatCount(user.followerCount || 0)}
+                </span>{" "}
+                Followers
+              </p>
+            }
+            isOpen={followerListDialogOpen}
+            onClose={() => {
+              setFollowerListDialogOpen(false);
+            }}
+            type="followers"
+            userId={userId}
+          />
+
+          {/* Following count with dialog */}
+          <UserListDialog
+            trigger={
+              <p
+                className="cursor-pointer"
+                onClick={() => setFollowingListDialogOpen(true)}
+              >
+                <span className="font-semibold text-dm-light-3">
+                  {formatCount(user.followingCount || 0)}
+                </span>{" "}
+                Following
+              </p>
+            }
+            isOpen={followingListDialogOpen}
+            onClose={() => {
+              setFollowingListDialogOpen(false);
+            }}
+            type="following"
+            userId={userId}
+          />
         </div>
         {user.bio ? (
           <ExpandableText text={user.bio} maxLength={200} className="text-lg" />

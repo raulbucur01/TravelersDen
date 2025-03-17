@@ -20,6 +20,10 @@ interface CustomizableDialogProps {
   onConfirm?: () => void;
   onClose?: () => void;
   children?: ReactNode;
+  className?: string;
+  isOpen?: boolean;
+  hasAction?: boolean;
+  hasCancel?: boolean;
 }
 
 const CustomizableDialog = ({
@@ -31,11 +35,15 @@ const CustomizableDialog = ({
   onConfirm,
   onClose,
   children,
+  className = "",
+  isOpen,
+  hasAction = true,
+  hasCancel = true,
 }: CustomizableDialogProps) => {
   return (
-    <Dialog onOpenChange={(isOpen) => !isOpen && onClose?.()}>
+    <Dialog onOpenChange={(isOpen) => !isOpen && onClose?.()} open={isOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent className="bg-dm-dark-2 border-dm-dark-3">
+      <DialogContent className={`bg-dm-dark-2 border-dm-dark-3 ${className}`}>
         <DialogHeader>
           <DialogTitle className="text-dm-light">{title}</DialogTitle>
           <DialogDescription className="text-dm-light-2">
@@ -44,17 +52,22 @@ const CustomizableDialog = ({
         </DialogHeader>
         {children}
         <DialogFooter>
-          <DialogClose asChild>
-            <Button className="text-dm-light bg-dm-dark hover:bg-dm-red">
-              {cancelText}
+          {hasCancel && (
+            <DialogClose asChild>
+              <Button className="text-dm-light bg-dm-dark hover:bg-dm-red">
+                {cancelText}
+              </Button>
+            </DialogClose>
+          )}
+
+          {hasAction && (
+            <Button
+              className="text-dm-light bg-dm-dark-3  hover:bg-dm-dark-4"
+              onClick={onConfirm}
+            >
+              {actionText}
             </Button>
-          </DialogClose>
-          <Button
-            className="text-dm-light bg-dm-dark-3  hover:bg-dm-dark-4"
-            onClick={onConfirm}
-          >
-            {actionText}
-          </Button>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
