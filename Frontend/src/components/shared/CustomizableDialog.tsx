@@ -24,6 +24,7 @@ interface CustomizableDialogProps {
   isOpen?: boolean;
   hasAction?: boolean;
   hasCancel?: boolean;
+  actionDisabled?: boolean;
 }
 
 const CustomizableDialog = ({
@@ -39,6 +40,7 @@ const CustomizableDialog = ({
   isOpen,
   hasAction = true,
   hasCancel = true,
+  actionDisabled = false,
 }: CustomizableDialogProps) => {
   return (
     <Dialog onOpenChange={(isOpen) => !isOpen && onClose?.()} open={isOpen}>
@@ -64,6 +66,7 @@ const CustomizableDialog = ({
             <Button
               className="text-dm-light bg-dm-dark-3  hover:bg-dm-dark-4"
               onClick={onConfirm}
+              disabled={actionDisabled}
             >
               {actionText}
             </Button>

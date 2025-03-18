@@ -42,6 +42,7 @@ import {
   unfollow,
   IsFollowing,
   updateUser,
+  getUserPosts,
 } from "../api";
 import {
   INewItineraryPost,
@@ -538,6 +539,17 @@ export const useGetFollowing = (userId: string, enabled: boolean) => {
       return lastPage.hasMore ? allPages.length + 1 : undefined;
     },
     enabled,
+  });
+};
+
+export const useGetUserPosts = (userId: string) => {
+  return useInfiniteQuery({
+    queryKey: [QUERY_KEYS.GET_USER_POSTS, userId],
+    queryFn: ({ pageParam = 1 }) => getUserPosts({ userId, pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.hasMore ? allPages.length + 1 : undefined;
+    },
   });
 };
 

@@ -202,6 +202,36 @@ namespace BackendAPI.Controllers
             }
         }
 
+        [HttpGet("{id}/posts")]
+        public async Task<IActionResult> GetUserPosts(string id, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var totalPosts = await _context.Posts.Where(p => p.UserId == id).CountAsync();
+
+                var posts = await _context.Posts
+                    .Where(p => p.UserId == id)
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(p => new
+                    {
+                        p.PostId,
+                        FirstMediaUrl = p.Media
+                        .Select(m => m.AppwriteFileUrl)
+                        .FirstOrDefault(),
+                    }).ToListAsync();
+
+                bool hasMore = (page * pageSize) < totalPosts;
+
+                return Ok(new { posts, hasMore });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpPost("follow")]
         public async Task<IActionResult> Follow(FollowRequestDTO createFollowDTO)
         {
@@ -298,6 +328,5 @@ namespace BackendAPI.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-
     }
 }

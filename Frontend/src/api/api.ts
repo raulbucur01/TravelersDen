@@ -448,13 +448,9 @@ export async function deletePost(
   toDeleteFromAppwrite: string[]
 ) {
   try {
-    console.log("In delete post");
-
     const allFilesSuccessfullyDeleted = await deleteFilesFromAppwrite(
       toDeleteFromAppwrite
     );
-
-    console.log("In delete post again");
 
     if (!allFilesSuccessfullyDeleted) throw Error("Failed to delete files");
 
@@ -930,11 +926,33 @@ export async function getFollowing({
   }
 }
 
+export async function getUserPosts({
+  userId,
+  pageParam = 1,
+}: {
+  userId: string;
+  pageParam?: number;
+}) {
+  try {
+    const response = await apiClient.get(`/users/${userId}/posts`, {
+      params: {
+        page: pageParam,
+        pageSize: 10,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
 export async function IsFollowing(userId1: string, userId2: string) {
   try {
     const response = await apiClient.get(
       `/users/${userId1}/is-following/${userId2}`
     );
+
     return response.data;
   } catch (error) {
     console.log(error);

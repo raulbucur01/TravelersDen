@@ -36,7 +36,6 @@ const UserListDialog = ({
     if (inView && hasNextPage) {
       fetchNextPage();
     }
-    console.log("inView:", inView, "hasNextPage:", hasNextPage);
   }, [inView, hasNextPage, fetchNextPage]);
 
   useEffect(() => {
@@ -45,7 +44,6 @@ const UserListDialog = ({
     }
   }, [isOpen, refetchUserConnections]);
 
-  console.log("data:", data);
   const users = data?.pages.flatMap((page) =>
     type === "followers" ? page.followers : page.following
   );
@@ -59,7 +57,7 @@ const UserListDialog = ({
       cancelText="Close"
       title={`${type === "followers" ? "Followers" : "Following"}`}
     >
-      <div className="h-[300px] overflow-y-auto p-4 custom-scrollbar">
+      <div className="h-[340px] overflow-y-auto p-4 custom-scrollbar">
         {/* Scrollable user list */}
         <div>
           {isGettingUserConnections ? (
@@ -100,7 +98,7 @@ const UserListDialog = ({
           )}
 
           {/* Infinite Scroll Trigger */}
-          <div ref={ref} className="text-center p-4">
+          <div ref={ref} className="text-center">
             {isFetchingNextPage && <Loader />}
           </div>
         </div>

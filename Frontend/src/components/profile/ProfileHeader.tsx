@@ -10,7 +10,7 @@ import {
 } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "../shared/Loader";
 import { Button } from "../ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomizableDialog from "../shared/CustomizableDialog";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -23,14 +23,17 @@ import UserListDialog from "./UserListDialog";
 const ProfileHeader = ({ userId }: { userId: string }) => {
   const { user: currentUser, setUser } = useUserContext();
   const { toast } = useToast();
+
   const { data: user, isPending: isGettingUser } = useGetUserById(userId);
-  const { data: followStatus } = useIsFollowing(currentUser.userId, userId);
+  const { data: followStatus, refetch: refetchFollowStatus } = useIsFollowing(
+    currentUser.userId,
+    userId
+  );
   const { mutateAsync: follow } = useFollow();
   const { mutateAsync: unfollow } = useUnfollow();
   const { mutateAsync: updateUser, isPending: isUpdatingUser } =
     useUpdateUser();
 
-  const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [profileInfo, setProfileInfo] = useState<IUpdateUserProfile>(() => ({
     userId: userId,
@@ -42,6 +45,19 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
   }));
   const [followerListDialogOpen, setFollowerListDialogOpen] = useState(false);
   const [followingListDialogOpen, setFollowingListDialogOpen] = useState(false);
+
+  const isFollowing = followStatus?.isFollowing || false;
+  const isLoading = isGettingUser || isUpdatingUser;
+
+  // Check if profile info has changed
+  const isProfileChanged = useMemo(() => {
+    return (
+      profileInfo.name !== user?.name ||
+      profileInfo.username !== user?.username ||
+      profileInfo.bio !== user?.bio ||
+      profileInfo.updatedImageFile !== null
+    );
+  }, [profileInfo, user]);
 
   // Wait for user data before setting profileInfo
   useEffect(() => {
@@ -56,12 +72,6 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
       });
     }
   }, [user]);
-
-  useEffect(() => {
-    if (followStatus !== undefined) {
-      setIsFollowing(followStatus.isFollowing);
-    }
-  }, [followStatus]);
 
   const handleCancel = () => {
     // Reset to original user data when cancel is clicked
@@ -85,29 +95,19 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
           userIdUnfollowing: currentUser.userId,
           userIdFollowed: userId,
         });
-        setIsFollowing(false);
       } else {
         await follow({
           userIdFollowing: currentUser.userId,
           userIdFollowed: userId,
         });
-        setIsFollowing(true);
       }
+
+      refetchFollowStatus();
     } catch (error) {
       console.error("Error updating follow status", error);
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleOpenFollowersDialog = () => {
-    console.log("Open Followers Dialog");
-    // TODO: Implement dialog logic
-  };
-
-  const handleOpenFollowingDialog = () => {
-    console.log("Open Following Dialog");
-    // TODO: Implement dialog logic
   };
 
   const handleInputChange = (
@@ -156,12 +156,7 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
     setProfileInfo((prev) => ({ ...prev, updatedImageFile: file }));
   };
 
-  useEffect(() => {
-    console.log("Follower List Dialog Open:", followerListDialogOpen);
-    console.log("Following List Dialog Open:", followingListDialogOpen);
-  }, [followerListDialogOpen, followingListDialogOpen]);
-
-  if (isGettingUser || isUpdatingUser) return <Loader />;
+  if (isLoading) return <Loader />;
 
   return (
     <div className="flex w-full max-w-2xl mx-auto h-full items-center gap-x-8 p-8">
@@ -198,6 +193,7 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
               actionText="Update"
               onConfirm={handleUpdateProfile}
               onClose={handleCancel}
+              actionDisabled={!isProfileChanged}
             >
               <div className="flex flex-col items-center justify-center w-full">
                 <ProfilePictureChanger
