@@ -43,6 +43,7 @@ import {
   IsFollowing,
   updateUser,
   getUserPosts,
+  searchPosts,
 } from "../api";
 import {
   INewItineraryPost,
@@ -626,5 +627,17 @@ export const useUpdateUser = () => {
         queryKey: [QUERY_KEYS.GET_USER_BY_ID, data.userId],
       });
     },
+  });
+};
+
+export const useSearchPosts = (searchTerm: string) => {
+  return useInfiniteQuery({
+    queryKey: [QUERY_KEYS.GET_SEARCH_POSTS, searchTerm],
+    queryFn: ({ pageParam = 1 }) => searchPosts({ searchTerm, pageParam }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage.hasMore ? allPages.length + 1 : undefined;
+    },
+    enabled: !!searchTerm,
   });
 };

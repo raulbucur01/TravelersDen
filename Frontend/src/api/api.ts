@@ -8,6 +8,8 @@ import {
   INewItineraryPost,
   INewNormalPost,
   INewUser,
+  IProfileGridPost,
+  IProfileGridPostResponse,
   IUpdateItineraryPost,
   IUpdateNormalPost,
   IUpdateUserProfile,
@@ -932,18 +934,22 @@ export async function getUserPosts({
 }: {
   userId: string;
   pageParam?: number;
-}) {
+}): Promise<IProfileGridPostResponse> {
   try {
-    const response = await apiClient.get(`/users/${userId}/posts`, {
-      params: {
-        page: pageParam,
-        pageSize: 10,
-      },
-    });
+    const response = await apiClient.get<IProfileGridPostResponse>(
+      `/users/${userId}/posts`,
+      {
+        params: {
+          page: pageParam,
+          pageSize: 10,
+        },
+      }
+    );
 
     return response.data;
   } catch (error) {
     console.log(error);
+    throw error;
   }
 }
 
@@ -952,6 +958,28 @@ export async function IsFollowing(userId1: string, userId2: string) {
     const response = await apiClient.get(
       `/users/${userId1}/is-following/${userId2}`
     );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function searchPosts({
+  searchTerm,
+  pageParam = 1,
+}: {
+  searchTerm: string;
+  pageParam?: number;
+}) {
+  try {
+    const response = await apiClient.get(`/posts/search`, {
+      params: {
+        searchTerm,
+        page: pageParam,
+        pageSize: 10,
+      },
+    });
 
     return response.data;
   } catch (error) {

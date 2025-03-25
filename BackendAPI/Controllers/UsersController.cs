@@ -220,6 +220,7 @@ namespace BackendAPI.Controllers
                         FirstMediaUrl = p.Media
                         .Select(m => m.AppwriteFileUrl)
                         .FirstOrDefault(),
+                        p.IsItinerary,
                     }).ToListAsync();
 
                 bool hasMore = (page * pageSize) < totalPosts;

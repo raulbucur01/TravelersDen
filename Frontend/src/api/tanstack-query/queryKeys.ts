@@ -26,6 +26,7 @@ export enum QUERY_KEYS {
   GET_ITINERARY_DETAILS = "getItineraryDetails",
   GET_RELATED_ITINERARY_MEDIA_URLS = "getRelatedItineraryMediaUrls",
   GET_SIMILAR_POSTS = "getSimilarPosts",
+  GET_SEARCH_POSTS = "getSearchPosts",
 
   //  SEARCH KEYS
   SEARCH_POSTS = "getSearchPosts",

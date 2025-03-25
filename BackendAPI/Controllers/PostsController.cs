@@ -764,6 +764,40 @@ namespace BackendAPI.Controllers
             }
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> SearchPosts([FromQuery] string searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var totalPosts = await _context.Posts.CountAsync();
+
+                var posts = await _context.Posts
+                    .Where(p => p.Caption.Contains(searchTerm)
+                                || p.Tags.Contains(searchTerm)
+                                || p.Body.Contains(searchTerm))
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(p => new
+                    {
+                        PostId = p.PostId,
+                        UserId = p.UserId,
+                        Caption = p.Caption,
+                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
+                        LikesCount = p.LikesCount,
+                    })
+                    .ToListAsync();
+
+                bool hasMore = (page * pageSize) < totalPosts;
+
+                return Ok(new { posts, hasMore });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
         [HttpPost("import")]
         public IActionResult ImportPosts()
         {

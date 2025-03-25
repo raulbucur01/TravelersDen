@@ -209,3 +209,14 @@ export type MediaUrl = {
 };
 
 export type TravelMode = "car" | "pedestrian" | "bus" | "bicycle";
+
+export type IProfileGridPost = {
+  postId: string;
+  firstMediaUrl: string;
+  isItinerary: boolean;
+};
+
+export type IProfileGridPostResponse = {
+  posts: IProfileGridPost[];
+  hasMore: boolean;
+};

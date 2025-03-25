@@ -23,13 +23,11 @@ const App = () => {
   return (
     <main className="flex h-screen">
       <Routes key={location.pathname} location={location}>
-        {/* Public routes (No animation needed here) */}
         <Route element={<AuthLayout />}>
           <Route path="/sign-in" element={<SigninForm />} />
           <Route path="/sign-up" element={<SignupForm />} />
         </Route>
 
-        {/* Private routes inside RootLayout (with animation) */}
         <Route element={<RootLayout />}>
           <Route index element={<Home />} />
           <Route path="/explore" element={<Explore />} />

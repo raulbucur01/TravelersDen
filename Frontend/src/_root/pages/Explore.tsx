@@ -1,7 +1,117 @@
-import React from "react";
+import {
+  useGetRecentPosts,
+  useSearchPosts,
+} from "@/api/tanstack-query/queriesAndMutations";
+import { QUERY_KEYS } from "@/api/tanstack-query/queryKeys";
+import SearchPostList from "@/components/explore/SearchPostList";
+import Loader from "@/components/shared/Loader";
+import { Input } from "@/components/ui/input";
+import { IBasePost } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState, useCallback } from "react";
+import { useInView } from "react-intersection-observer";
+import { useDebounce } from "use-debounce";
 
 const Explore = () => {
-  return <div>Explore</div>;
+  const { ref, inView } = useInView();
+  const [searchValue, setSearchValue] = useState("");
+  const [debouncedSearchQuery] = useDebounce(searchValue, 500);
+
+  const {
+    data: recentPosts,
+    fetchNextPage: recentPostsFetchNextPage,
+    hasNextPage: recentPostsHasNextPage,
+    isFetchingNextPage: recentPostsIsFetchingNextPage,
+    isLoading: isRecentPostsLoading,
+  } = useGetRecentPosts();
+
+  const {
+    data: searchedPosts,
+    fetchNextPage: searchedPostsFetchNextPage,
+    hasNextPage: searchedPostsHasNextPage,
+    isFetchingNextPage: searchedPostsIsFetchingNextPage,
+    isLoading: isSearchedPostsLoading,
+  } = useSearchPosts(debouncedSearchQuery.trim());
+
+  const showSearchResults = debouncedSearchQuery !== "";
+  const activePosts = showSearchResults ? searchedPosts : recentPosts;
+
+  const posts: IBasePost[] =
+    activePosts?.pages?.flatMap((page) => page.posts as IBasePost[]) || [];
+
+  const fetchNextPage = useCallback(() => {
+    if (!inView) return;
+    if (!showSearchResults && recentPostsHasNextPage) {
+      recentPostsFetchNextPage();
+    }
+    if (showSearchResults && searchedPostsHasNextPage) {
+      searchedPostsFetchNextPage();
+    }
+  }, [
+    inView,
+    showSearchResults,
+    recentPostsHasNextPage,
+    searchedPostsHasNextPage,
+  ]);
+
+  useEffect(() => {
+    fetchNextPage();
+  }, [fetchNextPage]);
+
+  // Inside the component:
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      queryClient.removeQueries({
+        queryKey: [QUERY_KEYS.GET_SEARCH_POSTS],
+      });
+    }
+  }, [debouncedSearchQuery, queryClient]);
+
+  return (
+    <div className="explore-container">
+      <div className="explore-inner_container">
+        <h2 className="h3-bold md:h2-bold w-full">Search Posts</h2>
+        <div className="flex gap-1 px-4 w-full rounded-lg bg-dark-4">
+          <img
+            src="/assets/icons/search.svg"
+            width={24}
+            height={24}
+            alt="search"
+          />
+          <Input
+            type="text"
+            placeholder="Search"
+            className="explore-search"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div className="flex-between w-full max-w-5xl mt-16 mb-7">
+        <h3 className="body-bold md:h3-bold">
+          {showSearchResults ? "Search Results" : "Popular Today"}
+        </h3>
+      </div>
+
+      <div className="flex flex-wrap gap-9 w-full max-w-5xl">
+        {(isRecentPostsLoading || isSearchedPostsLoading) &&
+        posts.length === 0 ? (
+          <Loader />
+        ) : (
+          <SearchPostList posts={posts} />
+        )}
+      </div>
+
+      {(recentPostsHasNextPage || searchedPostsHasNextPage) && (
+        <div ref={ref} className="mt-10">
+          <Loader />
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default Explore;
