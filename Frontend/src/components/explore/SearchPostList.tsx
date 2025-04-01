@@ -22,14 +22,47 @@ const SearchPostList = ({
   return (
     <ul className="grid-container">
       {posts.map((post) => (
-        <li key={post.postId} className="relative min-w-80 h-80">
-          <Link to={`/posts/${post.postId}`} className="grid-post_link">
-            <MediaSlideshow mediaUrls={post.mediaUrls} />
-          </Link>
+        <li
+          key={post.postId}
+          className="relative min-w-80 h-80 overflow-hidden rounded-lg"
+        >
+          {/* Background Media */}
+          <MediaSlideshow
+            mediaUrls={post.mediaUrls}
+            customStyles={{
+              container: "w-full h-full",
+              image: "w-full h-full object-cover",
+              video: "w-full h-full object-cover",
+            }}
+          />
 
-          <div className="grid-post_user">
-            {showUser && <SearchPostListUserInfo userId={post.userId} />}
-            {showStats && <PostStats post={post} userId={user.userId} />}
+          {/* Full Overlay Link for Navigation */}
+          <Link
+            to={`/posts/${post.postId}`}
+            className="absolute inset-0 z-10"
+          />
+
+          {/* Overlay Content */}
+          <div className="absolute inset-0 flex flex-col justify-between p-3 bg-gradient-to-b from-black/50 via-transparent to-black/50">
+            {showUser && (
+              <Link
+                to={`/profile/${post.userId}`}
+                className="absolute top-3 left-3 rounded-lg z-10"
+              >
+                <SearchPostListUserInfo userId={post.userId} />
+              </Link>
+            )}
+
+            {/* Bottom Right: Post Stats */}
+            {showStats && (
+              <div className="absolute bottom-3 right-3 z-10">
+                <PostStats
+                  usedIn="searchcard"
+                  post={post}
+                  userId={user.userId}
+                />
+              </div>
+            )}
           </div>
         </li>
       ))}

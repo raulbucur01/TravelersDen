@@ -22,7 +22,7 @@ const Explore = () => {
     fetchNextPage: recentPostsFetchNextPage,
     hasNextPage: recentPostsHasNextPage,
     isFetchingNextPage: recentPostsIsFetchingNextPage,
-    isLoading: isRecentPostsLoading,
+    isPending: isRecentPostsLoading,
   } = useGetRecentPosts();
 
   const {
@@ -30,50 +30,55 @@ const Explore = () => {
     fetchNextPage: searchedPostsFetchNextPage,
     hasNextPage: searchedPostsHasNextPage,
     isFetchingNextPage: searchedPostsIsFetchingNextPage,
-    isLoading: isSearchedPostsLoading,
+    isPending: isSearchedPostsLoading,
   } = useSearchPosts(debouncedSearchQuery.trim());
 
-  const showSearchResults = debouncedSearchQuery !== "";
-  const activePosts = showSearchResults ? searchedPosts : recentPosts;
+  const showSearchResults = debouncedSearchQuery.length > 3;
 
-  const posts: IBasePost[] =
-    activePosts?.pages?.flatMap((page) => page.posts as IBasePost[]) || [];
+  // Flatten the paginated data
+  const posts = showSearchResults
+    ? searchedPosts?.pages?.flatMap((page) => page.posts) || []
+    : recentPosts?.pages?.flatMap((page) => page.posts) || [];
 
-  const fetchNextPage = useCallback(() => {
+  // Handle infinite scrolling
+  useEffect(() => {
     if (!inView) return;
-    if (!showSearchResults && recentPostsHasNextPage) {
-      recentPostsFetchNextPage();
-    }
-    if (showSearchResults && searchedPostsHasNextPage) {
-      searchedPostsFetchNextPage();
+    if (searchedPostsIsFetchingNextPage || recentPostsIsFetchingNextPage)
+      return;
+
+    if (showSearchResults) {
+      if (searchedPostsHasNextPage) {
+        searchedPostsFetchNextPage();
+      }
+    } else {
+      if (recentPostsHasNextPage) {
+        recentPostsFetchNextPage();
+      }
     }
   }, [
     inView,
     showSearchResults,
-    recentPostsHasNextPage,
     searchedPostsHasNextPage,
+    searchedPostsIsFetchingNextPage,
+    searchedPostsFetchNextPage,
+    recentPostsHasNextPage,
+    recentPostsIsFetchingNextPage,
+    recentPostsFetchNextPage,
   ]);
 
-  useEffect(() => {
-    fetchNextPage();
-  }, [fetchNextPage]);
+  const isLoading =
+    (showSearchResults ? isSearchedPostsLoading : isRecentPostsLoading) &&
+    posts.length === 0;
 
-  // Inside the component:
-  const queryClient = useQueryClient();
-
-  useEffect(() => {
-    if (debouncedSearchQuery) {
-      queryClient.removeQueries({
-        queryKey: [QUERY_KEYS.GET_SEARCH_POSTS],
-      });
-    }
-  }, [debouncedSearchQuery, queryClient]);
+  console.log("posts", posts);
+  console.log("searchedPosts", searchedPosts);
+  console.log("recentPosts", recentPosts);
 
   return (
     <div className="explore-container">
       <div className="explore-inner_container">
         <h2 className="h3-bold md:h2-bold w-full">Search Posts</h2>
-        <div className="flex gap-1 px-4 w-full rounded-lg bg-dark-4">
+        <div className="flex gap-1 px-4 w-full rounded-lg bg-dm-dark">
           <img
             src="/assets/icons/search.svg"
             width={24}
@@ -97,19 +102,25 @@ const Explore = () => {
       </div>
 
       <div className="flex flex-wrap gap-9 w-full max-w-5xl">
-        {(isRecentPostsLoading || isSearchedPostsLoading) &&
-        posts.length === 0 ? (
+        {isLoading ? (
           <Loader />
+        ) : posts.length === 0 ? (
+          <p className="text-center text-dm-light-3">No results found.</p>
         ) : (
           <SearchPostList posts={posts} />
         )}
       </div>
 
-      {(recentPostsHasNextPage || searchedPostsHasNextPage) && (
-        <div ref={ref} className="mt-10">
-          <Loader />
-        </div>
-      )}
+      <div ref={ref} className="mt-10">
+        {posts.length > 0 &&
+          (recentPostsIsFetchingNextPage || searchedPostsIsFetchingNextPage ? (
+            <Loader />
+          ) : (
+            <p className="text-center text-dm-light-3 w-full mt-10">
+              You've reached the end!
+            </p>
+          ))}
+      </div>
     </div>
   );
 };

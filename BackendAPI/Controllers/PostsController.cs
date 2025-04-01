@@ -769,7 +769,12 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var totalPosts = await _context.Posts.CountAsync();
+                var query = _context.Posts
+                .Where(p => p.Caption.Contains(searchTerm)
+                        || p.Tags.Contains(searchTerm)
+                        || p.Body.Contains(searchTerm));
+
+                var totalMatchingPosts = await query.CountAsync();
 
                 var posts = await _context.Posts
                     .Where(p => p.Caption.Contains(searchTerm)
@@ -788,7 +793,7 @@ namespace BackendAPI.Controllers
                     })
                     .ToListAsync();
 
-                bool hasMore = (page * pageSize) < totalPosts;
+                bool hasMore = (page * pageSize) < totalMatchingPosts;
 
                 return Ok(new { posts, hasMore });
             }
@@ -798,6 +803,7 @@ namespace BackendAPI.Controllers
             }
         }
 
+        // base posts for initializing the app
         [HttpPost("import")]
         public IActionResult ImportPosts()
         {

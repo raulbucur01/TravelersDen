@@ -539,6 +539,8 @@ export async function getRecentPosts({ pageParam = 1 }) {
 
     if (!response) throw Error;
 
+    console.log("in api getRecentPosts", response.data);
+
     return response.data;
   } catch (error) {
     console.log(error);
@@ -981,6 +983,7 @@ export async function searchPosts({
       },
     });
 
+    console.log("in api search", response.data);
     return response.data;
   } catch (error) {
     console.log(error);

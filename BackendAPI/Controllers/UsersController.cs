@@ -12,7 +12,7 @@ namespace BackendAPI.Controllers
     [Route("users")]
     public class UsersController : Controller
     {
-        private readonly AppDbContext _context; // Your DbContext
+        private readonly AppDbContext _context;
 
         public UsersController(AppDbContext context)
         {

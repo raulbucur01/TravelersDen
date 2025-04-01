@@ -11,14 +11,15 @@ import { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { IBasePost } from "@/types";
 import { useNavigate } from "react-router-dom";
-import { formatCommentCount, formatLikeCount } from "@/lib/utils";
+import { formatCommentCount, formatCount, formatLikeCount } from "@/lib/utils";
 
 type PostStatsProps = {
   post: IBasePost;
   userId: string;
+  usedIn?: "postcard" | "searchcard";
 };
 
-const PostStats = ({ post, userId }: PostStatsProps) => {
+const PostStats = ({ post, userId, usedIn = "postcard" }: PostStatsProps) => {
   const { mutateAsync: likePost, isPending: isLikingPost } = useLikePost();
   const { mutateAsync: unlikePost, isPending: isUnlikingPost } =
     useUnlikePost();
@@ -80,7 +81,7 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
 
   return (
     <div
-      className="relative flex justify-between items-center z-20 cursor-pointer px-4 py-2"
+      className="relative flex justify-between gap-7 items-center z-20 cursor-pointer px-4 py-2"
       onClick={() => navigate(`/posts/${post.postId}`)}
     >
       {/* Like Section - Left-aligned */}
@@ -101,27 +102,31 @@ const PostStats = ({ post, userId }: PostStatsProps) => {
           />
         )}
         <p className="text-xs sm:text-sm lg:base-medium">
-          {formatLikeCount(likeCount)}
+          {usedIn === "postcard"
+            ? formatLikeCount(likeCount)
+            : formatCount(likeCount)}
         </p>
       </div>
 
       {/* Comment Section - Centered */}
-      <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-1">
-        <img
-          src="/assets/icons/chat.svg"
-          alt="comments"
-          width={25}
-          height={25}
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/posts/${post.postId}`);
-          }}
-          className="cursor-pointer"
-        />
-        <p className="text-xs sm:text-sm lg:base-medium">
-          {formatCommentCount(likeCount)}
-        </p>
-      </div>
+      {usedIn === "postcard" && (
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center gap-1">
+          <img
+            src="/assets/icons/chat.svg"
+            alt="comments"
+            width={25}
+            height={25}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/posts/${post.postId}`);
+            }}
+            className="cursor-pointer"
+          />
+          <p className="text-xs sm:text-sm lg:base-medium">
+            {formatCommentCount(likeCount)}
+          </p>
+        </div>
+      )}
 
       {/* Save Section - Right-aligned */}
       <div className="flex items-center gap-1">
