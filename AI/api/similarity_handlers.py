@@ -1,3 +1,5 @@
+# ruff: noqa: F403, F405
+from constants import *
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -17,22 +19,6 @@ from sentence_transformers import SentenceTransformer
 
 # Connect to Redis
 redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=True)
-
-TOP_N = 5  # Number of most similar posts to store
-WEIGHT_TFIDF = 0.5
-WEIGHT_SBERT = 0.5
-
-path_posts_csv = "../api/data/posts.csv"
-
-# TF-IDF paths
-path_similarity_matrix_tfidf = "../api/data/posts_similarity_matrix_TFIDF.csv"
-path_tfidf_model = "../api/data/tfidf_vectorizer.pkl"
-path_tfidf_matrix = "../api/data/tfidf_matrix.npz"
-
-# SBERT paths
-path_similarity_matrix_sbert = "../api/data/posts_similarity_matrix_SBERT.csv"
-path_sbert_model = "../api/data/sbert_model"
-path_sbert_matrix = "../api/data/sbert_matrix.npz"
 
 
 def update_redis_with_similarities(
@@ -78,8 +64,8 @@ def initialize_TFIDF_post_similarity_startpoint():
             print("⚠️ No posts found. Initialization skipped.")
             return
 
-        df.to_csv(path_posts_csv, index=False)
-        print(f"✅ CSV updated successfully: {path_posts_csv}")
+        df.to_csv(PATH_POSTS_CSV, index=False)
+        print(f"✅ CSV updated successfully: {PATH_POSTS_CSV}")
 
         # Combine Caption and Body for text analysis
         df["text"] = df["Caption"].fillna("") + " " + df["Body"].fillna("")
@@ -89,12 +75,12 @@ def initialize_TFIDF_post_similarity_startpoint():
         tfidf_matrix = vectorizer.fit_transform(df["text"])
 
         # Save the TF-IDF model
-        joblib.dump(vectorizer, path_tfidf_model)
-        print(f"✅ TF-IDF vectorizer saved at {path_tfidf_model}")
+        joblib.dump(vectorizer, PATH_TFIDF_MODEL)
+        print(f"✅ TF-IDF vectorizer saved at {PATH_TFIDF_MODEL}")
 
         # Save the TF-IDF matrix
-        np.savez_compressed(path_tfidf_matrix, tfidf_matrix.toarray())
-        print(f"✅ TF-IDF matrix saved at {path_tfidf_matrix}")
+        np.savez_compressed(PATH_TFIDF_MATRIX, tfidf_matrix.toarray())
+        print(f"✅ TF-IDF matrix saved at {PATH_TFIDF_MATRIX}")
 
         # Compute Cosine Similarity
         cosine_sim_matrix = cosine_similarity(tfidf_matrix, tfidf_matrix)
@@ -105,7 +91,7 @@ def initialize_TFIDF_post_similarity_startpoint():
         )
 
         # Save similarity matrix
-        similarity_df.to_csv(path_similarity_matrix_tfidf)
+        similarity_df.to_csv(PATH_SIMILARITY_MATRIX_TFIDF)
         print("✅ Similarity matrix updated successfully!")
 
     except Exception as e:
@@ -138,8 +124,8 @@ def initialize_SBERT_post_similarity_startpoint():
         # print(f"✅ SBERT model saved at {path_sbert_model}")
 
         # Save the SBERT matrix
-        np.savez_compressed(path_sbert_matrix, sbert_matrix)
-        print(f"✅ SBERT matrix saved at {path_sbert_matrix}")
+        np.savez_compressed(PATH_SBERT_MATRIX, sbert_matrix)
+        print(f"✅ SBERT matrix saved at {PATH_SBERT_MATRIX}")
 
         # Compute Cosine Similarity
         cosine_sim_matrix = cosine_similarity(sbert_matrix, sbert_matrix)
@@ -151,7 +137,7 @@ def initialize_SBERT_post_similarity_startpoint():
 
         # Save normalized similarity matrix
         similarity_df = normalize_similarity_matrix(similarity_df)
-        similarity_df.to_csv(path_similarity_matrix_sbert)
+        similarity_df.to_csv(PATH_SIMILARITY_MATRIX_SBERT)
         print("✅ Similarity matrix updated successfully!")
 
     except Exception as e:
@@ -173,8 +159,8 @@ def initialize_combined_similarity_redis_startpoint():
             return
 
         # Load and normalize similarity matrices
-        tfidf_sim_matrix = pd.read_csv(path_similarity_matrix_tfidf, index_col=0)
-        sbert_sim_matrix = pd.read_csv(path_similarity_matrix_sbert, index_col=0)
+        tfidf_sim_matrix = pd.read_csv(PATH_SIMILARITY_MATRIX_TFIDF, index_col=0)
+        sbert_sim_matrix = pd.read_csv(PATH_SIMILARITY_MATRIX_SBERT, index_col=0)
 
         # Ensure matrices are aligned (same post IDs and order)
         post_ids = df_posts["PostId"].astype(str).tolist()
@@ -196,9 +182,9 @@ def handle_unprocessed_inserted_posts(updated_posts_to_add=None):
     """
 
     # Load existing posts and similarity matrix
-    df_existing_posts = pd.read_csv(path_posts_csv)
-    df_similarity_matrix_tfidf = pd.read_csv(path_similarity_matrix_tfidf, index_col=0)
-    df_similarity_matrix_sbert = pd.read_csv(path_similarity_matrix_sbert, index_col=0)
+    df_existing_posts = pd.read_csv(PATH_POSTS_CSV)
+    df_similarity_matrix_tfidf = pd.read_csv(PATH_SIMILARITY_MATRIX_TFIDF, index_col=0)
+    df_similarity_matrix_sbert = pd.read_csv(PATH_SIMILARITY_MATRIX_SBERT, index_col=0)
 
     # Fetch unprocessed inserted posts
     if updated_posts_to_add:
@@ -213,13 +199,13 @@ def handle_unprocessed_inserted_posts(updated_posts_to_add=None):
 
     # Append new posts to CSV
     df_updated_posts = pd.concat([df_existing_posts, df_new_posts], ignore_index=True)
-    df_updated_posts.to_csv(path_posts_csv, index=False)
+    df_updated_posts.to_csv(PATH_POSTS_CSV, index=False)
 
     ## ====================== TF-IDF UPDATE ====================== ##
 
     # Load existing TF-IDF model and matrix
-    vectorizer = joblib.load(path_tfidf_model)
-    tfidf_matrix_existing = np.load(path_tfidf_matrix)["arr_0"]
+    vectorizer = joblib.load(PATH_TFIDF_MODEL)
+    tfidf_matrix_existing = np.load(PATH_TFIDF_MATRIX)["arr_0"]
 
     # Compute TF-IDF vectors **only for new posts**
     new_texts = (
@@ -231,7 +217,7 @@ def handle_unprocessed_inserted_posts(updated_posts_to_add=None):
     tfidf_matrix = np.vstack([tfidf_matrix_existing, new_tfidf_matrix.toarray()])
 
     # Save updated TF-IDF matrix
-    np.savez_compressed(path_tfidf_matrix, tfidf_matrix)
+    np.savez_compressed(PATH_TFIDF_MATRIX, tfidf_matrix)
 
     # Update similarity matrix **only for new posts**
     new_post_ids = df_new_posts["PostId"].tolist()
@@ -251,23 +237,23 @@ def handle_unprocessed_inserted_posts(updated_posts_to_add=None):
         df_similarity_matrix_tfidf.loc[all_post_ids, new_id] = new_similarities[i, :]
 
     # Save updated similarity matrix
-    df_similarity_matrix_tfidf.to_csv(path_similarity_matrix_tfidf)
+    df_similarity_matrix_tfidf.to_csv(PATH_SIMILARITY_MATRIX_TFIDF)
 
     # Save updated TF-IDF model
-    joblib.dump(vectorizer, path_tfidf_model)
+    joblib.dump(vectorizer, PATH_TFIDF_MODEL)
 
     ## ====================== SBERT UPDATE ====================== ##
 
     # Load SBERT model & embeddings
-    sbert_model = SentenceTransformer(path_sbert_model)
-    sbert_embeddings_existing = np.load(path_sbert_matrix)["arr_0"]
+    sbert_model = SentenceTransformer(PATH_SBERT_MODEL)
+    sbert_embeddings_existing = np.load(PATH_SBERT_MATRIX)["arr_0"]
 
     # Compute SBERT embeddings for new posts
     new_sbert_embeddings = sbert_model.encode(new_texts, convert_to_numpy=True)
 
     # Stack SBERT embeddings
     sbert_embeddings = np.vstack([sbert_embeddings_existing, new_sbert_embeddings])
-    np.savez_compressed(path_sbert_matrix, sbert_embeddings)
+    np.savez_compressed(PATH_SBERT_MATRIX, sbert_embeddings)
 
     # Ensure SBERT matrix is aligned
     df_similarity_matrix_sbert = df_similarity_matrix_sbert.reindex(
@@ -290,7 +276,7 @@ def handle_unprocessed_inserted_posts(updated_posts_to_add=None):
     df_similarity_matrix_sbert = normalize_similarity_matrix(
         df_similarity_matrix_sbert, new_post_ids
     )
-    df_similarity_matrix_sbert.to_csv(path_similarity_matrix_sbert)
+    df_similarity_matrix_sbert.to_csv(PATH_SIMILARITY_MATRIX_SBERT)
 
     ## ====================== COMBINED SIMILARITIES REDIS ====================== ##
 
@@ -320,7 +306,7 @@ def split_updated_posts():
 
     # Load existing posts
     df_existing = pd.read_csv(
-        path_posts_csv, usecols=["PostId"]
+        PATH_POSTS_CSV, usecols=["PostId"]
     )  # Load only PostId for efficiency
 
     # Fetch unprocessed updated posts
@@ -345,9 +331,9 @@ def handle_unprocessed_updated_posts():
     """Handle updated posts efficiently by recomputing only the necessary similarities."""
 
     # Load existing posts and similarity matrix
-    df_existing_posts = pd.read_csv(path_posts_csv)
-    df_similarity_matrix_tfidf = pd.read_csv(path_similarity_matrix_tfidf, index_col=0)
-    df_similarity_matrix_sbert = pd.read_csv(path_similarity_matrix_sbert, index_col=0)
+    df_existing_posts = pd.read_csv(PATH_POSTS_CSV)
+    df_similarity_matrix_tfidf = pd.read_csv(PATH_SIMILARITY_MATRIX_TFIDF, index_col=0)
+    df_similarity_matrix_sbert = pd.read_csv(PATH_SIMILARITY_MATRIX_SBERT, index_col=0)
 
     # Fetch and split unprocessed updated posts
     updated_posts, updated_posts_to_add = split_updated_posts()
@@ -379,13 +365,13 @@ def handle_unprocessed_updated_posts():
                 df_existing_posts.loc[mask, "Body"] = row["Body"]
 
         # Save the updated posts data
-        df_existing_posts.to_csv(path_posts_csv, index=False)
+        df_existing_posts.to_csv(PATH_POSTS_CSV, index=False)
 
         # =================== TF-IDF UPDATES =================== #
 
         # Load existing TF-IDF model and matrix
-        vectorizer = joblib.load(path_tfidf_model)
-        tfidf_matrix_existing = np.load(path_tfidf_matrix)["arr_0"]
+        vectorizer = joblib.load(PATH_TFIDF_MODEL)
+        tfidf_matrix_existing = np.load(PATH_TFIDF_MATRIX)["arr_0"]
 
         # Compute new TF-IDF vectors **only for updated posts**
         updated_texts = (
@@ -406,7 +392,7 @@ def handle_unprocessed_updated_posts():
             tfidf_matrix_existing[index] = updated_tfidf_matrix[i].toarray()
 
         # Save updated TF-IDF matrix
-        np.savez_compressed(path_tfidf_matrix, tfidf_matrix_existing)
+        np.savez_compressed(PATH_TFIDF_MATRIX, tfidf_matrix_existing)
 
         # Compute pairwise similarities **only for updated posts**
         all_post_ids = df_existing_posts["PostId"].tolist()
@@ -424,12 +410,12 @@ def handle_unprocessed_updated_posts():
             )
 
         # Save updated similarity matrix
-        df_similarity_matrix_tfidf.to_csv(path_similarity_matrix_tfidf)
+        df_similarity_matrix_tfidf.to_csv(PATH_SIMILARITY_MATRIX_TFIDF)
 
         # =================== SBERT UPDATES =================== #
 
-        sbert_model = SentenceTransformer(path_sbert_model)
-        sbert_embeddings_existing = np.load(path_sbert_matrix)["arr_0"]
+        sbert_model = SentenceTransformer(PATH_SBERT_MODEL)
+        sbert_embeddings_existing = np.load(PATH_SBERT_MATRIX)["arr_0"]
 
         # Compute SBERT embeddings for updated posts
         updated_sbert_embeddings = sbert_model.encode(
@@ -442,7 +428,7 @@ def handle_unprocessed_updated_posts():
             sbert_embeddings_existing[index] = updated_sbert_embeddings[i]
 
         # Save updated SBERT embeddings
-        np.savez_compressed(path_sbert_matrix, sbert_embeddings_existing)
+        np.savez_compressed(PATH_SBERT_MATRIX, sbert_embeddings_existing)
 
         # Compute SBERT similarities for updated posts
         updated_similarities_sbert = cosine_similarity(
@@ -462,7 +448,7 @@ def handle_unprocessed_updated_posts():
         df_similarity_matrix_sbert = normalize_similarity_matrix(
             df_similarity_matrix_sbert, updated_post_ids
         )
-        df_similarity_matrix_sbert.to_csv(path_similarity_matrix_sbert)
+        df_similarity_matrix_sbert.to_csv(PATH_SIMILARITY_MATRIX_SBERT)
 
         # =================== COMBINED SIMILARITIES REDIS =================== #
 
@@ -491,9 +477,9 @@ def handle_unprocessed_deleted_posts():
     """Handle deleted posts by removing them from all relevant data."""
 
     # Load existing posts and similarity matrix
-    df_existing_posts = pd.read_csv(path_posts_csv)
-    df_similarity_matrix_tfidf = pd.read_csv(path_similarity_matrix_tfidf, index_col=0)
-    df_similarity_matrix_sbert = pd.read_csv(path_similarity_matrix_sbert, index_col=0)
+    df_existing_posts = pd.read_csv(PATH_POSTS_CSV)
+    df_similarity_matrix_tfidf = pd.read_csv(PATH_SIMILARITY_MATRIX_TFIDF, index_col=0)
+    df_similarity_matrix_sbert = pd.read_csv(PATH_SIMILARITY_MATRIX_SBERT, index_col=0)
 
     # Fetch unprocessed deleted posts
     deleted_post_ids = fetch_unprocessed_deleted_posts()
@@ -511,7 +497,7 @@ def handle_unprocessed_deleted_posts():
     df_existing_posts = df_existing_posts[
         ~df_existing_posts["PostId"].isin(deleted_post_ids)
     ]
-    df_existing_posts.to_csv(path_posts_csv, index=False)
+    df_existing_posts.to_csv(PATH_POSTS_CSV, index=False)
 
     # =================== REMOVE FROM TF-IDF =================== #
 
@@ -519,33 +505,33 @@ def handle_unprocessed_deleted_posts():
     df_similarity_matrix_tfidf = df_similarity_matrix_tfidf.drop(
         index=deleted_post_ids, columns=deleted_post_ids, errors="ignore"
     )
-    df_similarity_matrix_tfidf.to_csv(path_similarity_matrix_tfidf)
+    df_similarity_matrix_tfidf.to_csv(PATH_SIMILARITY_MATRIX_TFIDF)
 
     ## Remove from TF-IDF matrix
-    tfidf_matrix_existing = np.load(path_tfidf_matrix)["arr_0"]
+    tfidf_matrix_existing = np.load(PATH_TFIDF_MATRIX)["arr_0"]
     all_post_ids = df_existing_posts["PostId"].tolist()
     indices_to_keep = [
         i for i, post_id in enumerate(all_post_ids) if post_id not in deleted_post_ids
     ]
     tfidf_matrix_existing = tfidf_matrix_existing[indices_to_keep]
-    np.savez_compressed(path_tfidf_matrix, tfidf_matrix_existing)
+    np.savez_compressed(PATH_TFIDF_MATRIX, tfidf_matrix_existing)
 
     # =================== REMOVE FROM SBERT =================== #
 
     # Load SBERT embeddings
-    sbert_embeddings_existing = np.load(path_sbert_matrix)["arr_0"]
+    sbert_embeddings_existing = np.load(PATH_SBERT_MATRIX)["arr_0"]
 
     # Filter out deleted posts' embeddings
     sbert_embeddings_existing = sbert_embeddings_existing[indices_to_keep]
 
     # Save updated SBERT embeddings
-    np.savez_compressed(path_sbert_matrix, sbert_embeddings_existing)
+    np.savez_compressed(PATH_SBERT_MATRIX, sbert_embeddings_existing)
 
     # Remove deleted posts from SBERT similarity matrix
     df_similarity_matrix_sbert = df_similarity_matrix_sbert.drop(
         index=deleted_post_ids, columns=deleted_post_ids, errors="ignore"
     )
-    df_similarity_matrix_sbert.to_csv(path_similarity_matrix_sbert)
+    df_similarity_matrix_sbert.to_csv(PATH_SIMILARITY_MATRIX_SBERT)
 
     # =================== REMOVE FROM REDIS =================== #
 

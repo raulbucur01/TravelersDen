@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BackendAPI.Models;
-using BackendAPI; // Assuming this is where your DbContext is
 using Microsoft.EntityFrameworkCore;
 using BackendAPI.DTOs;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.Hosting;
 
 namespace BackendAPI.Controllers
 {
