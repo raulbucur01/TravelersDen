@@ -13,3 +13,24 @@ PATH_TFIDF_MATRIX = "../api/data/tfidf_matrix.npz"
 PATH_SIMILARITY_MATRIX_SBERT = "../api/data/posts_similarity_matrix_SBERT.csv"
 PATH_SBERT_MODEL = "../api/data/sbert_model"
 PATH_SBERT_MATRIX = "../api/data/sbert_matrix.npz"
+
+# ITINERARY GENERATOR JSONs
+ITINERARY_JSON_STRUCTURE = """
+{
+  "destination": "string (destination name)",
+  "days": [
+    {
+      "day": integer (day number),
+      "activities": [
+        {
+          "title": "string (short name of activity including point of interest name)",
+          "description": "string (1-2 sentences describing what the activity is and why it's interesting)",
+          "location": "string (address of activity)",
+        },
+        ...
+      ]
+    },
+    ...
+  ]
+}
+"""

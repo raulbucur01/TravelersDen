@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BackendAPI.Models;
 using Microsoft.EntityFrameworkCore;
-using BackendAPI.DTOs;
+using BackendAPI.DTOs.Users;
 
 namespace BackendAPI.Controllers
 {

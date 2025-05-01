@@ -1,7 +1,5 @@
-﻿using Appwrite.Enums;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace BackendAPI.Controllers
 {

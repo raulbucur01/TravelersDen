@@ -1,15 +1,9 @@
-﻿using Azure.Core;
-using CsvHelper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
+﻿using CsvHelper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Globalization;
-using System.Runtime.Intrinsics.Arm;
-using BackendAPI.DTOs;
 using BackendAPI.Models;
-using BackendAPI.Services;
+using BackendAPI.DTOs.Posts;
 
 namespace BackendAPI.Controllers
 {
@@ -18,12 +12,10 @@ namespace BackendAPI.Controllers
     public class PostsController : Controller
     {
         private readonly AppDbContext _context; // Your DbContext
-        private readonly FastApiService _fastApiService;
 
-        public PostsController(AppDbContext context, FastApiService fastApiService)
+        public PostsController(AppDbContext context)
         {
             _context = context;
-            _fastApiService = fastApiService;
         }
 
         [HttpPost("normal")]
@@ -682,80 +674,6 @@ namespace BackendAPI.Controllers
 
                 // Return the itinerary details
                 return Ok(itineraryDetails);
-            }
-            catch (Exception ex)
-            {
-                // Log the error and return a generic error response
-                return StatusCode(500, "Internal server error: " + ex.Message);
-            }
-        }
-
-        [HttpGet("{id}/similar-posts")]
-        public async Task<IActionResult> GetSimilarPosts(string id)
-        {
-            try
-            {
-                var similarPostsResponse = await _fastApiService.GetSimilarPostsAsync(id);
-
-                if (similarPostsResponse == null)
-                {
-                    return NotFound("No similar posts found.");
-                }
-
-                var similarPostIds = similarPostsResponse.SimilarPostIds;
-                foreach (var item in similarPostIds)
-                {
-                    Console.WriteLine("\n\n Similar id: " + item);
-                }
-                Console.WriteLine(id);
-
-                // If no similar posts found yet, then return randomly
-                if (!similarPostIds.Any())
-                {
-                    int totalCount = await _context.Posts.CountAsync();
-                    int skip = new Random().Next(0, Math.Max(1, totalCount - 5));  // Pick a random starting point
-
-                    var randomPosts = await _context.Posts
-                        .Where(p => p.PostId != id)
-                        .OrderBy(p => p.PostId)
-                        .Skip(skip)
-                        .Take(5)
-                        .Select(p => new
-                        {
-                            PostId = p.PostId,
-                            UserId = p.UserId,
-                            Caption = p.Caption,
-                            Body = p.Body,
-                            MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
-                            Location = p.Location,
-                            Tags = p.Tags,
-                            CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"),
-                            LikesCount = p.LikesCount,
-                            IsItinerary = p.IsItinerary,
-                        })
-                        .ToListAsync();
-
-                    return Ok(randomPosts);
-                }
-
-                var similarPosts = await _context.Posts
-                    .Where(p => similarPostIds.Contains(p.PostId))
-                    .Select(p => new 
-                    {
-                        PostId = p.PostId,
-                        UserId = p.UserId,
-                        Caption = p.Caption,
-                        Body = p.Body,
-                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
-                        Location = p.Location,
-                        Tags = p.Tags,
-                        CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                        LikesCount = p.LikesCount,
-                        IsItinerary = p.IsItinerary,
-                    })
-                    .ToListAsync();
-
-                return Ok(similarPosts);
             }
             catch (Exception ex)
             {

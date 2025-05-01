@@ -1,4 +1,4 @@
-﻿namespace BackendAPI.DTOs
+﻿namespace BackendAPI.DTOs.Comments
 {
     public class EditCommentDTO
     {

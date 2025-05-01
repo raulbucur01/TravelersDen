@@ -89,7 +89,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Bind FastAPI settings
 builder.Services.Configure<FastApiSettings>(builder.Configuration.GetSection("FastApiSettings"));
 
-builder.Services.AddHttpClient<FastApiService>();
+builder.Services.AddHttpClient<FastApiService>(client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(10);  // adjust as needed
+});
 
 // Add services to the container.
 builder.Services.AddControllers();

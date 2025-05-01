@@ -1,4 +1,4 @@
-﻿namespace BackendAPI.DTOs
+﻿namespace BackendAPI.DTOs.FastApi
 {
     public class SimilarPostsResponseDTO
     {

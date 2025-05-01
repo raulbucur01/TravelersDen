@@ -1,7 +1,7 @@
-﻿namespace BackendAPI.DTOs
+﻿namespace BackendAPI.DTOs.Posts
 {
     public class CreateNormalPostDTO
-    {                                           
+    {
         public string UserId { get; set; }  // The ID of the user creating the post
         public string Caption { get; set; } // The post's caption
         public string Body { get; set; }    // The post's body content

@@ -1,4 +1,4 @@
-import { ID, ImageGravity } from "appwrite";
+import { ID } from "appwrite";
 
 import {
   IBasePost,
@@ -8,7 +8,6 @@ import {
   INewItineraryPost,
   INewNormalPost,
   INewUser,
-  IProfileGridPost,
   IProfileGridPostResponse,
   IUpdateItineraryPost,
   IUpdateNormalPost,

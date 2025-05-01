@@ -1,4 +1,4 @@
-﻿namespace BackendAPI.DTOs
+﻿namespace BackendAPI.DTOs.Posts
 {
     public class UpdateItineraryPostDTO
     {

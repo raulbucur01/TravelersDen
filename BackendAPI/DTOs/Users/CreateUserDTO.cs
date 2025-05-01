@@ -1,4 +1,4 @@
-﻿namespace BackendAPI.DTOs
+﻿namespace BackendAPI.DTOs.Users
 {
     public class CreateUserDTO
     {
