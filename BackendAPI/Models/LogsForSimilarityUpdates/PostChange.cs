@@ -1,4 +1,4 @@
-﻿namespace BackendAPI.Models
+﻿namespace BackendAPI.Models.LogsForSimilarityUpdates
 {
     public class PostChange
     {

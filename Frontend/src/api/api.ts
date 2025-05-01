@@ -491,14 +491,16 @@ export async function uploadFile(file: File) {
 
 export function getFilePreview(fileId: string) {
   try {
-    const fileUrl = storage.getFilePreview(
-      appwriteConfig.storageId,
-      fileId,
-      2000,
-      2000,
-      ImageGravity.Top,
-      100
-    );
+    // can no longer use this method as it is now a paid feature (need to get the raw url)
+    // const fileUrl = storage.getFilePreview(
+    //   appwriteConfig.storageId,
+    //   fileId,
+    //   2000,
+    //   2000,
+    //   ImageGravity.Top,
+    //   100
+    // );
+    const fileUrl = storage.getFileView(appwriteConfig.storageId, fileId);
 
     return fileUrl;
   } catch (error) {

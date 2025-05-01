@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using BackendAPI.Models;
+using BackendAPI.Models.LogsForSimilarityUpdates;
 
 public class AppDbContext : DbContext
 {

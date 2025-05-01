@@ -829,7 +829,7 @@ namespace BackendAPI.Controllers
                         return new Post
                         {
                             PostId = generatedPostId,
-                            UserId = "674b191b001951acb483",
+                            UserId = "68110844002953351eff",
                             Caption = p.Caption.Length > 2200 ? p.Caption.Substring(0, 2200) : p.Caption,
                             Body = p.Body.Length > 2200 ? p.Body.Substring(0, 2200) : p.Body,
                             Location = p.Location,
@@ -843,7 +843,7 @@ namespace BackendAPI.Controllers
                             {
                                 MediaId = Guid.NewGuid().ToString(),
                                 PostId = generatedPostId,
-                                AppwriteFileUrl = "https://cloud.appwrite.io/v1/storage/buckets/679e6e110026b5d8c68c/files/67a217ca003d22c9b4b8/preview?width=2000&height=2000&gravity=top&quality=100&project=6740c57e0035d48d554d",
+                                AppwriteFileUrl = "https://fra.cloud.appwrite.io/v1/storage/buckets/6811081b002327ad7fef/files/681108be0035cc74888c/view?project=6740c57e0035d48d554d&mode=admin",
                                 MediaType = "Photo"
                             }
                         }
