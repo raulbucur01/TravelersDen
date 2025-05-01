@@ -12,12 +12,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { DatePickerWithRange } from "../shared/DatePickerWithRange";
 import { DateRange } from "react-day-picker";
-import { IDisplayedAccommodation } from "@/types";
+import { DisplayedAccommodation } from "@/types";
 import { useEffect } from "react";
 
 type AccommodationFormProps = {
   fieldName: string; // Field name for form context, e.g., "accommodations"
-  accommodations?: IDisplayedAccommodation[]; // when in update mode prefilled
+  accommodations?: DisplayedAccommodation[]; // when in update mode prefilled
 };
 
 const AccommodationForm = ({

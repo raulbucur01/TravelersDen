@@ -55,7 +55,9 @@ namespace BackendAPI.Services
                     preferences
                 };
 
+                Console.WriteLine($"Request Body: {JsonSerializer.Serialize(requestBody)}");
                 HttpResponseMessage response = await _httpClient.PostAsJsonAsync(fastApiUrl, requestBody);
+                Console.WriteLine($"Response Status: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {

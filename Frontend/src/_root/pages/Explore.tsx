@@ -6,7 +6,7 @@ import { QUERY_KEYS } from "@/api/tanstack-query/queryKeys";
 import SearchPostList from "@/components/explore/SearchPostList";
 import Loader from "@/components/shared/Loader";
 import { Input } from "@/components/ui/input";
-import { IBasePost } from "@/types";
+import { BasePost } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState, useCallback } from "react";
 import { useInView } from "react-intersection-observer";

@@ -2,12 +2,12 @@ import { Link } from "react-router-dom";
 
 import { useUserContext } from "@/context/AuthContext";
 import PostStats from "../shared/PostStats";
-import { IBasePost } from "@/types";
+import { BasePost } from "@/types";
 import SearchPostListUserInfo from "./SearchPostListUserInfo";
 import MediaSlideshow from "../shared/MediaSlideshow";
 
 type SearchPostListProps = {
-  posts: IBasePost[];
+  posts: BasePost[];
   showUser?: boolean;
   showStats?: boolean;
 };

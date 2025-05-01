@@ -15,7 +15,7 @@ import CustomizableDialog from "../shared/CustomizableDialog";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { IUpdateUserProfile } from "@/types";
+import { UpdateUserProfile } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import ProfilePictureChanger from "./ProfilePictureChanger";
 import UserListDialog from "./UserListDialog";
@@ -35,7 +35,7 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
     useUpdateUser();
 
   const [loading, setLoading] = useState(false);
-  const [profileInfo, setProfileInfo] = useState<IUpdateUserProfile>(() => ({
+  const [profileInfo, setProfileInfo] = useState<UpdateUserProfile>(() => ({
     userId: userId,
     name: user?.name || "",
     username: user?.username || "",

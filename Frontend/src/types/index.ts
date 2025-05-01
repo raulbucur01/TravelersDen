@@ -1,19 +1,19 @@
-export type IContextType = {
-  user: IUser;
+export type ContextType = {
+  user: User;
   isLoading: boolean;
   isAuthenticated: boolean;
-  setUser: React.Dispatch<React.SetStateAction<IUser>>;
+  setUser: React.Dispatch<React.SetStateAction<User>>;
   setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
   checkAuthUser: () => Promise<boolean>;
 };
 
-export type INavLink = {
+export type NavLink = {
   imgURL: string;
   route: string;
   label: string;
 };
 
-export type IUpdateUser = {
+export type UpdateUser = {
   userId: string;
   name: string;
   bio: string;
@@ -22,7 +22,7 @@ export type IUpdateUser = {
   file: File[];
 };
 
-export type INewNormalPost = {
+export type NewNormalPost = {
   userId: string;
   caption: string;
   body: string;
@@ -31,18 +31,18 @@ export type INewNormalPost = {
   tags?: string;
 };
 
-export type INewItineraryPost = {
+export type NewItineraryPost = {
   userId: string;
   caption: string;
   body: string;
   files: File[];
   location?: string;
   tags?: string;
-  tripSteps: ITripStep[];
-  accommodations: IAccommodation[];
+  tripSteps: TripStep[];
+  accommodations: Accommodation[];
 };
 
-export type ITripStep = {
+export type TripStep = {
   stepNumber: number;
   latitude: number;
   longitude: number;
@@ -52,7 +52,7 @@ export type ITripStep = {
   files: File[];
 };
 
-export type IAccommodation = {
+export type Accommodation = {
   name: string;
   description: string;
   // latitude: number;
@@ -64,7 +64,7 @@ export type IAccommodation = {
   link: string;
 };
 
-export type IUpdateNormalPost = {
+export type UpdateNormalPost = {
   postId: string;
   caption: string;
   body: string;
@@ -74,19 +74,19 @@ export type IUpdateNormalPost = {
   deletedFiles: string[];
 };
 
-export type IUpdateItineraryPost = {
+export type UpdateItineraryPost = {
   postId: string;
   caption: string;
   body: string;
   location: string;
   tags: string;
   files: (File | MediaUrl)[];
-  tripSteps: ITripStep[];
-  accommodations: IAccommodation[];
+  tripSteps: TripStep[];
+  accommodations: Accommodation[];
   toDeleteFromAppwrite: string[];
 };
 
-export type IUser = {
+export type User = {
   userId: string;
   name: string;
   username: string;
@@ -95,7 +95,7 @@ export type IUser = {
   bio: string;
 };
 
-export type IBasePost = {
+export type BasePost = {
   postId: string;
   userId: string;
   caption: string;
@@ -108,7 +108,7 @@ export type IBasePost = {
   isItinerary: boolean;
 };
 
-export type IItineraryPost = {
+export type ItineraryPost = {
   postId: string;
   userId: string;
   caption: string;
@@ -120,11 +120,11 @@ export type IItineraryPost = {
   likesCount: number;
   isItinerary: boolean;
 
-  tripSteps: ITripStep[];
-  accommodations: IAccommodation[];
+  tripSteps: TripStep[];
+  accommodations: Accommodation[];
 };
 
-export type IDisplayedTripStep = {
+export type DisplayedTripStep = {
   tripStepId: string;
   stepNumber: number;
   latitude: number;
@@ -135,7 +135,7 @@ export type IDisplayedTripStep = {
   mediaUrls: { url: string; type: string }[];
 };
 
-export type IDisplayedAccommodation = {
+export type DisplayedAccommodation = {
   name: string;
   description: string;
   // latitude: number;
@@ -147,7 +147,7 @@ export type IDisplayedAccommodation = {
   link: string;
 };
 
-export type INewUser = {
+export type NewUser = {
   name: string;
   email: string;
   username: string;
@@ -194,7 +194,7 @@ export interface ISuggestionInfo {
   longitude: number;
 }
 
-export type IUpdateUserProfile = {
+export type UpdateUserProfile = {
   userId: string;
   name: string;
   username: string;
@@ -210,13 +210,35 @@ export type MediaUrl = {
 
 export type TravelMode = "car" | "pedestrian" | "bus" | "bicycle";
 
-export type IProfileGridPost = {
+export type ProfileGridPost = {
   postId: string;
   firstMediaUrl: string;
   isItinerary: boolean;
 };
 
-export type IProfileGridPostResponse = {
-  posts: IProfileGridPost[];
+export type ProfileGridPostResponse = {
+  posts: ProfileGridPost[];
   hasMore: boolean;
+};
+
+export type GenerateItineraryRequest = {
+  destination: string;
+  days: number;
+  preferences: string[];
+};
+
+export type GeneratedItineraryResponse = {
+  destination: string;
+  days: ItineraryDay[];
+};
+
+export type ItineraryDay = {
+  day: number;
+  activities: ItineraryActivity[];
+};
+
+export type ItineraryActivity = {
+  title: string;
+  description: string;
+  location: string;
 };

@@ -22,11 +22,11 @@ import {
 } from "@/api/tanstack-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { IBasePost } from "@/types";
+import { BasePost } from "@/types";
 import { useState } from "react";
 
 type NormalPostFormProps = {
-  post?: IBasePost;
+  post?: BasePost;
   action: "Create" | "Update";
 };
 

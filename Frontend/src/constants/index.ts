@@ -29,6 +29,11 @@ export const sidebarLinks = [
     route: "/map",
     label: "Map",
   },
+  {
+    imgURL: "/assets/icons/wallpaper.svg",
+    route: "/itinerary-generator-dashboard",
+    label: "Itinerary Generator",
+  },
 ];
 
 export const bottombarLinks = [

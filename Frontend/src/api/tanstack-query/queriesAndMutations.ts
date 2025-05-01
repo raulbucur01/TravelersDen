@@ -44,20 +44,22 @@ import {
   updateUser,
   getUserPosts,
   searchPosts,
+  generateNewItinerary,
 } from "../api";
 import {
-  INewItineraryPost,
-  INewNormalPost,
-  INewUser,
-  IUpdateUserProfile,
-  IUpdateItineraryPost,
-  IUpdateNormalPost,
+  NewItineraryPost,
+  NewNormalPost,
+  NewUser,
+  UpdateUserProfile,
+  UpdateItineraryPost,
+  UpdateNormalPost,
+  GenerateItineraryRequest,
 } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
 
 export const useCreateUserAccount = () => {
   return useMutation({
-    mutationFn: (user: INewUser) => createUserAccount(user),
+    mutationFn: (user: NewUser) => createUserAccount(user),
   });
 };
 
@@ -85,7 +87,7 @@ export const useCreateNormalPost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (post: INewNormalPost) => createNormalPost(post),
+    mutationFn: (post: NewNormalPost) => createNormalPost(post),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
@@ -98,7 +100,7 @@ export const useCreateItineraryPost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (post: INewItineraryPost) => createItineraryPost(post),
+    mutationFn: (post: NewItineraryPost) => createItineraryPost(post),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: [QUERY_KEYS.GET_RECENT_POSTS],
@@ -111,7 +113,7 @@ export const useUpdateNormalPost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (post: IUpdateNormalPost) => updateNormalPost(post),
+    mutationFn: (post: UpdateNormalPost) => updateNormalPost(post),
     onSuccess: async (data) => {
       await queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
@@ -124,7 +126,7 @@ export const useUpdateItineraryPost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (post: IUpdateItineraryPost) => updateItineraryPost(post),
+    mutationFn: (post: UpdateItineraryPost) => updateItineraryPost(post),
     onSuccess: async (data) => {
       await queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_POST_BY_ID, data.postId],
@@ -621,7 +623,7 @@ export const useIsFollowing = (userId1: string, userId2: string) => {
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (profileInfo: IUpdateUserProfile) => updateUser(profileInfo),
+    mutationFn: (profileInfo: UpdateUserProfile) => updateUser(profileInfo),
     onSuccess: (data) => {
       queryClient.refetchQueries({
         queryKey: [QUERY_KEYS.GET_USER_BY_ID, data.userId],
@@ -639,5 +641,13 @@ export const useSearchPosts = (searchTerm: string) => {
       return lastPage.hasMore ? allPages.length + 1 : undefined;
     },
     enabled: !!searchTerm,
+  });
+};
+
+// used to create and get a fresh generated itinerary
+export const useGenerateNewItinerary = () => {
+  return useMutation({
+    mutationFn: (generateItineraryRequest: GenerateItineraryRequest) =>
+      generateNewItinerary(generateItineraryRequest),
   });
 };

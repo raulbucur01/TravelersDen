@@ -26,13 +26,13 @@ import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AccommodationForm from "./AccommodationForm";
 import TripStepForm from "./TripStepForm";
-import { IBasePost } from "@/types";
+import { BasePost } from "@/types";
 import Loader from "../shared/Loader";
 import { useState } from "react";
 import { set } from "date-fns";
 
 type ItineraryPostFormProps = {
-  post?: IBasePost;
+  post?: BasePost;
   action: "Create" | "Update";
 };
 

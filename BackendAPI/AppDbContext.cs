@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using BackendAPI.Models;
 using BackendAPI.Models.LogsForSimilarityUpdates;
+using BackendAPI.Models.ItineraryGenerator;
 
 public class AppDbContext : DbContext
 {
@@ -20,8 +21,48 @@ public class AppDbContext : DbContext
     public DbSet<DeletedPost> DeletedPosts { get; set; }
     public DbSet<Follows> Follows { get; set; }
 
+    // Itinerary generator related
+    public DbSet<Itinerary> Itineraries { get; set; }
+    public DbSet<ItineraryDay> ItineraryDays { get; set; }
+    public DbSet<ItineraryActivity> ItineraryActivities { get; set; }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Itinerary
+        modelBuilder.Entity<Itinerary>(entity =>
+        {
+            entity.HasKey(i => i.ItineraryId);
+            entity.Property(i => i.Destination).IsRequired();
+            entity.Property(i => i.CreatedAt).IsRequired();
+
+            entity.HasMany(i => i.Days)
+                .WithOne(d => d.Itinerary)
+                .HasForeignKey(d => d.ItineraryId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ItineraryDay
+        modelBuilder.Entity<ItineraryDay>(entity =>
+        {
+            entity.HasKey(d => d.DayId);
+            entity.Property(d => d.DayNumber).IsRequired();
+
+            entity.HasMany(d => d.Activities)
+                .WithOne(a => a.ItineraryDay)
+                .HasForeignKey(a => a.ItineraryDayId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ItineraryActivity
+        modelBuilder.Entity<ItineraryActivity>(entity =>
+        {
+            entity.HasKey(a => a.ActivityId);
+            entity.Property(a => a.Title).IsRequired();
+            entity.Property(a => a.Description).IsRequired();
+            entity.Property(a => a.Location).IsRequired();
+        });
+
         // follows
         modelBuilder.Entity<Follows>()
             .HasKey(f => new { f.UserIdFollowing, f.UserIdFollowed });

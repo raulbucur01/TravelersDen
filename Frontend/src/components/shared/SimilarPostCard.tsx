@@ -1,11 +1,11 @@
-import { IBasePost, MediaUrl } from "@/types";
+import { BasePost, MediaUrl } from "@/types";
 import MediaSlideshow from "./MediaSlideshow";
 import { Link } from "react-router-dom";
 import { useGetUserById } from "@/api/tanstack-query/queriesAndMutations";
 import { formatToRelativeDate } from "@/lib/utils";
 
 type SimilarPostCardProps = {
-  post: IBasePost;
+  post: BasePost;
 };
 
 const SimilarPostCard = ({ post }: SimilarPostCardProps) => {

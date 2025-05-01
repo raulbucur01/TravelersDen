@@ -1,7 +1,7 @@
 import Loader from "@/components/shared/Loader";
 import PostCard from "@/components/shared/PostCard";
 import { useGetRecentPosts } from "@/api/tanstack-query/queriesAndMutations";
-import { IBasePost } from "@/types";
+import { BasePost } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
@@ -54,7 +54,7 @@ const Home = () => {
           )}
 
           <ul className="flex flex-col flex-1 gap-5 w-full">
-            {posts.map((post: IBasePost) => (
+            {posts.map((post: BasePost) => (
               <PostCard post={post} key={post.postId} />
             ))}
           </ul>

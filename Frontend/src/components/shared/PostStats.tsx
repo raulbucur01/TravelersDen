@@ -9,12 +9,12 @@ import {
 } from "@/api/tanstack-query/queriesAndMutations";
 import { useState, useEffect } from "react";
 import Loader from "./Loader";
-import { IBasePost } from "@/types";
+import { BasePost } from "@/types";
 import { useNavigate } from "react-router-dom";
 import { formatCommentCount, formatCount, formatLikeCount } from "@/lib/utils";
 
 type PostStatsProps = {
-  post: IBasePost;
+  post: BasePost;
   userId: string;
   usedIn?: "postcard" | "searchcard";
 };

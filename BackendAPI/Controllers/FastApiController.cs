@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using BackendAPI.DTOs.FastApi;
+using BackendAPI.Models.ItineraryGenerator;
 
 namespace BackendAPI.Controllers
 {
@@ -88,22 +89,42 @@ namespace BackendAPI.Controllers
         }
 
         [HttpPost("generate-itinerary")]
-        public async Task<IActionResult> GenerateItinerary([FromBody] GenerateItineraryRequest request)
+        public async Task<IActionResult> GenerateItinerary([FromBody] GenerateItineraryRequestDTO request)
         {
             try
             {
-                var itinerary = await _fastApiService.GenerateItineraryAsync(
+                var generatedItinerary = await _fastApiService.GenerateItineraryAsync(
                     request.Destination,
                     request.Days,
                     request.Preferences
                 );
 
-                if (itinerary == null)
+                if (generatedItinerary == null)
                 {
                     return StatusCode(500, "Failed to generate itinerary.");
                 }
 
-                return Ok(itinerary);
+                // Map to EF entity
+                var itinerary = new Itinerary
+                {
+                    Destination = generatedItinerary.Destination,
+                    CreatedAt = DateTime.UtcNow,
+                    Days = generatedItinerary.Days.Select(d => new ItineraryDay
+                    {
+                        DayNumber = d.Day,
+                        Activities = d.Activities.Select(a => new ItineraryActivity
+                        {
+                            Title = a.Title,
+                            Description = a.Description,
+                            Location = a.Location
+                        }).ToList()
+                    }).ToList()
+                };
+
+                _context.Itineraries.Add(itinerary);
+                await _context.SaveChangesAsync();
+
+                return Ok(new { itinerary.ItineraryId });
             }
             catch (Exception ex)
             {

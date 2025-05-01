@@ -1,6 +1,6 @@
 ﻿namespace BackendAPI.DTOs.FastApi
 {
-    public class GenerateItineraryRequest
+    public class GenerateItineraryRequestDTO
     {
         public string Destination { get; set; }
         public int Days { get; set; }

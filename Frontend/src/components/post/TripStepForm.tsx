@@ -11,12 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FileUploader from "../shared/FileUploader";
 import Map from "../shared/map/Map";
-import { IDisplayedTripStep } from "@/types";
+import { DisplayedTripStep } from "@/types";
 import { useEffect, useState } from "react";
 
 type TripStepFormProps = {
   fieldName: string; // Field name for form context, e.g., "accommodations"
-  tripSteps?: IDisplayedTripStep[]; // when in update mode prefilled
+  tripSteps?: DisplayedTripStep[]; // when in update mode prefilled
   action?: "Create" | "Update";
   onTripStepMediaUpdate?: (
     newFiles: File[],
@@ -44,7 +44,7 @@ const TripStepForm = ({
   const [completelyDeletedTripStepFiles, setCompletelyDeletedTripStepFiles] =
     useState<string[]>([]);
 
-  const [localTripSteps, setLocalTripSteps] = useState<IDisplayedTripStep[]>(
+  const [localTripSteps, setLocalTripSteps] = useState<DisplayedTripStep[]>(
     tripSteps || []
   );
 

@@ -1,9 +1,9 @@
 import Map from "@/components/shared/map/Map";
 import { getAllTripCoordinates } from "@/lib/utils";
-import { IDisplayedTripStep } from "@/types";
+import { DisplayedTripStep } from "@/types";
 
 type TripSummaryDisplayProps = {
-  tripSteps: IDisplayedTripStep[];
+  tripSteps: DisplayedTripStep[];
 };
 
 const TripSummaryDisplay = ({ tripSteps }: TripSummaryDisplayProps) => {

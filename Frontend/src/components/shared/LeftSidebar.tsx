@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { useSignOutAccount } from "@/api/tanstack-query/queriesAndMutations";
 import { INITIAL_USER, useUserContext } from "@/context/AuthContext";
 import { sidebarLinks } from "@/constants";
-import { INavLink } from "@/types";
+import { NavLink as NavLinkType } from "@/types";
 import { ModeToggle } from "../ModeToggle";
 
 const LeftSidebar = () => {
@@ -55,7 +55,7 @@ const LeftSidebar = () => {
         <ModeToggle />
 
         <ul className="flex flex-col gap-4">
-          {sidebarLinks.map((link: INavLink) => {
+          {sidebarLinks.map((link: NavLinkType) => {
             const isActive = pathname === link.route;
 
             return (

@@ -1,18 +1,20 @@
 import { ID } from "appwrite";
 
 import {
-  IBasePost,
+  BasePost,
   IComment,
-  IDisplayedAccommodation,
-  IDisplayedTripStep,
-  INewItineraryPost,
-  INewNormalPost,
-  INewUser,
-  IProfileGridPostResponse,
-  IUpdateItineraryPost,
-  IUpdateNormalPost,
-  IUpdateUserProfile,
+  DisplayedAccommodation,
+  DisplayedTripStep,
+  GenerateItineraryRequest,
+  NewItineraryPost,
+  NewNormalPost,
+  NewUser,
+  ProfileGridPostResponse,
+  UpdateItineraryPost,
+  UpdateNormalPost,
+  UpdateUserProfile,
   MediaUrl,
+  GeneratedItineraryResponse,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
@@ -230,7 +232,7 @@ export async function signOutAccount() {
 
 // ~~~~~~~~~~~~~~~~~~ SIGN IN & SIGN OUT with JWT Handling ~~~~~~~~~~~~~~~~~~
 
-export async function createUserAccount(user: INewUser) {
+export async function createUserAccount(user: NewUser) {
   try {
     const newAccount = await account.create(
       ID.unique(),
@@ -319,7 +321,7 @@ export async function getUserById(id: string | undefined) {
   }
 }
 
-export async function createNormalPost(post: INewNormalPost) {
+export async function createNormalPost(post: NewNormalPost) {
   try {
     const mainFiles = await processFiles(post.files);
 
@@ -338,7 +340,7 @@ export async function createNormalPost(post: INewNormalPost) {
   }
 }
 
-export async function updateNormalPost(post: IUpdateNormalPost) {
+export async function updateNormalPost(post: UpdateNormalPost) {
   try {
     let newFiles: { url: string; type: string }[] = [];
     // add the new files to appwrite if any
@@ -370,7 +372,7 @@ export async function updateNormalPost(post: IUpdateNormalPost) {
   }
 }
 
-export async function createItineraryPost(post: INewItineraryPost) {
+export async function createItineraryPost(post: NewItineraryPost) {
   try {
     const mainFiles = await processFiles(post.files);
 
@@ -401,7 +403,7 @@ export async function createItineraryPost(post: INewItineraryPost) {
   }
 }
 
-export async function updateItineraryPost(post: IUpdateItineraryPost) {
+export async function updateItineraryPost(post: UpdateItineraryPost) {
   try {
     // delete files from appwrite if any
     const allFilesSuccessfullyDeleted = await deleteFilesFromAppwrite(
@@ -614,9 +616,9 @@ export async function getPostSavedBy(postId: string) {
 
 export async function getPostById(
   postId: string
-): Promise<IBasePost | undefined> {
+): Promise<BasePost | undefined> {
   try {
-    const response = await apiClient.get<IBasePost>(`/posts/${postId}`);
+    const response = await apiClient.get<BasePost>(`/posts/${postId}`);
     return response.data;
   } catch (error) {
     console.log(error);
@@ -625,15 +627,15 @@ export async function getPostById(
 
 export async function getItineraryDetails(postId: string): Promise<
   | {
-      tripSteps: IDisplayedTripStep[];
-      accommodations: IDisplayedAccommodation[];
+      tripSteps: DisplayedTripStep[];
+      accommodations: DisplayedAccommodation[];
     }
   | undefined
 > {
   try {
     const response = await apiClient.get<{
-      tripSteps: IDisplayedTripStep[];
-      accommodations: IDisplayedAccommodation[];
+      tripSteps: DisplayedTripStep[];
+      accommodations: DisplayedAccommodation[];
     }>(`/posts/${postId}/itinerary-details`);
 
     return response.data;
@@ -800,7 +802,7 @@ export async function deleteUser(userId: string) {
   }
 }
 
-export async function updateUser(profileInfo: IUpdateUserProfile) {
+export async function updateUser(profileInfo: UpdateUserProfile) {
   try {
     const updateResponse = await account.updateName(profileInfo.name);
 
@@ -937,9 +939,9 @@ export async function getUserPosts({
 }: {
   userId: string;
   pageParam?: number;
-}): Promise<IProfileGridPostResponse> {
+}): Promise<ProfileGridPostResponse> {
   try {
-    const response = await apiClient.get<IProfileGridPostResponse>(
+    const response = await apiClient.get<ProfileGridPostResponse>(
       `/users/${userId}/posts`,
       {
         params: {
@@ -985,6 +987,21 @@ export async function searchPosts({
     });
 
     console.log("in api search", response.data);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function generateNewItinerary(
+  generateItineraryRequest: GenerateItineraryRequest
+): Promise<GeneratedItineraryResponse | undefined> {
+  try {
+    const response = await apiClient.post<GeneratedItineraryResponse>(
+      `/fastApi/generate-itinerary`,
+      generateItineraryRequest
+    );
+
     return response.data;
   } catch (error) {
     console.log(error);

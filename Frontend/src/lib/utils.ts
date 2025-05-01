@@ -1,4 +1,4 @@
-import { IDisplayedTripStep, ISuggestionInfo } from "@/types";
+import { DisplayedTripStep, ISuggestionInfo } from "@/types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { MotionProps } from "framer-motion";
@@ -355,11 +355,11 @@ export const getCenterOfCoordinates = (
 /**
  * Extracts all trip step coordinates from an itinerary post's trip steps.
  *
- * @param {IDisplayedTripStep[]} tripSteps - An array of trip steps.
+ * @param {DisplayedTripStep[]} tripSteps - An array of trip steps.
  * @returns {[number, number][]} An array of [longitude, latitude] pairs.
  */
 export const getAllTripCoordinates = (
-  tripSteps: IDisplayedTripStep[]
+  tripSteps: DisplayedTripStep[]
 ): [number, number][] => {
   return tripSteps.map(({ longitude, latitude }) => [longitude, latitude]);
 };

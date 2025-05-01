@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/api/api";
-import { IContextType, IUser } from "@/types";
+import { ContextType, User } from "@/types";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -21,10 +21,10 @@ const INITIAL_STATE = {
   checkAuthUser: async () => false as boolean,
 };
 
-const AuthContext = createContext<IContextType>(INITIAL_STATE);
+const AuthContext = createContext<ContextType>(INITIAL_STATE);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<IUser>(INITIAL_USER);
+  const [user, setUser] = useState<User>(INITIAL_USER);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 

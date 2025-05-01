@@ -11,11 +11,13 @@ import {
   MapPage,
   UpdatePost,
   PostDetails,
+  ItineraryGeneratorDashboard,
 } from "./_root/pages";
 import RootLayout from "./_root/RootLayout";
 import "./globals.css";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
+import ItineraryEditor from "./_root/pages/ItineraryEditor";
 
 const App = () => {
   const location = useLocation();
@@ -38,6 +40,11 @@ const App = () => {
           <Route path="/profile/:id/*" element={<Profile />} />
           <Route path="/map" element={<MapPage />} />
           <Route path="/update-post/:id" element={<UpdatePost />} />
+          <Route
+            path="/itinerary-generator-dashboard"
+            element={<ItineraryGeneratorDashboard />}
+          />
+          <Route path="itinerary-editor/:id?" element={<ItineraryEditor />} />
         </Route>
       </Routes>
 

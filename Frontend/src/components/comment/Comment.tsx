@@ -1,4 +1,4 @@
-import { IComment, ICommentReply, IUser } from "@/types";
+import { IComment, ICommentReply, User } from "@/types";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import CommentForm from "./CommentForm";
@@ -10,7 +10,7 @@ import CommentStats from "./CommentStats";
 type CommentProps = {
   comment?: IComment;
   reply?: ICommentReply;
-  currentUser: IUser;
+  currentUser: User;
   headCommentId: string;
 };
 

@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 import { formatToRelativeDate } from "@/lib/utils";
 import { useUserContext } from "@/context/AuthContext";
 import PostStats from "./PostStats";
-import { IBasePost } from "@/types";
+import { BasePost } from "@/types";
 import { useGetUserById } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "./Loader";
 import MediaCarousel from "./MediaCarousel";
 import ExpandableText from "./ExpandableText";
 
 type PostCardProps = {
-  post: IBasePost;
+  post: BasePost;
 };
 
 const PostCard = ({ post }: PostCardProps) => {

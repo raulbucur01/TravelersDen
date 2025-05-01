@@ -1,10 +1,10 @@
-import { IDisplayedTripStep } from "@/types";
+import { DisplayedTripStep } from "@/types";
 import ExpandableText from "../shared/ExpandableText";
 import Map from "../shared/map/Map";
 import MediaCarousel from "../shared/MediaCarousel";
 
 type TripStepDisplayProps = {
-  tripSteps: IDisplayedTripStep[];
+  tripSteps: DisplayedTripStep[];
 };
 
 const TripStepDisplay = ({ tripSteps }: TripStepDisplayProps) => {

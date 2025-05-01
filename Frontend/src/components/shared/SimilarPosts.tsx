@@ -1,4 +1,4 @@
-import { IBasePost, MediaUrl } from "@/types";
+import { BasePost, MediaUrl } from "@/types";
 import MediaSlideshow from "./MediaSlideshow";
 import { useUserContext } from "@/context/AuthContext";
 import {
@@ -20,7 +20,7 @@ const SimilarPosts = ({ postId }: SimilarPostsProps) => {
 
   return (
     <div className="w-full overflow-y-auto flex flex-col items-center gap-7 pr-10">
-      {similarPosts.map((post: IBasePost, index: number) => (
+      {similarPosts.map((post: BasePost, index: number) => (
         <SimilarPostCard post={post} key={index} />
       ))}
     </div>
