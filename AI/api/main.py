@@ -31,19 +31,19 @@ scheduler.add_job(periodic_similarity_update_task, "interval", minutes=2)
 scheduler.add_job(delete_processed_data_task, "interval", minutes=5)
 
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     """Lifespan function to manage the scheduler lifecycle."""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Lifespan function to manage the scheduler lifecycle."""
 
-#     print("⏳ Starting Scheduler...")
-#     scheduler.start()  # Start scheduler when FastAPI starts
-#     print("✅ Scheduler started")
-#     periodic_similarity_update_task()
-#     delete_processed_data_task()
-#     yield  # Keep FastAPI running
-#     print("⏳ Shutting Down Scheduler...")
-#     scheduler.shutdown()  # Shutdown scheduler when FastAPI stops
-#     print("✅ Scheduler shut down")
+    # print("⏳ Starting Scheduler...")
+    # scheduler.start()  # Start scheduler when FastAPI starts
+    # print("✅ Scheduler started")
+    # periodic_similarity_update_task()
+    # delete_processed_data_task()
+    yield  # Keep FastAPI running
+    # print("⏳ Shutting Down Scheduler...")
+    # scheduler.shutdown()  # Shutdown scheduler when FastAPI stops
+    # print("✅ Scheduler shut down")
 
 
 try:
@@ -54,8 +54,8 @@ except Exception as e:
     raise
 
 # http://127.0.0.1:8000/docs
-# app = FastAPI(lifespan=lifespan)
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
+# app = FastAPI()
 
 # Add CORS middleware to allow all origins (or specify your frontend's URL)
 app.add_middleware(
@@ -90,12 +90,9 @@ async def get_similar_posts(post_id: str):
 @app.post("/generate-itinerary", response_model=GeneratedItinerary)
 async def generate_itinerary_endpoint(request: GenerateItineraryRequest):
     try:
-        print(request.destination, request.days, request.preferences)
         itinerary = generate_itinerary(
             request.destination, request.days, request.preferences
         )
-
-        print(itinerary)
 
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))

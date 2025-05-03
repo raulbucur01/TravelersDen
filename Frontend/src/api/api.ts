@@ -14,7 +14,7 @@ import {
   UpdateNormalPost,
   UpdateUserProfile,
   MediaUrl,
-  GeneratedItineraryResponse,
+  GeneratedItinerary,
   NewGeneratedItineraryResponse,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
@@ -1002,6 +1002,47 @@ export async function generateNewItinerary(
     const response = await apiClient.post<NewGeneratedItineraryResponse>(
       `/itinerary-generator/generate-itinerary`,
       generateItineraryRequest
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+// get user's generated itineraries
+export async function getGeneratedItinerariesForUser(
+  userId: string
+): Promise<GeneratedItinerary[] | undefined> {
+  try {
+    const response = await apiClient.get<GeneratedItinerary[]>(
+      `/itinerary-generator/generated-itineraries/by-user/${userId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function deleteGeneratedItinerary(itineraryId: string) {
+  try {
+    const response = await apiClient.delete(
+      `/itinerary-generator/generated-itineraries/${itineraryId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function getGeneratedItineraryById(
+  itineraryId: string
+): Promise<GeneratedItinerary | undefined> {
+  try {
+    const response = await apiClient.get<GeneratedItinerary>(
+      `/itinerary-generator/generated-itineraries/by-id/${itineraryId}`
     );
 
     return response.data;

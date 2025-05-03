@@ -2,17 +2,20 @@
 {
     public class GeneratedItineraryDTO
     {
+        public string ItineraryId { get; set; }
+        public string UserId { get; set; }
         public string Destination { get; set; }
-        public List<DayDTO> Days { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public List<ItineraryDayDTO> Days { get; set; }
     }
 
-    public class DayDTO
+    public class ItineraryDayDTO
     {
         public int Day { get; set; }
-        public List<ActivityDTO> Activities { get; set; }
+        public List<ItineraryActivityDTO> Activities { get; set; }
     }
 
-    public class ActivityDTO
+    public class ItineraryActivityDTO
     {
         public string Title { get; set; }
         public string Description { get; set; }

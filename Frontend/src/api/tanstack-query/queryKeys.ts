@@ -27,9 +27,12 @@ export enum QUERY_KEYS {
   GET_RELATED_ITINERARY_MEDIA_URLS = "getRelatedItineraryMediaUrls",
   GET_SIMILAR_POSTS = "getSimilarPosts",
   GET_SEARCH_POSTS = "getSearchPosts",
-  GET_GENERATED_ITINERARY = "getGeneratedItinerary",
 
   // SEARCH KEYS
   SEARCH_POSTS = "getSearchPosts",
   GET_MAP_SEARCH_RESULTS = "getMapSearchResults",
+
+  // ITINERARY GENERATOR KEYS
+  GET_GENERATED_ITINERARY_BY_ID = "getGeneratedItineraryById",
+  GET_GENERATED_ITINERARIES_FOR_USER = "getGeneratedItinerariesForUser",
 }

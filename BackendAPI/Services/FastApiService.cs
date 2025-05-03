@@ -42,7 +42,7 @@ namespace BackendAPI.Services
             }
         }
 
-        public async Task<GeneratedItineraryDTO?> GenerateItineraryAsync(string destination, int days, List<string> preferences)
+        public async Task<GeneratedItineraryFromFastApiDTO?> GenerateItineraryAsync(string destination, int days, List<string> preferences)
         {
             try
             {
@@ -55,9 +55,7 @@ namespace BackendAPI.Services
                     preferences
                 };
 
-                Console.WriteLine($"Request Body: {JsonSerializer.Serialize(requestBody)}");
                 HttpResponseMessage response = await _httpClient.PostAsJsonAsync(fastApiUrl, requestBody);
-                Console.WriteLine($"Response Status: {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -66,7 +64,7 @@ namespace BackendAPI.Services
 
                 string responseContent = await response.Content.ReadAsStringAsync();
 
-                return JsonSerializer.Deserialize<GeneratedItineraryDTO>(responseContent, _jsonOptions);
+                return JsonSerializer.Deserialize<GeneratedItineraryFromFastApiDTO>(responseContent, _jsonOptions);
             }
             catch (Exception ex)
             {

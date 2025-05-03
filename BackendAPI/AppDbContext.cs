@@ -41,6 +41,8 @@ public class AppDbContext : DbContext
                 .HasForeignKey(d => d.ItineraryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // if user (parent) is deleted, delete all itineraries (children) of that user
+            // cascade works from parent to child (where the foreign key is)
             entity.HasOne(i => i.User)
                 .WithMany()
                 .HasForeignKey(i => i.UserId)
@@ -51,7 +53,7 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ItineraryDay>(entity =>
         {
             entity.HasKey(d => d.DayId);
-            entity.Property(d => d.DayNumber).IsRequired();
+            entity.Property(d => d.Day).IsRequired();
 
             entity.HasMany(d => d.Activities)
                 .WithOne(a => a.ItineraryDay)

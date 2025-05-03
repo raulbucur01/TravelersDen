@@ -1,58 +1,28 @@
-import { useGenerateNewItinerary } from "@/api/tanstack-query/queriesAndMutations";
+import {
+  useDeleteGeneratedItinerary,
+  useGenerateNewItinerary,
+  useGetGeneratedItinerariesForUser,
+} from "@/api/tanstack-query/queriesAndMutations";
 import GeneratedItineraryHistory from "@/components/itinerary-generator/GeneratedItineraryHistory";
 import GeneratorForm from "@/components/itinerary-generator/GeneratorForm";
 import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-const mockHistory = [
-  {
-    id: "1",
-    destination: "Rome",
-    days: [
-      {
-        day: 1,
-        activities: [
-          { title: "Visit Colosseum" },
-          { title: "Roman Forum walk" },
-        ],
-      },
-      {
-        day: 2,
-        activities: [
-          { title: "Vatican Museums" },
-          { title: "St. Peter's Basilica" },
-        ],
-      },
-    ],
-    createdAt: "2024-04-30",
-  },
-  {
-    id: "2",
-    destination: "Paris",
-    days: [
-      {
-        day: 1,
-        activities: [{ title: "Eiffel Tower" }, { title: "Louvre Museum" }],
-      },
-      {
-        day: 2,
-        activities: [
-          { title: "Seine River Cruise" },
-          { title: "Montmartre walk" },
-        ],
-      },
-    ],
-    createdAt: "2024-04-25",
-  },
-];
-
 const ItineraryGeneratorDashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user: currentUser } = useUserContext();
+
   const { mutateAsync: generateNewItinerary, isPending: isGenerating } =
     useGenerateNewItinerary();
+  const {
+    data: generatedItineraries,
+    refetch: refetchItineraries,
+    isPending: isGettingItineraries,
+  } = useGetGeneratedItinerariesForUser(currentUser.userId);
+  const { mutateAsync: deleteItinerary, isPending: isDeleting } =
+    useDeleteGeneratedItinerary();
 
   // call the useGenerateNewItinerary inside the dashboard and after it
   // returns the id we navigate to ItineraryEditor and fetch the data there
@@ -79,13 +49,12 @@ const ItineraryGeneratorDashboard = () => {
   };
 
   const handleViewEdit = (id: string) => {
-    console.log("View/Edit itinerary:", id);
     navigate(`/itinerary-editor/${id}`);
   };
 
-  const handleDelete = (id: string) => {
-    console.log("Delete itinerary:", id);
-    // Call backend or remove from state
+  const handleDelete = async (id: string) => {
+    await deleteItinerary(id);
+    await refetchItineraries();
   };
 
   return (
@@ -102,7 +71,7 @@ const ItineraryGeneratorDashboard = () => {
           Your generated itineraries
         </h2>
         <GeneratedItineraryHistory
-          history={mockHistory}
+          generatedItineraries={generatedItineraries || []}
           onViewEdit={handleViewEdit}
           onDelete={handleDelete}
         />

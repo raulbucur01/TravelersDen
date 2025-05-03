@@ -45,6 +45,9 @@ import {
   getUserPosts,
   searchPosts,
   generateNewItinerary,
+  getGeneratedItineraryById,
+  getGeneratedItinerariesForUser,
+  deleteGeneratedItinerary,
 } from "../api";
 import {
   NewItineraryPost,
@@ -644,10 +647,33 @@ export const useSearchPosts = (searchTerm: string) => {
   });
 };
 
+// Queries and mutations for generated itineraries
 // used to create and get a fresh generated itinerary id
 export const useGenerateNewItinerary = () => {
   return useMutation({
     mutationFn: (generateItineraryRequest: GenerateItineraryRequest) =>
       generateNewItinerary(generateItineraryRequest),
+  });
+};
+
+export const useGetGeneratedItinerariesForUser = (userId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_GENERATED_ITINERARIES_FOR_USER, userId],
+    queryFn: () => getGeneratedItinerariesForUser(userId),
+    enabled: !!userId,
+  });
+};
+
+export const useDeleteGeneratedItinerary = () => {
+  return useMutation({
+    mutationFn: (itineraryId: string) => deleteGeneratedItinerary(itineraryId),
+  });
+};
+
+export const useGetGeneratedItineraryById = (itineraryId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_GENERATED_ITINERARY_BY_ID, itineraryId],
+    queryFn: () => getGeneratedItineraryById(itineraryId),
+    enabled: !!itineraryId,
   });
 };

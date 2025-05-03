@@ -232,8 +232,11 @@ export type NewGeneratedItineraryResponse = {
   itineraryId: string;
 };
 
-export type GeneratedItineraryResponse = {
+export type GeneratedItinerary = {
+  itineraryId: string;
+  userId: string;
   destination: string;
+  createdAt: string;
   days: ItineraryDay[];
 };
 
