@@ -1,5 +1,7 @@
+import { useGenerateNewItinerary } from "@/api/tanstack-query/queriesAndMutations";
 import GeneratedItineraryHistory from "@/components/itinerary-generator/GeneratedItineraryHistory";
 import GeneratorForm from "@/components/itinerary-generator/GeneratorForm";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 const mockHistory = [
@@ -45,19 +47,38 @@ const mockHistory = [
 ];
 
 const ItineraryGeneratorDashboard = () => {
+  const { toast } = useToast();
   const navigate = useNavigate();
+  const { mutateAsync: generateNewItinerary, isPending: isGenerating } =
+    useGenerateNewItinerary();
 
   // call the useGenerateNewItinerary inside the dashboard and after it
   // returns the id we navigate to ItineraryEditor and fetch the data there
-  const handleGenerate = (
+  const handleGenerateItinerary = async (
     destination: string,
     days: number,
     preferences: string[]
-  ) => {};
+  ) => {
+    console.log("Generate itinerary:", destination, days, preferences);
+    const response = await generateNewItinerary({
+      destination,
+      days,
+      preferences,
+    });
+
+    if (response?.itineraryId) {
+      navigate(`/itinerary-editor/${response.itineraryId}`);
+    } else {
+      return toast({
+        title: "Failed to generate itinerary",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleViewEdit = (id: string) => {
     console.log("View/Edit itinerary:", id);
-    // Navigate to /itinerary-editor/:id
+    navigate(`/itinerary-editor/${id}`);
   };
 
   const handleDelete = (id: string) => {
@@ -72,7 +93,7 @@ const ItineraryGeneratorDashboard = () => {
         <p className="text-gray-600 mb-6">
           Plan your perfect trip with AI assistance!
         </p>
-        <GeneratorForm onGenerate={handleGenerate} />
+        <GeneratorForm onGenerate={handleGenerateItinerary} />
       </div>
       <div>
         <h2 className="text-2xl font-semibold mb-4">

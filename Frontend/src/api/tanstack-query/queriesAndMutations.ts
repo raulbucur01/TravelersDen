@@ -644,7 +644,7 @@ export const useSearchPosts = (searchTerm: string) => {
   });
 };
 
-// used to create and get a fresh generated itinerary
+// used to create and get a fresh generated itinerary id
 export const useGenerateNewItinerary = () => {
   return useMutation({
     mutationFn: (generateItineraryRequest: GenerateItineraryRequest) =>

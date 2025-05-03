@@ -1,3 +1,4 @@
+import { useToast } from "@/hooks/use-toast";
 import React, { useState } from "react";
 import CreatableSelect from "react-select/creatable";
 
@@ -19,6 +20,7 @@ interface GeneratorFormProps {
 }
 
 const GeneratorForm = ({ onGenerate }: GeneratorFormProps) => {
+  const { toast } = useToast();
   const [destination, setDestination] = useState("");
   const [days, setDays] = useState(1);
   const [preferences, setPreferences] = useState<
@@ -27,22 +29,44 @@ const GeneratorForm = ({ onGenerate }: GeneratorFormProps) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate destination
+    if (!destination.trim()) {
+      toast({
+        title: "Destination is required",
+        description: "Please enter a destination for your itinerary.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate days
+    if (isNaN(days) || days < 1) {
+      toast({
+        title: "Invalid number of days",
+        description: "Please enter a valid number of days (at least 1).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // create preference strings as an array
     const prefStrings = preferences.map((p) => p.value);
-    onGenerate(destination, days, prefStrings);
+
+    onGenerate(destination.trim(), Number(days), prefStrings);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <label className="block mb-1 font-medium text-gray-700">
-          Destination
+          Your Destination
         </label>
         <input
           type="text"
           value={destination}
           onChange={(e) => setDestination(e.target.value)}
           className="w-full p-2 border rounded bg-dm-dark"
-          required
         />
       </div>
 
@@ -52,17 +76,15 @@ const GeneratorForm = ({ onGenerate }: GeneratorFormProps) => {
         </label>
         <input
           type="number"
-          min={1}
-          value={days}
+          value={isNaN(days) ? "" : days}
           onChange={(e) => setDays(parseInt(e.target.value))}
           className="w-full p-2 border rounded bg-dm-dark"
-          required
         />
       </div>
 
       <div>
         <label className="block mb-1 font-medium text-gray-700">
-          Preferences
+          Preferences (optional)
         </label>
         <CreatableSelect
           isMulti

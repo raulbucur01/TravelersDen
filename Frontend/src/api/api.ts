@@ -15,6 +15,7 @@ import {
   UpdateUserProfile,
   MediaUrl,
   GeneratedItineraryResponse,
+  NewGeneratedItineraryResponse,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
@@ -993,11 +994,12 @@ export async function searchPosts({
   }
 }
 
+// generate new itinerary
 export async function generateNewItinerary(
   generateItineraryRequest: GenerateItineraryRequest
-): Promise<GeneratedItineraryResponse | undefined> {
+): Promise<NewGeneratedItineraryResponse | undefined> {
   try {
-    const response = await apiClient.post<GeneratedItineraryResponse>(
+    const response = await apiClient.post<NewGeneratedItineraryResponse>(
       `/fastApi/generate-itinerary`,
       generateItineraryRequest
     );

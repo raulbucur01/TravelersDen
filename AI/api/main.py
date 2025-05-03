@@ -90,9 +90,12 @@ async def get_similar_posts(post_id: str):
 @app.post("/generate-itinerary", response_model=GeneratedItinerary)
 async def generate_itinerary_endpoint(request: GenerateItineraryRequest):
     try:
+        print(request.destination, request.days, request.preferences)
         itinerary = generate_itinerary(
             request.destination, request.days, request.preferences
         )
+
+        print(itinerary)
 
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
