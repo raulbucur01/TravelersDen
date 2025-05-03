@@ -29,16 +29,19 @@ def generate_itinerary(destination: str, days: int, preferences: list[str]) -> d
 
         raw_output = response["message"]["content"]
     except Exception as e:
+        print(f"AI generation failed: {str(e)}")
         raise RuntimeError(f"AI generation failed: {str(e)}")
 
     try:
         itinerary_data = json.loads(raw_output)
     except json.JSONDecodeError:
+        print("AI response was not valid JSON.")
         raise ValueError("AI response was not valid JSON.")
 
     try:
         validated_itinerary = GeneratedItinerary(**itinerary_data)
     except Exception as e:
+        print(f"AI response JSON did not match expected schema: {str(e)}")
         raise ValueError(f"AI response JSON did not match expected schema: {str(e)}")
 
     return validated_itinerary.model_dump()

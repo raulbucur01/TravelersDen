@@ -40,6 +40,11 @@ public class AppDbContext : DbContext
                 .WithOne(d => d.Itinerary)
                 .HasForeignKey(d => d.ItineraryId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(i => i.User)
+                .WithMany()
+                .HasForeignKey(i => i.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // ItineraryDay

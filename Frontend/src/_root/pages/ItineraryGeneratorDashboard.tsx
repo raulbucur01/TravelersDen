@@ -1,6 +1,7 @@
 import { useGenerateNewItinerary } from "@/api/tanstack-query/queriesAndMutations";
 import GeneratedItineraryHistory from "@/components/itinerary-generator/GeneratedItineraryHistory";
 import GeneratorForm from "@/components/itinerary-generator/GeneratorForm";
+import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
@@ -49,6 +50,7 @@ const mockHistory = [
 const ItineraryGeneratorDashboard = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user: currentUser } = useUserContext();
   const { mutateAsync: generateNewItinerary, isPending: isGenerating } =
     useGenerateNewItinerary();
 
@@ -59,11 +61,11 @@ const ItineraryGeneratorDashboard = () => {
     days: number,
     preferences: string[]
   ) => {
-    console.log("Generate itinerary:", destination, days, preferences);
     const response = await generateNewItinerary({
       destination,
       days,
       preferences,
+      userId: currentUser.userId,
     });
 
     if (response?.itineraryId) {

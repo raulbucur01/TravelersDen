@@ -225,6 +225,7 @@ export type GenerateItineraryRequest = {
   destination: string;
   days: number;
   preferences: string[];
+  userId: string;
 };
 
 export type NewGeneratedItineraryResponse = {

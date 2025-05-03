@@ -1000,7 +1000,7 @@ export async function generateNewItinerary(
 ): Promise<NewGeneratedItineraryResponse | undefined> {
   try {
     const response = await apiClient.post<NewGeneratedItineraryResponse>(
-      `/fastApi/generate-itinerary`,
+      `/itinerary-generator/generate-itinerary`,
       generateItineraryRequest
     );
 
