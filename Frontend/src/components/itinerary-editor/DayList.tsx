@@ -9,16 +9,21 @@ interface DayList {
   days: ItineraryDay[];
   // called from day list
   onAddDay: () => void;
-  onAddActivity: (
-    dayIndex: number,
-    itineraryActivity: ItineraryActivity
-  ) => void;
-  onDeleteDay: (dayIndex: number) => void;
+  onAddActivity: (dayId: string, itineraryActivity: ItineraryActivity) => void;
+  onDeleteDay: (dayId: string) => void;
   onRegenerateDay: () => void;
   // passed to individual activities
-  onEditActivity: () => void;
-  onDeleteActivity: (dayIndex: number, activityIndex: number) => void;
-  onRegenerateActivity?: () => void;
+  onEditActivity: (
+    dayId: string,
+    activityId: string,
+    editedActivity: ItineraryActivity
+  ) => void;
+  onDeleteActivity: (dayId: string, activityId: string) => void;
+  onRegenerateActivity: () => void;
+  onReorderActivities: (
+    dayId: string,
+    newActivities: ItineraryActivity[]
+  ) => void;
 }
 
 const DayList = ({
@@ -32,18 +37,19 @@ const DayList = ({
   onEditActivity,
   onDeleteActivity,
   onRegenerateActivity,
+  onReorderActivities,
 }: DayList) => {
   const { toast } = useToast();
   // used to open a dialog for a specific day index (we know which day's dialog is opened)
-  const [openDialogForDayIndex, setOpenDialogForDayIndex] = useState<
-    number | null
-  >(null);
+  const [openDialogForDayId, setOpenDialogForDayId] = useState<string | null>(
+    null
+  );
 
   const [newActivityTitle, setNewActivityTitle] = useState("");
   const [newActivityDescription, setNewActivityDescription] = useState("");
   const [newActivityLocation, setNewActivityLocation] = useState("");
 
-  const handleAddActivity = (index: number) => {
+  const handleAddActivity = (dayId: string) => {
     if (!newActivityTitle || !newActivityDescription || !newActivityLocation) {
       toast({
         title: "Missing Fields",
@@ -53,16 +59,20 @@ const DayList = ({
       return;
     }
 
-    // pass operation to parent
+    // create new activity and send to parent
     const newActivity: ItineraryActivity = {
       title: newActivityTitle,
       description: newActivityDescription,
       location: newActivityLocation,
+      activityId: undefined, // generated in parent
     };
-    onAddActivity(index, newActivity);
+    onAddActivity(dayId, newActivity);
 
-    // reset
-    setOpenDialogForDayIndex(null);
+    setOpenDialogForDayId(null);
+  };
+
+  const handleOpenAddDialogSetup = (dayId: string) => {
+    setOpenDialogForDayId(dayId);
     setNewActivityTitle("");
     setNewActivityDescription("");
     setNewActivityLocation("");
@@ -71,7 +81,7 @@ const DayList = ({
   return (
     <div className="flex-1 overflow-x-visible max-h-[80vh] overflow-y-auto custom-scrollbar space-y-6 p-4 rounded">
       {days.map((day, index) => (
-        <div className="flex space-x-2">
+        <div key={day.dayId} className="flex space-x-2">
           {/* Left: Buttons */}
           <div className="flex flex-col w-16 items-center justify-center space-y-2">
             {/* Add Activity Button with Dialog */}
@@ -79,7 +89,7 @@ const DayList = ({
               trigger={
                 <Button
                   className="px-2 py-1 bg-green-600 text-white text-xl rounded hover:bg-green-700 w-10 h-10"
-                  onClick={() => setOpenDialogForDayIndex(index)}
+                  onClick={() => handleOpenAddDialogSetup(day.dayId!)}
                 >
                   +
                 </Button>
@@ -87,13 +97,10 @@ const DayList = ({
               title="Add Activity"
               description={`Add an activity to Day ${index + 1}`}
               actionText="Add"
-              isOpen={index === openDialogForDayIndex}
-              onConfirm={() => handleAddActivity(index)}
+              isOpen={day.dayId === openDialogForDayId}
+              onConfirm={() => handleAddActivity(day.dayId!)}
               onClose={() => {
-                setNewActivityTitle("");
-                setNewActivityDescription("");
-                setNewActivityLocation("");
-                setOpenDialogForDayIndex(null);
+                setOpenDialogForDayId(null);
               }}
             >
               <div className="space-y-2">
@@ -104,12 +111,11 @@ const DayList = ({
                   onChange={(e) => setNewActivityTitle(e.target.value)}
                   className="w-full p-2 rounded bg-dm-dark text-dm-light"
                 />
-                <input
-                  type="text"
+                <textarea
                   placeholder="Description"
                   value={newActivityDescription}
                   onChange={(e) => setNewActivityDescription(e.target.value)}
-                  className="w-full p-2 rounded bg-dm-dark text-dm-light"
+                  className="w-full h-32 custom-scrollbar p-2 rounded bg-dm-dark text-dm-light"
                 />
                 <input
                   type="text"
@@ -125,7 +131,7 @@ const DayList = ({
             </Button>
             <Button
               className="px-2 py-1 bg-dm-dark text-white text-xl rounded hover:bg-blue-700 w-10 h-10"
-              onClick={() => onDeleteDay(index)}
+              onClick={() => onDeleteDay(day.dayId!)}
             >
               <img
                 src="/assets/icons/delete.svg"
@@ -137,14 +143,16 @@ const DayList = ({
           </div>
 
           {/* Right: Day card */}
-          <div className="flex-1 rounded p-4 bg-white dark:bg-gray-800">
+          <div className="flex-1 rounded p-4 bg-dm-dark">
             <h2 className="text-xl font-semibold mb-2">Day {day.day}</h2>
             <ActivityList
               activities={day.activities}
-              dayIndex={index}
+              dayId={day.dayId!}
               onDeleteActivity={onDeleteActivity}
               onEditActivity={onEditActivity}
               onRegenerateActivity={onRegenerateActivity}
+              // for dnd
+              onReorderActivities={onReorderActivities}
             />
           </div>
         </div>

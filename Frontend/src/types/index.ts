@@ -241,11 +241,13 @@ export type GeneratedItinerary = {
 };
 
 export type ItineraryDay = {
+  dayId?: string; // for frontend use
   day: number;
   activities: ItineraryActivity[];
 };
 
 export type ItineraryActivity = {
+  activityId?: string; // for frontend use
   title: string;
   description: string;
   location: string;

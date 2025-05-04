@@ -1,59 +1,81 @@
 import { ItineraryActivity } from "@/types";
-import ExpandableText from "../shared/ExpandableText";
-import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import SortableActivityItem from "./SortableActivityItem";
 
 interface ActivityListProps {
   activities: ItineraryActivity[];
-  dayIndex: number;
-  onEditActivity: () => void;
-  onDeleteActivity: (dayIndex: number, activityIndex: number) => void;
-  onRegenerateActivity?: () => void;
+  dayId: string;
+  onEditActivity: (
+    dayId: string,
+    activityId: string,
+    editedActivity: ItineraryActivity
+  ) => void;
+  onDeleteActivity: (dayId: string, activityId: string) => void;
+  onRegenerateActivity: () => void;
+
+  // for dnd
+  onReorderActivities: (
+    dayId: string,
+    newActivities: ItineraryActivity[]
+  ) => void;
 }
 
 const ActivityList = ({
   activities,
-  dayIndex,
+  dayId,
   onDeleteActivity,
   onEditActivity,
   onRegenerateActivity,
+  onReorderActivities,
 }: ActivityListProps) => {
-  const { toast } = useToast();
-  // used to open a dialog for a specific activity index (we know which activity's dialog is opened)
-  const [openDialogForActivityIndex, setOpenDialogForActivityIndex] = useState<
-    number | null
-  >(null);
+  const sensors = useSensors(useSensor(PointerSensor));
 
-  const [editedActivityTitle, setEditedActivityTitle] = useState("");
-  const [editedActivityDescription, setEditedActivityDescription] =
-    useState("");
-  const [editedActivityLocation, setEditedActivityLocation] = useState("");
+  const handleDragEnd = (event: any) => {
+    const { active, over } = event;
+    if (active.id !== over.id) {
+      const oldIndex = activities.findIndex((a) => a.activityId === active.id);
+      const newIndex = activities.findIndex((a) => a.activityId === over.id);
 
-  const handleEditActivity = (index: number) => {};
+      const newActivities = arrayMove(activities, oldIndex, newIndex);
+      onReorderActivities(dayId, newActivities);
+    }
+  };
 
   return (
-    <ul className="space-y-2">
-      {activities.map((activity, index) => (
-        <li className="border p-2 rounded bg-gray-50">
-          <div className="font-medium text-dm-dark">{activity.title}</div>
-          <div className="text-sm text-gray-600">{activity.description}</div>
-          <div className="text-sm text-gray-500">
-            Location: {activity.location}
-          </div>
-          <div className="mt-2 space-x-2">
-            <button className="text-blue-600 hover:underline text-sm">
-              Edit
-            </button>
-            <button
-              className="text-red hover:underline text-sm"
-              onClick={() => onDeleteActivity(dayIndex, index)}
-            >
-              Delete
-            </button>
-          </div>
-        </li>
-      ))}
-    </ul>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={closestCenter}
+      onDragEnd={handleDragEnd}
+    >
+      <SortableContext
+        items={activities.map((a) => a.activityId!)}
+        strategy={verticalListSortingStrategy}
+      >
+        <ul className="space-y-5">
+          {activities.map((activity) => (
+            <SortableActivityItem
+              key={activity.activityId}
+              activity={activity}
+              dayId={dayId}
+              onEditActivity={onEditActivity}
+              onDeleteActivity={onDeleteActivity}
+              onRegenerateActivity={onRegenerateActivity}
+            />
+          ))}
+        </ul>
+      </SortableContext>
+    </DndContext>
   );
 };
 

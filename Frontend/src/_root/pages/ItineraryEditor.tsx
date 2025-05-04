@@ -3,6 +3,7 @@ import DayList from "@/components/itinerary-editor/DayList";
 import { GeneratedItinerary, ItineraryActivity, ItineraryDay } from "@/types";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { nanoid } from "nanoid";
 
 const ItineraryEditor = () => {
   const { id } = useParams();
@@ -15,7 +16,19 @@ const ItineraryEditor = () => {
   // Sync fetched itinerary into local state when it arrives
   useEffect(() => {
     if (itinerary) {
-      setEditedItinerary(itinerary);
+      // Add ids to activities and days for UI dnd
+      const itineraryWithIds = {
+        ...itinerary,
+        days: itinerary.days.map((day) => ({
+          ...day,
+          dayId: nanoid(),
+          activities: day.activities.map((activity) => ({
+            ...activity,
+            activityId: nanoid(),
+          })),
+        })),
+      };
+      setEditedItinerary(itineraryWithIds);
     }
   }, [itinerary]);
 
@@ -25,13 +38,22 @@ const ItineraryEditor = () => {
     return <div className="p-4 text-red-600">Itinerary not found.</div>;
 
   // done by parent
-  const handleDeleteItinerary = () => {};
-  const handleSaveItinerary = () => {};
-  const handleTurnIntoPost = () => {};
+  const handleDeleteItinerary = () => {
+    console.log("NOT IMPLEMENTED");
+  };
+
+  const handleSaveItinerary = () => {
+    console.log("NOT IMPLEMENTED");
+  };
+
+  const handleTurnIntoPost = () => {
+    console.log("NOT IMPLEMENTED");
+  };
 
   // operations inside day list
   const handleAddDay = () => {
     const newDay: ItineraryDay = {
+      dayId: nanoid(),
       day: editedItinerary.days.length + 1,
       activities: [],
     };
@@ -42,31 +64,39 @@ const ItineraryEditor = () => {
     });
   };
 
-  const handleDeleteDay = (dayIndex: number) => {
+  const handleDeleteDay = (dayId: string) => {
     const updatedDays = editedItinerary.days.filter(
-      (_, index) => index !== dayIndex
+      (day) => day.dayId !== dayId
     );
 
-    // Optionally re-number days if you rely on `day.day`
-    const renumberedDays = updatedDays.map((day, idx) => ({
-      ...day,
-      day: idx + 1,
-    }));
+    // // Optionally re-number days if you rely on `day.day`
+    // const renumberedDays = updatedDays.map((day, idx) => ({
+    //   ...day,
+    //   day: idx + 1,
+    // }));
 
     setEditedItinerary({
       ...editedItinerary,
-      days: renumberedDays,
+      days: updatedDays,
     });
   };
 
-  const handleRegenerateDay = () => {};
-  const handleAddActivity = (dayIndex: number, activity: ItineraryActivity) => {
-    const updatedDays = editedItinerary.days.map((day, idx) => {
-      if (idx !== dayIndex) return day;
+  const handleRegenerateDay = () => {
+    console.log("NOT IMPLEMENTED");
+  };
+
+  const handleAddActivity = (dayId: string, activity: ItineraryActivity) => {
+    const newActivity = {
+      ...activity,
+      activityId: nanoid(),
+    };
+
+    const updatedDays = editedItinerary.days.map((day) => {
+      if (day.dayId !== dayId) return day;
 
       return {
         ...day,
-        activities: [...day.activities, activity],
+        activities: [...day.activities, newActivity],
       };
     });
 
@@ -77,15 +107,20 @@ const ItineraryEditor = () => {
   };
 
   // operations inside activity, passed to day list then to activity item
-  const handleEditActivity = () => {};
+  const handleEditActivity = (
+    dayId: string,
+    activityId: string,
+    editedActivity: ItineraryActivity
+  ) => {
+    const updatedDays = editedItinerary.days.map((day) => {
+      if (day.dayId !== dayId) return day;
 
-  const handleDeleteActivity = (dayIndex: number, activityIndex: number) => {
-    const updatedDays = editedItinerary!.days.map((day, idx) => {
-      if (idx !== dayIndex) return day;
+      const updatedActivities = day.activities.map((act) => {
+        if (act.activityId !== activityId) return act;
 
-      const updatedActivities = day.activities.filter(
-        (_, actIdx) => actIdx !== activityIndex
-      );
+        return editedActivity;
+      });
+
       return {
         ...day,
         activities: updatedActivities,
@@ -93,17 +128,69 @@ const ItineraryEditor = () => {
     });
 
     setEditedItinerary({
-      ...editedItinerary!,
+      ...editedItinerary,
       days: updatedDays,
     });
   };
 
-  const handleRegenerateActivity = () => {};
+  const handleDeleteActivity = (dayId: string, activityId: string) => {
+    const updatedDays = editedItinerary.days.map((day) => {
+      if (day.dayId !== dayId) return day;
 
-  const handleRevertAllChanges = () => {
-    setEditedItinerary(itinerary);
+      const updatedActivities = day.activities.filter(
+        (act) => act.activityId !== activityId
+      );
+
+      return {
+        ...day,
+        activities: updatedActivities,
+      };
+    });
+
+    setEditedItinerary({
+      ...editedItinerary,
+      days: updatedDays,
+    });
   };
 
+  const handleRegenerateActivity = () => {
+    console.log("NOT IMPLEMENTED");
+  };
+
+  const handleRevertAllChanges = () => {
+    if (!itinerary) return;
+
+    // Add ids to activities and days for UI dnd
+    const itineraryWithIds = {
+      ...itinerary,
+      days: itinerary.days.map((day) => ({
+        ...day,
+        dayId: nanoid(),
+        activities: day.activities.map((activity) => ({
+          ...activity,
+          activityId: nanoid(),
+        })),
+      })),
+    };
+    setEditedItinerary(itineraryWithIds);
+  };
+
+  // dnd
+  const handleReorderActivities = (
+    dayId: string,
+    newActivities: ItineraryActivity[]
+  ) => {
+    const updatedDays = editedItinerary.days.map((day) =>
+      day.dayId === dayId ? { ...day, activities: newActivities } : day
+    );
+
+    setEditedItinerary({
+      ...editedItinerary,
+      days: updatedDays,
+    });
+  };
+
+  console.log(editedItinerary.days[0]);
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {/* Destination Title */}
@@ -124,6 +211,8 @@ const ItineraryEditor = () => {
           onEditActivity={handleEditActivity}
           onDeleteActivity={handleDeleteActivity}
           onRegenerateActivity={handleRegenerateActivity}
+          // for dnd
+          onReorderActivities={handleReorderActivities}
         />
 
         {/* Right: Action Buttons */}
