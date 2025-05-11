@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 interface SortableActivityItemProps {
   activity: ItineraryActivity;
   dayId: string;
+  isPlaceholder?: boolean;
   onEditActivity: (
     dayId: string,
     activityId: string,
@@ -20,6 +21,7 @@ interface SortableActivityItemProps {
 const SortableActivityItem = ({
   activity,
   dayId,
+  isPlaceholder,
   onEditActivity,
   onDeleteActivity,
   onRegenerateActivity,
@@ -61,6 +63,20 @@ const SortableActivityItem = ({
     });
     setOpenEdit(false);
   };
+
+  if (isPlaceholder) {
+    return (
+      <li
+        ref={setNodeRef}
+        style={style}
+        className="py-6 text-sm text-center italic text-dm-light border border-dashed rounded pointer-events-none"
+        {...attributes}
+        {...listeners}
+      >
+        Drop activity here
+      </li>
+    );
+  }
 
   return (
     <li

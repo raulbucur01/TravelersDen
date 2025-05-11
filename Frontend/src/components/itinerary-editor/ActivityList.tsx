@@ -11,12 +11,6 @@ interface ActivityListProps {
   ) => void;
   onDeleteActivity: (dayId: string, activityId: string) => void;
   onRegenerateActivity: () => void;
-
-  // for dnd
-  onReorderActivities: (
-    dayId: string,
-    newActivities: ItineraryActivity[]
-  ) => void;
 }
 
 const ActivityList = ({
@@ -25,20 +19,36 @@ const ActivityList = ({
   onDeleteActivity,
   onEditActivity,
   onRegenerateActivity,
-  onReorderActivities,
 }: ActivityListProps) => {
   return (
     <ul className="space-y-5">
-      {activities.map((activity) => (
+      {activities.length > 0 ? (
+        activities.map((activity) => (
+          <SortableActivityItem
+            key={activity.activityId}
+            activity={activity}
+            dayId={dayId}
+            onEditActivity={onEditActivity}
+            onDeleteActivity={onDeleteActivity}
+            onRegenerateActivity={onRegenerateActivity}
+          />
+        ))
+      ) : (
         <SortableActivityItem
-          key={activity.activityId}
-          activity={activity}
+          key={`__placeholder__-${dayId}`}
+          activity={{
+            activityId: `__placeholder__-${dayId}`,
+            title: "",
+            description: "",
+            location: "",
+          }}
           dayId={dayId}
-          onEditActivity={onEditActivity}
-          onDeleteActivity={onDeleteActivity}
-          onRegenerateActivity={onRegenerateActivity}
+          isPlaceholder
+          onEditActivity={() => {}}
+          onDeleteActivity={() => {}}
+          onRegenerateActivity={() => {}}
         />
-      ))}
+      )}
     </ul>
   );
 };

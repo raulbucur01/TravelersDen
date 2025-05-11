@@ -24,10 +24,6 @@ interface DayList {
   ) => void;
   onDeleteActivity: (dayId: string, activityId: string) => void;
   onRegenerateActivity: () => void;
-  onReorderActivities: (
-    dayId: string,
-    newActivities: ItineraryActivity[]
-  ) => void;
 }
 
 const DayList = ({
@@ -41,7 +37,6 @@ const DayList = ({
   onEditActivity,
   onDeleteActivity,
   onRegenerateActivity,
-  onReorderActivities,
 }: DayList) => {
   const { toast } = useToast();
   // used to open a dialog for a specific day index (we know which day's dialog is opened)
@@ -150,8 +145,12 @@ const DayList = ({
           <div className="flex-1 rounded p-4 bg-dm-dark">
             <h2 className="text-xl font-semibold mb-2">Day {day.day}</h2>
             <SortableContext
-              id={day.dayId!}
-              items={day.activities.map((a) => a.activityId!)}
+              id={day.dayId}
+              items={
+                day.activities.length > 0
+                  ? day.activities.map((a) => a.activityId!)
+                  : [`__placeholder__-${day.dayId}`]
+              }
               strategy={verticalListSortingStrategy}
             >
               <ActivityList
@@ -160,8 +159,6 @@ const DayList = ({
                 onDeleteActivity={onDeleteActivity}
                 onEditActivity={onEditActivity}
                 onRegenerateActivity={onRegenerateActivity}
-                // for dnd
-                onReorderActivities={onReorderActivities}
               />
             </SortableContext>
           </div>

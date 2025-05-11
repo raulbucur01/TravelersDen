@@ -28,6 +28,7 @@ const ItineraryEditor = () => {
   const [editedItinerary, setEditedItinerary] = useState<
     GeneratedItinerary | undefined
   >(undefined);
+  const [hoveredDayId, setHoveredDayId] = useState<string | null>(null); // for UI
 
   // Sync fetched itinerary into local state when it arrives
   useEffect(() => {
@@ -167,21 +168,6 @@ const ItineraryEditor = () => {
     setEditedItinerary(itinerary);
   };
 
-  // dnd
-  const handleReorderActivities = (
-    dayId: string,
-    newActivities: ItineraryActivity[]
-  ) => {
-    const updatedDays = editedItinerary.days.map((day) =>
-      day.dayId === dayId ? { ...day, activities: newActivities } : day
-    );
-
-    setEditedItinerary({
-      ...editedItinerary,
-      days: updatedDays,
-    });
-  };
-
   // handle cross-container moves as you drag
   function handleDragOver(event: DragOverEvent) {
     const { active, over } = event;
@@ -277,8 +263,6 @@ const ItineraryEditor = () => {
             onEditActivity={handleEditActivity}
             onDeleteActivity={handleDeleteActivity}
             onRegenerateActivity={handleRegenerateActivity}
-            // for dnd
-            onReorderActivities={handleReorderActivities}
           />
         </DndContext>
 
