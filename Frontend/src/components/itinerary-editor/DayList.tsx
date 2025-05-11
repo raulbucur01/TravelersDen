@@ -4,6 +4,10 @@ import { Button } from "../ui/button";
 import CustomizableDialog from "../shared/CustomizableDialog";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 interface DayList {
   days: ItineraryDay[];
@@ -145,15 +149,21 @@ const DayList = ({
           {/* Right: Day card */}
           <div className="flex-1 rounded p-4 bg-dm-dark">
             <h2 className="text-xl font-semibold mb-2">Day {day.day}</h2>
-            <ActivityList
-              activities={day.activities}
-              dayId={day.dayId!}
-              onDeleteActivity={onDeleteActivity}
-              onEditActivity={onEditActivity}
-              onRegenerateActivity={onRegenerateActivity}
-              // for dnd
-              onReorderActivities={onReorderActivities}
-            />
+            <SortableContext
+              id={day.dayId!}
+              items={day.activities.map((a) => a.activityId!)}
+              strategy={verticalListSortingStrategy}
+            >
+              <ActivityList
+                activities={day.activities}
+                dayId={day.dayId!}
+                onDeleteActivity={onDeleteActivity}
+                onEditActivity={onEditActivity}
+                onRegenerateActivity={onRegenerateActivity}
+                // for dnd
+                onReorderActivities={onReorderActivities}
+              />
+            </SortableContext>
           </div>
         </div>
       ))}

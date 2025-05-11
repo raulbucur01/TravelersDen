@@ -4,8 +4,24 @@ import { GeneratedItinerary, ItineraryActivity, ItineraryDay } from "@/types";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { v4 } from "uuid";
+import {
+  DndContext,
+  closestCenter,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+  DragOverEvent,
+  PointerSensor,
+} from "@dnd-kit/core";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 const ItineraryEditor = () => {
+  const sensors = useSensors(useSensor(PointerSensor));
+
   const { id } = useParams();
   const { data: itinerary, isPending: isGettingItinerary } =
     useGetGeneratedItineraryById(id || "");
@@ -57,15 +73,15 @@ const ItineraryEditor = () => {
       (day) => day.dayId !== dayId
     );
 
-    // // Optionally re-number days if you rely on `day.day`
-    // const renumberedDays = updatedDays.map((day, idx) => ({
-    //   ...day,
-    //   day: idx + 1,
-    // }));
+    // Optionally re-number days if you rely on `day.day`
+    const renumberedDays = updatedDays.map((day, idx) => ({
+      ...day,
+      day: idx + 1,
+    }));
 
     setEditedItinerary({
       ...editedItinerary,
-      days: updatedDays,
+      days: renumberedDays,
     });
   };
 
@@ -166,6 +182,74 @@ const ItineraryEditor = () => {
     });
   };
 
+  // handle cross-container moves as you drag
+  function handleDragOver(event: DragOverEvent) {
+    const { active, over } = event;
+    if (!over) return;
+    if (!over || !active.data?.current || !over.data?.current) return;
+
+    const fromId = active.data.current.sortable.containerId as string;
+    const toId = over.data.current.sortable.containerId as string;
+    const itemId = active.id as string;
+    if (fromId === toId) return;
+
+    setEditedItinerary((prev) => {
+      if (!prev) return prev;
+      const fromDay = prev.days.find((d) => d.dayId === fromId)!;
+      const toDay = prev.days.find((d) => d.dayId === toId)!;
+
+      // remove from source
+      const sourceActivities = [...fromDay.activities];
+      const idx = sourceActivities.findIndex((a) => a.activityId === itemId);
+      const [moved] = sourceActivities.splice(idx, 1);
+
+      // insert at end of target
+      const targetActivities = [...toDay.activities, moved];
+
+      return {
+        ...prev,
+        days: prev.days.map((d) => {
+          if (d.dayId === fromId) return { ...d, activities: sourceActivities };
+          if (d.dayId === toId) return { ...d, activities: targetActivities };
+          return d;
+        }),
+      };
+    });
+  }
+
+  // finalize intra-day reorder
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over) return;
+    if (!over || !active.data?.current || !over.data?.current) return;
+
+    const fromId = active.data.current.sortable.containerId as string;
+    const toId = over.data.current.sortable.containerId as string;
+    const itemId = active.id as string;
+
+    // only handle same-day reordering here
+    if (fromId === toId) {
+      setEditedItinerary((prev) => {
+        if (!prev) return prev;
+        const day = prev.days.find((d) => d.dayId === fromId)!;
+        const oldIndex = day.activities.findIndex(
+          (a) => a.activityId === itemId
+        );
+        const newIndex = day.activities.findIndex(
+          (a) => a.activityId === over.id
+        );
+        const items = arrayMove(day.activities, oldIndex, newIndex);
+
+        return {
+          ...prev,
+          days: prev.days.map((d) =>
+            d.dayId === fromId ? { ...d, activities: items } : d
+          ),
+        };
+      });
+    }
+  }
+
   console.log(editedItinerary.days[0]);
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -176,20 +260,27 @@ const ItineraryEditor = () => {
       </h2>
 
       <div className="flex flex-col md:flex-row gap-4">
-        {/* Left: Itinerary Editor */}
-        <DayList
-          days={editedItinerary.days}
-          onAddDay={handleAddDay}
-          onAddActivity={handleAddActivity}
-          onDeleteDay={handleDeleteDay}
-          onRegenerateDay={handleRegenerateDay}
-          // passed to activity item
-          onEditActivity={handleEditActivity}
-          onDeleteActivity={handleDeleteActivity}
-          onRegenerateActivity={handleRegenerateActivity}
-          // for dnd
-          onReorderActivities={handleReorderActivities}
-        />
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          {/* Left: Itinerary Editor */}
+          <DayList
+            days={editedItinerary.days.sort((a, b) => a.day - b.day)}
+            onAddDay={handleAddDay}
+            onAddActivity={handleAddActivity}
+            onDeleteDay={handleDeleteDay}
+            onRegenerateDay={handleRegenerateDay}
+            // passed to activity item
+            onEditActivity={handleEditActivity}
+            onDeleteActivity={handleDeleteActivity}
+            onRegenerateActivity={handleRegenerateActivity}
+            // for dnd
+            onReorderActivities={handleReorderActivities}
+          />
+        </DndContext>
 
         {/* Right: Action Buttons */}
         <div className="w-1/4 flex flex-col justify-between h-[80vh]">
