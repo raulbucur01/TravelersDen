@@ -3,7 +3,7 @@ import DayList from "@/components/itinerary-editor/DayList";
 import { GeneratedItinerary, ItineraryActivity, ItineraryDay } from "@/types";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { nanoid } from "nanoid";
+import { v4 } from "uuid";
 
 const ItineraryEditor = () => {
   const { id } = useParams();
@@ -16,19 +16,7 @@ const ItineraryEditor = () => {
   // Sync fetched itinerary into local state when it arrives
   useEffect(() => {
     if (itinerary) {
-      // Add ids to activities and days for UI dnd
-      const itineraryWithIds = {
-        ...itinerary,
-        days: itinerary.days.map((day) => ({
-          ...day,
-          dayId: nanoid(),
-          activities: day.activities.map((activity) => ({
-            ...activity,
-            activityId: nanoid(),
-          })),
-        })),
-      };
-      setEditedItinerary(itineraryWithIds);
+      setEditedItinerary(itinerary);
     }
   }, [itinerary]);
 
@@ -53,7 +41,7 @@ const ItineraryEditor = () => {
   // operations inside day list
   const handleAddDay = () => {
     const newDay: ItineraryDay = {
-      dayId: nanoid(),
+      dayId: v4(),
       day: editedItinerary.days.length + 1,
       activities: [],
     };
@@ -88,7 +76,7 @@ const ItineraryEditor = () => {
   const handleAddActivity = (dayId: string, activity: ItineraryActivity) => {
     const newActivity = {
       ...activity,
-      activityId: nanoid(),
+      activityId: v4(),
     };
 
     const updatedDays = editedItinerary.days.map((day) => {
@@ -160,19 +148,7 @@ const ItineraryEditor = () => {
   const handleRevertAllChanges = () => {
     if (!itinerary) return;
 
-    // Add ids to activities and days for UI dnd
-    const itineraryWithIds = {
-      ...itinerary,
-      days: itinerary.days.map((day) => ({
-        ...day,
-        dayId: nanoid(),
-        activities: day.activities.map((activity) => ({
-          ...activity,
-          activityId: nanoid(),
-        })),
-      })),
-    };
-    setEditedItinerary(itineraryWithIds);
+    setEditedItinerary(itinerary);
   };
 
   // dnd

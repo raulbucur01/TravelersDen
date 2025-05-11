@@ -43,9 +43,11 @@ namespace BackendAPI.Controllers
                     CreatedAt = itinerary.CreatedAt,
                     Days = itinerary.Days.Select(d => new ItineraryDayDTO
                     {
+                        DayId = d.DayId,
                         Day = d.Day,
                         Activities = d.Activities.Select(a => new ItineraryActivityDTO
                         {
+                            ActivityId = a.ActivityId,
                             Title = a.Title,
                             Description = a.Description,
                             Location = a.Location
@@ -86,9 +88,11 @@ namespace BackendAPI.Controllers
                     CreatedAt = i.CreatedAt,
                     Days = i.Days.Select(d => new ItineraryDayDTO
                     {
+                        DayId = d.DayId,
                         Day = d.Day,
                         Activities = d.Activities.Select(a => new ItineraryActivityDTO
                         {
+                            ActivityId = a.ActivityId,
                             Title = a.Title,
                             Description = a.Description,
                             Location = a.Location

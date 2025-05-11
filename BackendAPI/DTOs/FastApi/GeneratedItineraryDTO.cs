@@ -11,12 +11,14 @@
 
     public class ItineraryDayDTO
     {
+        public string DayId { get; set; }
         public int Day { get; set; }
         public List<ItineraryActivityDTO> Activities { get; set; }
     }
 
     public class ItineraryActivityDTO
     {
+        public string ActivityId { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string Location { get; set; }
