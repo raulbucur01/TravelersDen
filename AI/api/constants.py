@@ -34,3 +34,14 @@ ITINERARY_JSON_STRUCTURE = """
   ]
 }
 """
+
+ITINERARY_DAY_ACTIVITIES_JSON_STRUCTURE = """
+  [
+    {
+      "title": "string (short name of activity including point of interest name)",
+      "description": "string (1-2 sentences describing what the activity is and why it's interesting)",
+      "location": "string (address of activity)",
+    },
+    ...
+  ]
+"""

@@ -2,8 +2,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from apscheduler.schedulers.background import BackgroundScheduler
 import redis
-from itinerary_generator import generate_itinerary
-from models import GenerateItineraryRequest, SimilarPostsResponse, GeneratedItinerary
+from itinerary_generator import generate_itinerary, regenerate_day_activities
+from models import (
+    ItineraryActivity,
+    GenerateItineraryRequest,
+    RegenerateDayRequest,
+    RegenerateDayResponse,
+    SimilarPostsResponse,
+    GeneratedItinerary,
+)
 from similarity_handlers import update_similarity_for_posts
 from database_operations import delete_processed_data
 import ollama
@@ -94,9 +101,25 @@ async def generate_itinerary_endpoint(request: GenerateItineraryRequest):
             request.destination, request.days, request.preferences
         )
 
+        return itinerary
+
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return itinerary
+
+@app.post("/regenerate-day-activities", response_model=RegenerateDayResponse)
+async def regenerate_day_activities_endpoint(request: RegenerateDayRequest):
+    try:
+        activities = regenerate_day_activities(
+            request.destination,
+            request.excludedActivities,
+        )
+
+    except (RuntimeError, ValueError) as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return RegenerateDayResponse(
+        activities=[ItineraryActivity(**a) for a in activities]
+    )

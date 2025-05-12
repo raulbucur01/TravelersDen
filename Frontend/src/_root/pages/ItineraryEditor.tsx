@@ -172,10 +172,14 @@ const ItineraryEditor = () => {
   function handleDragOver(event: DragOverEvent) {
     const { active, over } = event;
     if (!over) return;
-    if (!over || !active.data?.current || !over.data?.current) return;
+    if (!over || !active.data?.current || !over.data?.current) {
+      setHoveredDayId(null); // reset if drag leaves all valid targets
+      return;
+    }
 
     const fromId = active.data.current.sortable.containerId as string;
     const toId = over.data.current.sortable.containerId as string;
+    setHoveredDayId(toId); // track the day being hovered over
     const itemId = active.id as string;
     if (fromId === toId) return;
 
@@ -226,6 +230,7 @@ const ItineraryEditor = () => {
         );
         const items = arrayMove(day.activities, oldIndex, newIndex);
 
+        setHoveredDayId(null); // reset
         return {
           ...prev,
           days: prev.days.map((d) =>
@@ -263,6 +268,7 @@ const ItineraryEditor = () => {
             onEditActivity={handleEditActivity}
             onDeleteActivity={handleDeleteActivity}
             onRegenerateActivity={handleRegenerateActivity}
+            hoveredDayId={hoveredDayId}
           />
         </DndContext>
 

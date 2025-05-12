@@ -58,22 +58,38 @@ const ItineraryGeneratorDashboard = () => {
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold mb-2">AI Trip Itinerary Generator</h1>
-        <p className="text-gray-600 mb-6">
-          Plan your perfect trip with AI assistance!
-        </p>
-        <GeneratorForm onGenerate={handleGenerateItinerary} />
+    <div className="p-6 max-w-6xl mx-auto space-y-12">
+      <h1 className="h3-bold md:h2-bold text-center w-full mt-7">
+        AI Trip Itinerary Generator
+      </h1>
+      {/* Generator Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div className="space-y-4">
+          <h1 className="text-3xl font-bold text-dm-light-2">
+            Plan Your Perfect Trip
+          </h1>
+          <p className="text-lg text-dm-light">
+            Generate your personalized travel itinerary with the help of AI.
+            Select a destination, how many days you want to spend there, pick
+            your preferences and let us handle the planning!
+          </p>
+        </div>
+        <GeneratorForm
+          onGenerate={handleGenerateItinerary}
+          isLoading={isGenerating}
+        />
       </div>
+
+      {/* History Section */}
       <div>
-        <h2 className="text-2xl font-semibold mb-4">
-          Your generated itineraries
+        <h2 className="text-2xl font-semibold text-dm-light-2 mb-4">
+          Your Generated Itineraries
         </h2>
         <GeneratedItineraryHistory
           generatedItineraries={generatedItineraries || []}
           onViewEdit={handleViewEdit}
           onDelete={handleDelete}
+          isLoading={isGettingItineraries || isDeleting}
         />
       </div>
     </div>

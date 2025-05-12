@@ -13,17 +13,26 @@ class GenerateItineraryRequest(BaseModel):
     preferences: list[str] = []
 
 
-class Activity(BaseModel):
+class ItineraryActivity(BaseModel):
     title: str
     description: str
     location: str
 
 
-class Day(BaseModel):
+class ItineraryDay(BaseModel):
     day: int
-    activities: List[Activity]
+    activities: List[ItineraryActivity]
 
 
 class GeneratedItinerary(BaseModel):
     destination: str
-    days: List[Day]
+    days: List[ItineraryDay]
+
+
+class RegenerateDayRequest(BaseModel):
+    destination: str
+    excludedActivities: List[str]
+
+
+class RegenerateDayResponse(BaseModel):
+    activities: List[ItineraryActivity]

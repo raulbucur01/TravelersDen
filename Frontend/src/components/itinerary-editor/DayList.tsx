@@ -11,6 +11,7 @@ import {
 
 interface DayList {
   days: ItineraryDay[];
+  hoveredDayId: string | null;
   // called from day list
   onAddDay: () => void;
   onAddActivity: (dayId: string, itineraryActivity: ItineraryActivity) => void;
@@ -28,6 +29,7 @@ interface DayList {
 
 const DayList = ({
   days,
+  hoveredDayId,
   // called from day section
   onAddDay,
   onAddActivity,
@@ -142,7 +144,13 @@ const DayList = ({
           </div>
 
           {/* Right: Day card */}
-          <div className="flex-1 rounded p-4 bg-dm-dark">
+          <div
+            className={`flex-1 rounded p-4 bg-dm-dark transition-all duration-200 ${
+              hoveredDayId === day.dayId
+                ? "ring-4 ring-dm-accent bg-dm-dark"
+                : ""
+            }`}
+          >
             <h2 className="text-xl font-semibold mb-2">Day {day.day}</h2>
             <SortableContext
               id={day.dayId}

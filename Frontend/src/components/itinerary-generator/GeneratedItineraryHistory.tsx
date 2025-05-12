@@ -2,31 +2,42 @@ import { formatToRelativeDate } from "@/lib/utils";
 import { GeneratedItinerary } from "@/types";
 import CustomizableAlertDialog from "../shared/CustomizableAlertDialog";
 import { Button } from "../ui/button";
+import Loader from "../shared/Loader";
 
 interface GeneratedItineraryHistoryProps {
   generatedItineraries: GeneratedItinerary[];
+  isLoading: boolean;
   onViewEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
 const GeneratedItineraryHistory = ({
   generatedItineraries,
+  isLoading,
   onViewEdit,
   onDelete,
 }: GeneratedItineraryHistoryProps) => {
+  if (isLoading) {
+    return (
+      <div className="mt-20">
+        <Loader />
+      </div>
+    );
+  }
+
   return (
     <div className="max-h-96 overflow-y-auto space-y-4">
       {generatedItineraries.map((item) => (
         <div
           key={item.itineraryId}
-          className="border p-4 rounded shadow flex flex-col md:flex-row md:justify-between md:items-center"
+          className="p-4 rounded bg-dm-dark flex flex-col md:flex-row md:justify-between md:items-center"
         >
           <div>
             <h3 className="text-xl font-bold">{item.destination}</h3>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-dm-light-2">
               Created: {formatToRelativeDate(item.createdAt)}
             </p>
-            <ul className="mt-2 text-sm text-gray-700 list-disc list-inside">
+            <ul className="mt-2 text-sm text-dm-light list-disc list-inside">
               {item.days.slice(0, 1).map((day) => (
                 <li key={day.day}>
                   Day {day.day}:{" "}
@@ -67,7 +78,7 @@ const GeneratedItineraryHistory = ({
         </div>
       ))}
       {generatedItineraries.length === 0 && (
-        <p className="text-gray-500 text-center">
+        <p className="text-dm-light-2 text-center mt-12">
           No itineraries yet. Generate one to get started!
         </p>
       )}

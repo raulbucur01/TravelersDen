@@ -45,13 +45,15 @@ namespace BackendAPI.Controllers
                     {
                         DayId = d.DayId,
                         Day = d.Day,
-                        Activities = d.Activities.Select(a => new ItineraryActivityDTO
-                        {
-                            ActivityId = a.ActivityId,
-                            Title = a.Title,
-                            Description = a.Description,
-                            Location = a.Location
-                        }).ToList()
+                        Activities = d.Activities
+                            .OrderBy(a => a.Position)
+                            .Select(a => new ItineraryActivityDTO
+                            {
+                                ActivityId = a.ActivityId,
+                                Title = a.Title,
+                                Description = a.Description,
+                                Location = a.Location
+                            }).ToList()
                     }).ToList()
                 };
 
@@ -156,11 +158,12 @@ namespace BackendAPI.Controllers
                     Days = generatedItinerary.Days.Select(d => new ItineraryDay
                     {
                         Day = d.Day,
-                        Activities = d.Activities.Select(a => new ItineraryActivity
+                        Activities = d.Activities.Select((a, index) => new ItineraryActivity
                         {
                             Title = a.Title,
                             Description = a.Description,
-                            Location = a.Location
+                            Location = a.Location,
+                            Position = index
                         }).ToList()
                     }).ToList()
                 };
