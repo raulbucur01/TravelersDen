@@ -72,7 +72,36 @@ namespace BackendAPI.Services
             }
         }
 
-        public async Task
+        public async Task<List<RawItineraryActivityDTO>> RegenerateDayActivitiesAsync(string destination, List<string> excludedActivities)
+        {
+            try
+            {
+                string fastApiUrl = $"{_fastApiBaseUrl}/regenerate-day-activities";
+
+                var requestBody = new
+                {
+                    destination,
+                    excludedActivities
+                };
+
+                HttpResponseMessage response = await _httpClient.PostAsJsonAsync(fastApiUrl, requestBody);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to regenerate day activities. Status: {response.StatusCode}");
+                }
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+
+                var result = JsonSerializer.Deserialize<List<RawItineraryActivityDTO>>(responseContent, _jsonOptions);
+
+                return result ?? new List<RawItineraryActivityDTO>();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error: {ex.Message}");
+            }
+        }
 
     }
 }

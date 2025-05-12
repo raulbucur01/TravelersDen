@@ -32,7 +32,3 @@ class GeneratedItinerary(BaseModel):
 class RegenerateDayRequest(BaseModel):
     destination: str
     excludedActivities: List[str]
-
-
-class RegenerateDayResponse(BaseModel):
-    activities: List[ItineraryActivity]

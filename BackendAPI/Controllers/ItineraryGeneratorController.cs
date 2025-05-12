@@ -179,5 +179,39 @@ namespace BackendAPI.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+        [HttpPost("regenerate-day-activities")]
+        public async Task<IActionResult> RegenerateDayActivities([FromBody] RegenerateDayActivitiesRequestDTO request)
+        {
+            try
+            {
+                // find the full itinerary by its id
+                var itinerary = await _context.Itineraries
+                    .Include(i => i.Days)
+                    .ThenInclude(d => d.Activities)
+                    .FirstOrDefaultAsync(i => i.ItineraryId == request.ItineraryId);
+
+                if (itinerary == null)
+                {
+                    return NotFound("Itinerary not found.");
+                }
+
+                // construct the excluded activities list by making a string array containing the titles
+                // of all other activities in the itinerary except the ones from the day we want to regen
+                var excludedActivityTitles = itinerary.Days
+                    .Where(d => d.DayId != request.DayId)
+                    .SelectMany(d => d.Activities)
+                    .Select(a => a.Title)
+                    .ToList();
+
+                var regeneratedActivities = await _fastApiService.RegenerateDayActivitiesAsync(itinerary.Destination, excludedActivityTitles);
+
+                return Ok(regeneratedActivities);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

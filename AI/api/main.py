@@ -1,4 +1,5 @@
 from contextlib import asynccontextmanager
+from typing import List
 from fastapi import FastAPI, HTTPException
 from apscheduler.schedulers.background import BackgroundScheduler
 import redis
@@ -7,7 +8,6 @@ from models import (
     ItineraryActivity,
     GenerateItineraryRequest,
     RegenerateDayRequest,
-    RegenerateDayResponse,
     SimilarPostsResponse,
     GeneratedItinerary,
 )
@@ -109,17 +109,16 @@ async def generate_itinerary_endpoint(request: GenerateItineraryRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.post("/regenerate-day-activities", response_model=RegenerateDayResponse)
+@app.post("/regenerate-day-activities", response_model=List[ItineraryActivity])
 async def regenerate_day_activities_endpoint(request: RegenerateDayRequest):
     try:
+        print(request.excludedActivities)
         activities = regenerate_day_activities(
             request.destination,
             request.excludedActivities,
         )
-
+        print(activities)
     except (RuntimeError, ValueError) as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    return RegenerateDayResponse(
-        activities=[ItineraryActivity(**a) for a in activities]
-    )
+    return [ItineraryActivity(**a) for a in activities]
