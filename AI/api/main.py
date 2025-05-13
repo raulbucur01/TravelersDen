@@ -112,12 +112,11 @@ async def generate_itinerary_endpoint(request: GenerateItineraryRequest):
 @app.post("/regenerate-day-activities", response_model=List[ItineraryActivity])
 async def regenerate_day_activities_endpoint(request: RegenerateDayRequest):
     try:
-        print(request.excludedActivities)
         activities = regenerate_day_activities(
             request.destination,
             request.excludedActivities,
         )
-        print(activities)
+
     except (RuntimeError, ValueError) as e:
         raise HTTPException(status_code=500, detail=str(e))
 

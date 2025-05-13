@@ -73,8 +73,6 @@ def regenerate_day_activities(
         destination, excluded_activities
     )
 
-    print(prompt)
-
     try:
         response = ollama.chat(
             model="mistral", messages=[{"role": "user", "content": prompt}]

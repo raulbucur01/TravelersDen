@@ -16,6 +16,8 @@ import {
   MediaUrl,
   GeneratedItinerary,
   NewGeneratedItineraryResponse,
+  ItineraryActivity,
+  RegenerateDayActivitiesRequest,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
@@ -1043,6 +1045,21 @@ export async function getGeneratedItineraryById(
   try {
     const response = await apiClient.get<GeneratedItinerary>(
       `/itinerary-generator/generated-itineraries/by-id/${itineraryId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export async function regenerateDayActivities(
+  regenerateDayActivitiesRequest: RegenerateDayActivitiesRequest
+): Promise<ItineraryActivity[] | undefined> {
+  try {
+    const response = await apiClient.post<ItineraryActivity[]>(
+      "/itinerary-generator/regenerate-day-activities",
+      regenerateDayActivitiesRequest
     );
 
     return response.data;

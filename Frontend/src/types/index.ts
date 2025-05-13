@@ -247,8 +247,13 @@ export type ItineraryDay = {
 };
 
 export type ItineraryActivity = {
-  activityId: string | undefined;
+  activityId?: string | undefined;
   title: string;
   description: string;
   location: string;
+};
+
+export type RegenerateDayActivitiesRequest = {
+  itineraryId: string;
+  dayId: string;
 };
