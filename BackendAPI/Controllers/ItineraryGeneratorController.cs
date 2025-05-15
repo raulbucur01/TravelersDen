@@ -40,7 +40,7 @@ namespace BackendAPI.Controllers
                     ItineraryId = itinerary.ItineraryId,
                     UserId = itinerary.UserId,
                     Destination = itinerary.Destination,
-                    CreatedAt = itinerary.CreatedAt,
+                    CreatedAt = itinerary.CreatedAt.ToLocalTime(),
                     Days = itinerary.Days.Select(d => new ItineraryDayDTO
                     {
                         DayId = d.DayId,
@@ -88,7 +88,7 @@ namespace BackendAPI.Controllers
                     ItineraryId = i.ItineraryId,
                     UserId = i.UserId,
                     Destination = i.Destination,
-                    CreatedAt = i.CreatedAt,
+                    CreatedAt = i.CreatedAt.ToLocalTime(),
                     Days = i.Days.Select(d => new ItineraryDayDTO
                     {
                         DayId = d.DayId,

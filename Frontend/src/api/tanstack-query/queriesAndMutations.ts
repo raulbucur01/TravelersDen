@@ -654,9 +654,19 @@ export const useSearchPosts = (searchTerm: string) => {
 // Queries and mutations for generated itineraries
 // used to create and get a fresh generated itinerary id
 export const useGenerateNewItinerary = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (generateItineraryRequest: GenerateItineraryRequest) =>
       generateNewItinerary(generateItineraryRequest),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_GENERATED_ITINERARIES_FOR_USER],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_GENERATED_ITINERARY_BY_ID, data?.itineraryId],
+      });
+    },
   });
 };
 
