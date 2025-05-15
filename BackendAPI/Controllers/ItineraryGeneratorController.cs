@@ -74,6 +74,7 @@ namespace BackendAPI.Controllers
                     .Include(i => i.Days)
                     .ThenInclude(d => d.Activities)
                     .Where(i => i.UserId == userId)
+                    .OrderByDescending(i => i.CreatedAt)
                     .ToListAsync();
 
                 if (itineraries == null || !itineraries.Any())
@@ -110,8 +111,56 @@ namespace BackendAPI.Controllers
             }
         }
 
+        [HttpPut("generated-itineraries")]
+        public async Task<IActionResult> SaveGeneratedItineraryChanges([FromBody] GeneratedItineraryDTO itineraryDto)
+        {
+            try
+            {
+                var itinerary = await _context.Itineraries
+                    .Include(i => i.Days)
+                    .ThenInclude(d => d.Activities)
+                    .FirstOrDefaultAsync(i => i.ItineraryId == itineraryDto.ItineraryId);
+
+                if (itinerary == null)
+                {
+                    return NotFound("Itinerary not found.");
+                }
+
+                // Update basic info
+                itinerary.Destination = itineraryDto.Destination;
+                itinerary.UserId = itineraryDto.UserId;
+                itinerary.CreatedAt = DateTime.UtcNow;
+
+                // Remove existing children
+                _context.ItineraryActivities.RemoveRange(itinerary.Days.SelectMany(d => d.Activities));
+                _context.ItineraryDays.RemoveRange(itinerary.Days);
+
+                // Rebuild days and activities
+                itinerary.Days = itineraryDto.Days.Select(dayDto => new ItineraryDay
+                {
+                    Day = dayDto.Day,
+                    Activities = dayDto.Activities.Select((activityDto, index) => new ItineraryActivity
+                    {
+                        Title = activityDto.Title,
+                        Description = activityDto.Description,
+                        Location = activityDto.Location,
+                        Position = index
+                    }).ToList()
+                }).ToList();
+
+                await _context.SaveChangesAsync();
+
+                return Ok(new { itineraryDto.ItineraryId });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+
         [HttpDelete("generated-itineraries/{itineraryId}")]
-        public async Task<IActionResult> DeleteItinerary(string itineraryId)
+        public async Task<IActionResult> DeleteGeneratedItinerary(string itineraryId)
         {
             try
             {

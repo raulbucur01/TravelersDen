@@ -49,6 +49,7 @@ import {
   getGeneratedItinerariesForUser,
   deleteGeneratedItinerary,
   regenerateDayActivities,
+  saveGeneratedItineraryChanges,
 } from "../api";
 import {
   NewItineraryPost,
@@ -59,6 +60,7 @@ import {
   UpdateNormalPost,
   GenerateItineraryRequest,
   RegenerateDayActivitiesRequest,
+  GeneratedItinerary,
 } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
 
@@ -685,5 +687,22 @@ export const useRegenerateDayActivities = () => {
     mutationFn: (
       regenerateDayActivitiesRequest: RegenerateDayActivitiesRequest
     ) => regenerateDayActivities(regenerateDayActivitiesRequest),
+  });
+};
+
+export const useSaveGeneratedItineraryChanges = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (itinerary: GeneratedItinerary) =>
+      saveGeneratedItineraryChanges(itinerary),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_GENERATED_ITINERARIES_FOR_USER],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [QUERY_KEYS.GET_GENERATED_ITINERARY_BY_ID, data.itineraryId],
+      });
+    },
   });
 };

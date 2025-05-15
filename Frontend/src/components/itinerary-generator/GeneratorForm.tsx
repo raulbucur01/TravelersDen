@@ -61,20 +61,20 @@ const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
   return (
     <div className="relative bg-dm-dark shadow-lg rounded-2xl p-6">
       {isLoading && (
-        <div className="absolute inset-0 bg-black bg-opacity-80 flex flex-col items-center justify-center z-50 rounded-2xl">
-          <img
-            src="/assets/icons/loader.svg"
-            alt="loader"
-            width={24}
-            height={24}
-          />
-          <p className="text-white font-semibold text-center mt-7">
-            Generating your itinerary... <br></br>This could take a little bit!
+        <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center text-white text-center">
+          <div className="loader-spinner w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-sm font-semibold">
+            Generating your itinerary...
+            <br />
+            This could take a little bit!
           </p>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form
+        onSubmit={handleSubmit}
+        className={`space-y-4 ${isLoading ? "pointer-events-none" : ""}`}
+      >
         <div>
           <label className="block mb-1 font-medium text-dm-light">
             Your Destination
@@ -85,7 +85,6 @@ const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
             onChange={(e) => setDestination(e.target.value)}
             className="w-full p-2 border rounded bg-dm-dark"
             placeholder="e.g. Madrid"
-            disabled={isLoading}
           />
         </div>
 
@@ -98,7 +97,6 @@ const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
             value={isNaN(days) ? "" : days}
             onChange={(e) => setDays(parseInt(e.target.value))}
             className="w-full p-2 border rounded bg-dm-dark"
-            disabled={isLoading}
           />
         </div>
 
@@ -113,18 +111,12 @@ const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
             onChange={(selected) => setPreferences(selected as any)}
             placeholder="Select or type preferences"
             classNamePrefix={"react-select"}
-            isDisabled={isLoading}
           />
         </div>
 
         <button
           type="submit"
-          className={
-            isLoading
-              ? "w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition pointer-events-none"
-              : "w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
-          }
-          disabled={isLoading}
+          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
         >
           Generate Itinerary
         </button>

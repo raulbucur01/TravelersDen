@@ -1067,3 +1067,18 @@ export async function regenerateDayActivities(
     console.log(error);
   }
 }
+
+export async function saveGeneratedItineraryChanges(
+  itinerary: GeneratedItinerary
+) {
+  try {
+    const response = await apiClient.put(
+      `/itinerary-generator/generated-itineraries`,
+      itinerary
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}

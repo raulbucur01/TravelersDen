@@ -1,8 +1,12 @@
-import { useGetGeneratedItineraryById } from "@/api/tanstack-query/queriesAndMutations";
+import {
+  useGetGeneratedItineraryById,
+  useRegenerateDayActivities,
+  useSaveGeneratedItineraryChanges,
+} from "@/api/tanstack-query/queriesAndMutations";
 import DayList from "@/components/itinerary-editor/DayList";
 import { GeneratedItinerary, ItineraryActivity, ItineraryDay } from "@/types";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
 import {
   DndContext,
@@ -18,24 +22,39 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { useToast } from "@/hooks/use-toast";
 
 const ItineraryEditor = () => {
   const sensors = useSensors(useSensor(PointerSensor));
-
   const { id } = useParams();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
   const { data: itinerary, isPending: isGettingItinerary } =
     useGetGeneratedItineraryById(id || "");
+  const {
+    mutateAsync: regenerateDayActivities,
+    isPending: isRegeneratingDayActivities,
+  } = useRegenerateDayActivities();
+  const {
+    mutateAsync: saveGeneratedItineraryChanges,
+    isPending: isSavingChanges,
+  } = useSaveGeneratedItineraryChanges();
+
   const [editedItinerary, setEditedItinerary] = useState<
     GeneratedItinerary | undefined
   >(undefined);
   const [hoveredDayId, setHoveredDayId] = useState<string | null>(null); // for UI
+  const [regeneratingDayId, setRegeneratingDayId] = useState<string | null>(
+    null
+  );
 
   // Sync fetched itinerary into local state when it arrives
   useEffect(() => {
-    if (itinerary) {
+    if (itinerary && !editedItinerary) {
       setEditedItinerary(itinerary);
     }
-  }, [itinerary]);
+  }, [itinerary, editedItinerary]);
 
   if (isGettingItinerary)
     return <div className="p-4">Loading itinerary...</div>;
@@ -47,8 +66,25 @@ const ItineraryEditor = () => {
     console.log("NOT IMPLEMENTED");
   };
 
-  const handleSaveItinerary = () => {
-    console.log("NOT IMPLEMENTED");
+  const handleSaveChanges = async () => {
+    try {
+      await saveGeneratedItineraryChanges(editedItinerary);
+
+      toast({
+        title: "Success",
+        description: "Changes saved successfully",
+      });
+
+      setTimeout(() => {
+        navigate("/itinerary-generator-dashboard");
+      }, 1000);
+    } catch (error) {
+      toast({
+        title: "Save failed",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleTurnIntoPost = () => {
@@ -86,8 +122,50 @@ const ItineraryEditor = () => {
     });
   };
 
-  const handleRegenerateDay = () => {
-    console.log("NOT IMPLEMENTED");
+  const handleRegenerateDay = async (dayId: string) => {
+    setRegeneratingDayId(dayId);
+
+    const regeneratedActivities: ItineraryActivity[] | undefined =
+      await regenerateDayActivities({
+        itineraryId: id || "",
+        dayId: dayId,
+      });
+
+    if (!regeneratedActivities) {
+      toast({
+        title: "Error",
+        description: "Failed to regenerate day activities.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // add activity ids to regenerated activities
+    const regeneratedActivitiesWithIds = regeneratedActivities.map(
+      (activity) => ({
+        ...activity,
+        activityId: v4(),
+      })
+    );
+
+    setEditedItinerary((prev) => {
+      if (!prev) return prev;
+
+      const updatedDays = prev.days.map((day) =>
+        day.dayId === dayId
+          ? { ...day, activities: regeneratedActivitiesWithIds }
+          : day
+      );
+
+      return { ...prev, days: updatedDays };
+    });
+
+    toast({
+      title: "Success",
+      description: "Day activities regenerated successfully.",
+    });
+
+    setRegeneratingDayId(null);
   };
 
   const handleAddActivity = (dayId: string, activity: ItineraryActivity) => {
@@ -179,6 +257,13 @@ const ItineraryEditor = () => {
 
     const fromId = active.data.current.sortable.containerId as string;
     const toId = over.data.current.sortable.containerId as string;
+
+    // Prevent dropping into a regenerating day
+    if (toId === regeneratingDayId) {
+      setHoveredDayId(null);
+      return;
+    }
+
     setHoveredDayId(toId); // track the day being hovered over
     const itemId = active.id as string;
     if (fromId === toId) return;
@@ -215,6 +300,13 @@ const ItineraryEditor = () => {
 
     const fromId = active.data.current.sortable.containerId as string;
     const toId = over.data.current.sortable.containerId as string;
+
+    // Prevent final drop into regenerating day
+    if (toId === regeneratingDayId) {
+      setHoveredDayId(null);
+      return;
+    }
+
     const itemId = active.id as string;
 
     // only handle same-day reordering here
@@ -241,7 +333,7 @@ const ItineraryEditor = () => {
     }
   }
 
-  console.log(editedItinerary.days[0]);
+  console.log(editedItinerary.days[1]);
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {/* Destination Title */}
@@ -264,6 +356,7 @@ const ItineraryEditor = () => {
             onAddActivity={handleAddActivity}
             onDeleteDay={handleDeleteDay}
             onRegenerateDay={handleRegenerateDay}
+            regeneratingDayId={regeneratingDayId}
             // passed to activity item
             onEditActivity={handleEditActivity}
             onDeleteActivity={handleDeleteActivity}
@@ -276,7 +369,10 @@ const ItineraryEditor = () => {
         <div className="w-1/4 flex flex-col justify-between h-[80vh]">
           {/* Top buttons */}
           <div className="space-y-4">
-            <button className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+            <button
+              className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              onClick={handleSaveChanges}
+            >
               Save Changes
             </button>
             <button

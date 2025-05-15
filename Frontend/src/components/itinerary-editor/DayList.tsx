@@ -16,7 +16,8 @@ interface DayList {
   onAddDay: () => void;
   onAddActivity: (dayId: string, itineraryActivity: ItineraryActivity) => void;
   onDeleteDay: (dayId: string) => void;
-  onRegenerateDay: () => void;
+  onRegenerateDay: (dayId: string) => void;
+  regeneratingDayId: string | null;
   // passed to individual activities
   onEditActivity: (
     dayId: string,
@@ -35,6 +36,7 @@ const DayList = ({
   onAddActivity,
   onDeleteDay,
   onRegenerateDay,
+  regeneratingDayId,
   // passed to individual activities
   onEditActivity,
   onDeleteActivity,
@@ -91,6 +93,7 @@ const DayList = ({
                 <Button
                   className="px-2 py-1 bg-green-600 text-white text-xl rounded hover:bg-green-700 w-10 h-10"
                   onClick={() => handleOpenAddDialogSetup(day.dayId!)}
+                  disabled={regeneratingDayId === day.dayId}
                 >
                   +
                 </Button>
@@ -127,12 +130,17 @@ const DayList = ({
                 />
               </div>
             </CustomizableDialog>
-            <Button className="px-2 py-1 bg-blue-600 text-white text-xl rounded hover:bg-blue-700 w-10 h-10">
+            <Button
+              className="px-2 py-1 bg-blue-600 text-white text-xl rounded hover:bg-blue-700 w-10 h-10"
+              onClick={() => onRegenerateDay(day.dayId!)}
+              disabled={regeneratingDayId === day.dayId}
+            >
               🔄
             </Button>
             <Button
               className="px-2 py-1 bg-dm-dark text-white text-xl rounded hover:bg-blue-700 w-10 h-10"
               onClick={() => onDeleteDay(day.dayId!)}
+              disabled={regeneratingDayId === day.dayId}
             >
               <img
                 src="/assets/icons/delete.svg"
@@ -145,30 +153,43 @@ const DayList = ({
 
           {/* Right: Day card */}
           <div
-            className={`flex-1 rounded p-4 bg-dm-dark transition-all duration-200 ${
+            className={`flex-1 rounded p-4 bg-dm-dark transition-all duration-200 relative ${
               hoveredDayId === day.dayId
                 ? "ring-4 ring-dm-accent bg-dm-dark"
                 : ""
             }`}
           >
-            <h2 className="text-xl font-semibold mb-2">Day {day.day}</h2>
-            <SortableContext
-              id={day.dayId}
-              items={
-                day.activities.length > 0
-                  ? day.activities.map((a) => a.activityId!)
-                  : [`__placeholder__-${day.dayId}`]
+            {/* Overlay spinner and message when regenerating */}
+            {regeneratingDayId === day.dayId && (
+              <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center text-white">
+                <div className="loader-spinner w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-2" />
+                <p className="text-sm">Regenerating activities...</p>
+              </div>
+            )}
+            <div
+              className={
+                regeneratingDayId === day.dayId ? "pointer-events-none" : ""
               }
-              strategy={verticalListSortingStrategy}
             >
-              <ActivityList
-                activities={day.activities}
-                dayId={day.dayId!}
-                onDeleteActivity={onDeleteActivity}
-                onEditActivity={onEditActivity}
-                onRegenerateActivity={onRegenerateActivity}
-              />
-            </SortableContext>
+              <h2 className="text-xl font-semibold mb-2">Day {day.day}</h2>
+              <SortableContext
+                id={day.dayId}
+                items={
+                  day.activities.length > 0
+                    ? day.activities.map((a) => a.activityId!)
+                    : [`__placeholder__-${day.dayId}`]
+                }
+                strategy={verticalListSortingStrategy}
+              >
+                <ActivityList
+                  activities={day.activities}
+                  dayId={day.dayId!}
+                  onDeleteActivity={onDeleteActivity}
+                  onEditActivity={onEditActivity}
+                  onRegenerateActivity={onRegenerateActivity}
+                />
+              </SortableContext>
+            </div>
           </div>
         </div>
       ))}
