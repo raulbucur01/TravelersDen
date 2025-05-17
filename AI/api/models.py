@@ -7,6 +7,11 @@ class SimilarPostsResponse(BaseModel):
     similarPostIds: List[str]
 
 
+class SimilarUsersResponse(BaseModel):
+    userId: str
+    similarUserIds: List[str]
+
+
 class GenerateItineraryRequest(BaseModel):
     destination: str
     days: int

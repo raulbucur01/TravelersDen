@@ -122,3 +122,28 @@ def delete_processed_data():
     except Exception as e:
         print(f"❌ Failed to delete processed entries: {e}")
         conn.rollback()
+
+
+# user similarity operations
+def get_post_ids_by_user(user_id: str) -> list[str]:
+    """Fetches all PostIds created by the given user."""
+    try:
+        with engine.connect() as conn:
+            query = text("SELECT PostId FROM Posts WHERE UserId = :user_id")
+            result = conn.execute(query, {"user_id": user_id}).fetchall()
+            return [str(row[0]) for row in result]
+    except Exception as e:
+        print(f"❌ Failed to fetch posts for user {user_id}: {e}")
+        return []
+
+
+def get_post_user_mapping():
+    """Maps each PostId to the user who created it."""
+    try:
+        with engine.connect() as conn:
+            query = text("SELECT PostId, UserId FROM Posts")
+            result = conn.execute(query).fetchall()
+            return {str(row[0]): str(row[1]) for row in result}
+    except Exception as e:
+        print(f"❌ Failed to fetch post-user mapping: {e}")
+        return {}

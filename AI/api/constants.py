@@ -1,4 +1,5 @@
-TOP_N = 5  # Number of most similar posts to store
+TOP_N_SIMILAR_POSTS = 5  # Number of most similar posts to store
+TOP_N_SIMILAR_USERS = 10
 WEIGHT_TFIDF = 0.5
 WEIGHT_SBERT = 0.5
 

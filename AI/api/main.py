@@ -10,8 +10,10 @@ from models import (
     RegenerateDayRequest,
     SimilarPostsResponse,
     GeneratedItinerary,
+    SimilarUsersResponse,
 )
-from similarity_handlers import update_similarity_for_posts
+from post_similarity_handlers import update_similarity_for_posts
+from user_similarity_handlers import update_similarity_for_users
 from database_operations import delete_processed_data
 import ollama
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,21 +22,27 @@ from fastapi.middleware.cors import CORSMiddleware
 scheduler = BackgroundScheduler()
 
 
-def periodic_similarity_update_task():
+def periodic_post_similarity_update_task():
     """Task to update the similarity matrix periodically."""
-    print("\n⏳ Updating similarity...")
+    print("🔄 Updating similarity for posts...")
     update_similarity_for_posts()
-    print("✅ Similarity updated")
+    print("✅ Similarity for posts successfully updated.")
 
 
 def delete_processed_data_task():
-    print("\n⏳ Deleting processed data...")
+    print("🔄 Deleting processed data...")
     delete_processed_data()
-    print("✅ Processed data deleted")
+    print("✅ Processed data successfully deleted.")
+
+
+def periodic_user_similarity_update_task():
+    print("🔄 Updating similarity for users...")
+    update_similarity_for_users()
+    print("✅ Similarity for users successfully updated.")
 
 
 # Schedule the periodic similarity update task every 6 hours
-scheduler.add_job(periodic_similarity_update_task, "interval", minutes=2)
+scheduler.add_job(periodic_post_similarity_update_task, "interval", minutes=2)
 scheduler.add_job(delete_processed_data_task, "interval", minutes=5)
 
 
@@ -83,15 +91,25 @@ redis_client = redis.Redis(host="localhost", port=6379, db=0, decode_responses=T
 @app.get("/similar-posts/{post_id}", response_model=SimilarPostsResponse)
 async def get_similar_posts(post_id: str):
     """Retrieve Top-N similar posts for a given Post ID from Redis."""
-    similar_posts = redis_client.get(f"similar:{post_id}")
+    result = redis_client.get(f"similar:{post_id}")
 
-    if similar_posts is None:
-        return {"postId": post_id, "similarPostIds": []}
+    if result is None:
+        return SimilarPostsResponse(postId=post_id, similarPostIds=[])
 
-    return SimilarPostsResponse(
-        postId=post_id,
-        similarPostIds=list(map(str, similar_posts.split(","))),
-    )
+    similar_post_ids = result.split(",")
+    return SimilarPostsResponse(postId=post_id, similarPostIds=similar_post_ids)
+
+
+@app.get("/similar-users/{user_id}", response_model=SimilarUsersResponse)
+async def get_similar_users(user_id: str):
+    """Retrieve Top-N similar users for a given User ID from Redis."""
+    result = redis_client.get(f"similar_users:{user_id}")
+
+    if result is None:
+        return SimilarUsersResponse(userId=user_id, similarUserIds=[])
+
+    similar_user_ids = result.split(",")
+    return SimilarUsersResponse(userId=user_id, similarUserIds=similar_user_ids)
 
 
 @app.post("/generate-itinerary", response_model=GeneratedItinerary)

@@ -44,7 +44,9 @@ def update_redis_with_similarities(
         filtered_post_ids = post_ids_array[mask]
 
         # Get Top-N most similar posts
-        top_indices = np.argpartition(-filtered_similarities, TOP_N)[:TOP_N]
+        top_indices = np.argpartition(-filtered_similarities, TOP_N_SIMILAR_POSTS)[
+            :TOP_N_SIMILAR_POSTS
+        ]
         similar_posts = filtered_post_ids[top_indices].tolist()
 
         # Store in Redis
