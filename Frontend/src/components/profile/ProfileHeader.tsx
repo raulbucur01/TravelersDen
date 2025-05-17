@@ -1,5 +1,5 @@
 import { formatCount } from "@/lib/utils";
-import ExpandableText from "../shared/ExpandableText";
+import ExpandableText from "../reusable/ExpandableText";
 import { useUserContext } from "@/context/AuthContext";
 import {
   useFollow,
@@ -11,7 +11,7 @@ import {
 import Loader from "../shared/Loader";
 import { Button } from "../ui/button";
 import { useEffect, useMemo, useState } from "react";
-import CustomizableDialog from "../shared/CustomizableDialog";
+import CustomizableDialog from "../reusable/CustomizableDialog";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";

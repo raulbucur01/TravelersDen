@@ -1,7 +1,7 @@
 import { ItineraryActivity, ItineraryDay } from "@/types";
 import ActivityList from "./ActivityList";
 import { Button } from "../ui/button";
-import CustomizableDialog from "../shared/CustomizableDialog";
+import CustomizableDialog from "../reusable/CustomizableDialog";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import {

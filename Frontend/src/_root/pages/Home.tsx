@@ -1,5 +1,5 @@
 import Loader from "@/components/shared/Loader";
-import PostCard from "@/components/shared/PostCard";
+import PostCard from "@/components/post/PostCard";
 import { useGetRecentPosts } from "@/api/tanstack-query/queriesAndMutations";
 import { BasePost } from "@/types";
 import { useQueryClient } from "@tanstack/react-query";

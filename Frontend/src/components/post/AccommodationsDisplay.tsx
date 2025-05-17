@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { DisplayedAccommodation } from "@/types";
 import { formatToLongDate } from "@/lib/utils";
-import ExpandableText from "../shared/ExpandableText";
+import ExpandableText from "../reusable/ExpandableText";
 
 type AccommodationsDisplayProps = {
   accommodations: DisplayedAccommodation[];

@@ -17,11 +17,7 @@ import {
   DragOverEvent,
   PointerSensor,
 } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
+import { arrayMove } from "@dnd-kit/sortable";
 import { useToast } from "@/hooks/use-toast";
 
 const ItineraryEditor = () => {
@@ -74,10 +70,6 @@ const ItineraryEditor = () => {
         title: "Success",
         description: "Changes saved successfully",
       });
-
-      setTimeout(() => {
-        navigate("/itinerary-generator-dashboard");
-      }, 1000);
     } catch (error) {
       toast({
         title: "Save failed",

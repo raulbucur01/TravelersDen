@@ -1,5 +1,5 @@
-import { BasePost, MediaUrl } from "@/types";
-import MediaSlideshow from "./MediaSlideshow";
+import { BasePost } from "@/types";
+import MediaSlideshow from "../reusable/MediaSlideshow";
 import { Link } from "react-router-dom";
 import { useGetUserById } from "@/api/tanstack-query/queriesAndMutations";
 import { formatToRelativeDate } from "@/lib/utils";

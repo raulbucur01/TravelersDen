@@ -4,7 +4,7 @@ import { useUserContext } from "@/context/AuthContext";
 import PostStats from "../shared/PostStats";
 import { BasePost } from "@/types";
 import SearchPostListUserInfo from "./SearchPostListUserInfo";
-import MediaSlideshow from "../shared/MediaSlideshow";
+import MediaSlideshow from "../reusable/MediaSlideshow";
 
 type SearchPostListProps = {
   posts: BasePost[];

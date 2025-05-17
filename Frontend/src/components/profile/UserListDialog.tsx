@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import CustomizableDialog from "../shared/CustomizableDialog";
+import CustomizableDialog from "../reusable/CustomizableDialog";
 import { useInView } from "react-intersection-observer";
 import { useGetUserConnections } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "../shared/Loader";

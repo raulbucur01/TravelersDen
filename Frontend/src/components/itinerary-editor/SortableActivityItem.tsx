@@ -1,6 +1,6 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import CustomizableDialog from "../shared/CustomizableDialog";
+import CustomizableDialog from "../reusable/CustomizableDialog";
 import { ItineraryActivity } from "@/types";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";

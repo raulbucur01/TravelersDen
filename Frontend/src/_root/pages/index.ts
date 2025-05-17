@@ -8,3 +8,4 @@ export { default as MapPage } from "./MapPage";
 export { default as UpdatePost } from "./UpdatePost";
 export { default as PostDetails } from "./PostDetails";
 export { default as ItineraryGeneratorDashboard } from "./ItineraryGeneratorDashboard";
+export { default as ItineraryEditor } from "./ItineraryEditor";

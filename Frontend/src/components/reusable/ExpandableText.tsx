@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type ExpandableTextProps = {
   text: string; // The full text to display

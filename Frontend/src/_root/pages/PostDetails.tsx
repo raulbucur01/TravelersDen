@@ -12,14 +12,14 @@ import { Button } from "@/components/ui/button";
 import { useGetUserById } from "@/api/tanstack-query/queriesAndMutations";
 import { formatToRelativeDate } from "@/lib/utils";
 import { Link } from "react-router-dom";
-import MediaCarousel from "@/components/shared/MediaCarousel";
+import MediaCarousel from "@/components/reusable/MediaCarousel";
 import ItineraryDetails from "@/components/post/ItineraryDetails";
-import ExpandableText from "@/components/shared/ExpandableText";
+import ExpandableText from "@/components/reusable/ExpandableText";
 import { toast } from "@/hooks/use-toast";
-import CustomizableAlertDialog from "@/components/shared/CustomizableAlertDialog";
+import CustomizableAlertDialog from "@/components/reusable/CustomizableAlertDialog";
 import { useEffect, useRef, useState } from "react";
 import { ChevronDownCircle, ChevronUpCircle } from "lucide-react";
-import SimilarPosts from "@/components/shared/SimilarPosts";
+import SimilarPosts from "@/components/recommendation-related/SimilarPosts";
 
 const PostDetails = () => {
   const navigate = useNavigate();
@@ -266,12 +266,7 @@ const PostDetails = () => {
           </div>
 
           {/* Similar Posts Section */}
-          <div className="hidden xl:block w-1/3 max-w-md overflow-y-auto custom-scrollbar">
-            <h1 className="base-medium lg:body-bold text-dm-light ml-1 mt-2">
-              Similar Posts
-            </h1>
-            <SimilarPosts postId={post!.postId} />
-          </div>
+          <SimilarPosts postId={post!.postId} />
         </div>
       )}
     </>

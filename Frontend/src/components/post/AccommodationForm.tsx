@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { useFieldArray, useFormContext, useWatch } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +9,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { DatePickerWithRange } from "../shared/DatePickerWithRange";
+import { DatePickerWithRange } from "../reusable/DatePickerWithRange";
 import { DateRange } from "react-day-picker";
 import { DisplayedAccommodation } from "@/types";
 import { useEffect } from "react";
