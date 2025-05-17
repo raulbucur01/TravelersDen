@@ -50,6 +50,7 @@ import {
   deleteGeneratedItinerary,
   regenerateDayActivities,
   saveGeneratedItineraryChanges,
+  getSimilarUsers,
 } from "../api";
 import {
   NewItineraryPost,
@@ -714,5 +715,13 @@ export const useSaveGeneratedItineraryChanges = () => {
         queryKey: [QUERY_KEYS.GET_GENERATED_ITINERARY_BY_ID, data.itineraryId],
       });
     },
+  });
+};
+
+export const useGetSimilarUsers = (userId: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.GET_SIMILAR_USERS, userId],
+    queryFn: () => getSimilarUsers(userId),
+    enabled: !!userId,
   });
 };

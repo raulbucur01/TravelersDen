@@ -1082,3 +1082,14 @@ export async function saveGeneratedItineraryChanges(
     console.log(error);
   }
 }
+
+// user recomendations
+export async function getSimilarUsers(userId: string) {
+  try {
+    const response = await apiClient.get(`/users/${userId}/similar-users`);
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}

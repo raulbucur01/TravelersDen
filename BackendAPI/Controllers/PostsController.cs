@@ -39,12 +39,10 @@ namespace BackendAPI.Controllers
                 if (!similarPostIds.Any())
                 {
                     int totalCount = await _context.Posts.CountAsync();
-                    int skip = new Random().Next(0, Math.Max(1, totalCount - 5));  // Pick a random starting point
 
                     var randomPosts = await _context.Posts
                         .Where(p => p.PostId != id)
                         .OrderBy(p => p.PostId)
-                        .Skip(skip)
                         .Take(5)
                         .Select(p => new
                         {
@@ -805,6 +803,21 @@ namespace BackendAPI.Controllers
 
                 if (!System.IO.File.Exists(filePath))
                     return NotFound("CSV file not found!");
+                
+                // list of user IDs
+                var userIds = new List<string>
+                {
+                    "68110844002953351eff",
+                    "68285d6d00158b4f9757",
+                    "68285d8200115078bb9c",
+                    "68285e900012edcb5e68",
+                    "68285ebd0038d5474c16",
+                    "68285f3700325f52df3d",
+                    "68285f81003c56f4f634",
+                    "68285fa100265bc29013"
+                };
+
+                var random = new Random();
 
                 using (var reader = new StreamReader(filePath))
                 using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
@@ -815,11 +828,12 @@ namespace BackendAPI.Controllers
                     var newPosts = posts.Select(p =>
                     {
                         string generatedPostId = Guid.NewGuid().ToString();
+                        string randomUserId = userIds[random.Next(userIds.Count)];
 
                         return new Post
                         {
                             PostId = generatedPostId,
-                            UserId = "68110844002953351eff",
+                            UserId = randomUserId,
                             Caption = p.Caption.Length > 2200 ? p.Caption.Substring(0, 2200) : p.Caption,
                             Body = p.Body.Length > 2200 ? p.Body.Substring(0, 2200) : p.Body,
                             Location = p.Location,
@@ -845,14 +859,14 @@ namespace BackendAPI.Controllers
                     _context.SaveChanges();
                 }
 
-                return Ok("✅ CSV imported successfully!");
+                return Ok("CSV imported successfully!");
             }
             catch (Exception ex)
             {
                 // Log the inner exception details
                 Console.WriteLine($"Error: {ex.Message}");
                 Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
-                return StatusCode(500, $"❌ Error: {ex.Message}");
+                return StatusCode(500, $"Error: {ex.Message}");
             }
         }
 

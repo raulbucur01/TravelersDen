@@ -42,6 +42,28 @@ namespace BackendAPI.Services
             }
         }
 
+        public async Task<SimilarUsersResponseDTO?> GetSimilarUsersAsync(string userId)
+        {
+            try
+            {
+                string fastApiUrl = $"{_fastApiBaseUrl}/similar-users/{userId}";
+                HttpResponseMessage response = await _httpClient.GetAsync(fastApiUrl);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to fetch similar users. Status: {response.StatusCode}");
+                }
+
+                string responseContent = await response.Content.ReadAsStringAsync();
+
+                return JsonSerializer.Deserialize<SimilarUsersResponseDTO>(responseContent, _jsonOptions);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error: {ex.Message}");
+            }
+        }
+
         public async Task<GeneratedItineraryFromFastApiDTO?> GenerateItineraryAsync(string destination, int days, List<string> preferences)
         {
             try

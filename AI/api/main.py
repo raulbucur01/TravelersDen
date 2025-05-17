@@ -22,43 +22,40 @@ from fastapi.middleware.cors import CORSMiddleware
 scheduler = BackgroundScheduler()
 
 
-def periodic_post_similarity_update_task():
-    """Task to update the similarity matrix periodically."""
-    print("🔄 Updating similarity for posts...")
-    update_similarity_for_posts()
-    print("✅ Similarity for posts successfully updated.")
-
-
-def delete_processed_data_task():
-    print("🔄 Deleting processed data...")
-    delete_processed_data()
-    print("✅ Processed data successfully deleted.")
-
-
 def periodic_user_similarity_update_task():
-    print("🔄 Updating similarity for users...")
+    print(" \n🔄 Updating similarity for users...")
     update_similarity_for_users()
     print("✅ Similarity for users successfully updated.")
 
 
-# Schedule the periodic similarity update task every 6 hours
-scheduler.add_job(periodic_post_similarity_update_task, "interval", minutes=2)
-scheduler.add_job(delete_processed_data_task, "interval", minutes=5)
+def periodic_post_similarity_update_task():
+    print(" \n🔄 Updating similarity for posts...")
+    update_similarity_for_posts()
+    print("✅ Similarity for posts successfully updated.")
+
+    print(" \n🔄 Deleting processed data...")
+    delete_processed_data()
+    print("✅ Processed data successfully deleted.")
+
+
+# Schedule the periodic similarity update
+scheduler.add_job(periodic_post_similarity_update_task, "interval", minutes=3)
+scheduler.add_job(periodic_user_similarity_update_task, "interval", minutes=2)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Lifespan function to manage the scheduler lifecycle."""
 
-    # print("⏳ Starting Scheduler...")
-    # scheduler.start()  # Start scheduler when FastAPI starts
-    # print("✅ Scheduler started")
-    # periodic_similarity_update_task()
-    # delete_processed_data_task()
+    print("⏳ Starting Scheduler...")
+    scheduler.start()  # Start scheduler when FastAPI starts
+    print("✅ Scheduler started")
+    periodic_post_similarity_update_task()
+    periodic_user_similarity_update_task()
     yield  # Keep FastAPI running
-    # print("⏳ Shutting Down Scheduler...")
-    # scheduler.shutdown()  # Shutdown scheduler when FastAPI stops
-    # print("✅ Scheduler shut down")
+    print("⏳ Shutting Down Scheduler...")
+    scheduler.shutdown()  # Shutdown scheduler when FastAPI stops
+    print("✅ Scheduler shut down")
 
 
 try:

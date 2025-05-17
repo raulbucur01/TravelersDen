@@ -8,7 +8,7 @@ from constants import (
     PATH_SIMILARITY_MATRIX_SBERT,
     PATH_SIMILARITY_MATRIX_TFIDF,
 )
-from database_operations import get_post_user_mapping
+from database_operations import get_post_user_mapping, get_user_followings_map
 import redis
 
 # Connect to Redis
@@ -20,13 +20,16 @@ def compute_user_similarity_scores(
     sbert_sim_matrix: pd.DataFrame,
 ) -> dict[str, list[str]]:
     """
-    Computes the top-N most similar users for each user, based on average post similarity.
+    Computes the top-N most similar users for each user, based on average post similarity,
+    excluding the users they follow.
 
     Returns:
         dict: A mapping of user_id -> list of top similar user_ids.
     """
     # Load post-to-user mapping
     post_user_map = get_post_user_mapping()
+    users_and_followed_ids = get_user_followings_map()
+
     users_and_their_posts = defaultdict(list)
 
     # Group posts by user
@@ -44,9 +47,10 @@ def compute_user_similarity_scores(
 
     for user_a in user_ids:
         posts_a = users_and_their_posts[user_a]
+        followed_users = users_and_followed_ids.get(user_a, set())
 
         for user_b in user_ids:
-            if user_a == user_b:
+            if user_a == user_b or user_b in followed_users:
                 continue
 
             posts_b = users_and_their_posts[user_b]
@@ -80,9 +84,15 @@ def compute_user_similarity_scores(
 def store_user_similarities_in_redis(user_sim_map: dict[str, list[str]]):
     """
     Stores the top similar users for each user into Redis.
+    Clears old values to avoid outdated results.
     """
     pipeline = redis_client.pipeline()
 
+    # Clear old values
+    for key in redis_client.scan_iter("similar_users:*"):
+        pipeline.delete(key)
+
+    # Store new values
     for user_id, similar_users in user_sim_map.items():
         key = f"similar_users:{user_id}"
         value = ",".join(similar_users)
@@ -97,8 +107,6 @@ def update_similarity_for_users():
     Recomputes and updates top-N similar users based on post similarity matrices.
     """
     try:
-        print("🔄 Updating similarity for users...")
-
         # Load similarity matrices
         tfidf_sim_matrix = pd.read_csv(PATH_SIMILARITY_MATRIX_TFIDF, index_col=0)
         sbert_sim_matrix = pd.read_csv(PATH_SIMILARITY_MATRIX_SBERT, index_col=0)
@@ -115,8 +123,6 @@ def update_similarity_for_users():
 
         # Store in Redis
         store_user_similarities_in_redis(user_sim_map)
-
-        print("✅ User similarity updated and stored in Redis.")
 
     except Exception as e:
         print(f"❌ Error updating user similarity: {e}")

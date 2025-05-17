@@ -2,6 +2,7 @@
 using BackendAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using BackendAPI.DTOs.Users;
+using BackendAPI.Services;
 
 namespace BackendAPI.Controllers
 {
@@ -10,10 +11,12 @@ namespace BackendAPI.Controllers
     public class UsersController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly FastApiService _fastApiService;
 
-        public UsersController(AppDbContext context)
+        public UsersController(AppDbContext context, FastApiService fastApiService)
         {
             _context = context;
+            _fastApiService = fastApiService;
         }
 
         // POST: api/User
@@ -54,7 +57,8 @@ namespace BackendAPI.Controllers
             {
                 var user = await _context.Users.FindAsync(id);
 
-                if (user == null) {
+                if (user == null)
+                {
                     return NotFound(new { Message = "User not found." });
                 }
 
@@ -261,7 +265,7 @@ namespace BackendAPI.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new {createFollowDTO.UserIdFollowing, createFollowDTO.UserIdFollowed});
+                return Ok(new { createFollowDTO.UserIdFollowing, createFollowDTO.UserIdFollowed });
             }
             catch (Exception ex)
             {
@@ -303,7 +307,7 @@ namespace BackendAPI.Controllers
 
                 await _context.SaveChangesAsync();
 
-                return Ok(new {userIdUnfollowing, userIdFollowed});
+                return Ok(new { userIdUnfollowing, userIdFollowed });
             }
             catch (Exception ex)
             {
@@ -320,6 +324,92 @@ namespace BackendAPI.Controllers
                     .AnyAsync(f => f.UserIdFollowing == id1 && f.UserIdFollowed == id2);
 
                 return Ok(new { isFollowing });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+        [HttpGet("{id}/similar-users")]
+        public async Task<IActionResult> GetSimilarUsers(string id)
+        {
+            try
+            {
+                var similarUsersResponse = await _fastApiService.GetSimilarUsersAsync(id);
+
+                if (similarUsersResponse == null)
+                {
+                    return NotFound("No similar users found.");
+                }
+
+                var similarUserIds = similarUsersResponse.SimilarUserIds;
+                Console.WriteLine($"Similar User IDs: {string.Join(", ", similarUserIds)}");
+
+                // Get IDs the current user follows
+                var followedUserIds = await _context.Follows
+                    .Where(f => f.UserIdFollowing == id)
+                    .Select(f => f.UserIdFollowed)
+                    .ToListAsync();
+
+                // If no similar users are found, return randomly selected users
+                if (!similarUserIds.Any())
+                {
+                    int totalCount = await _context.Users.CountAsync();
+
+                    var randomUsers = await _context.Users
+                        .Where(u => u.UserId != id)
+                        .OrderBy(u => u.UserId)  // Order by UserId to ensure randomness
+                        .Take(10)
+                        .Select(u => new
+                        {
+                            UserId = u.UserId,
+                            Name = u.Name,
+                            Username = u.Username,
+                            Email = u.Email,
+                            ImageUrl = u.ImageUrl,
+                            Bio = u.Bio,
+                            FollowedBy = _context.Follows
+                                .Where(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
+                                .Select(f => _context.Users
+                                    .Where(us => us.UserId == f.UserIdFollowing)
+                                    .Select(us => us.Username)
+                                    .FirstOrDefault())
+                                .FirstOrDefault(),
+
+                            MutualCount = _context.Follows
+                                 .Count(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
+
+                        })
+                        .ToListAsync();
+
+                    return Ok(randomUsers);
+                }
+
+                var similarUsers = await _context.Users
+                    .Where(u => similarUserIds.Contains(u.UserId))
+                    .Select(u => new
+                    {
+                        UserId = u.UserId,
+                        Name = u.Name,
+                        Username = u.Username,
+                        Email = u.Email,
+                        ImageUrl = u.ImageUrl,
+                        Bio = u.Bio,
+                        FollowedBy = _context.Follows
+                                .Where(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
+                                .Select(f => _context.Users
+                                    .Where(us => us.UserId == f.UserIdFollowing)
+                                    .Select(us => us.Username)
+                                    .FirstOrDefault())
+                                .FirstOrDefault(),
+
+                        MutualCount = _context.Follows
+                                 .Count(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
+                    })
+                    .ToListAsync();
+
+                return Ok(similarUsers);
             }
             catch (Exception ex)
             {

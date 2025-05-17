@@ -573,5 +573,3 @@ def update_similarity_for_posts():
 # initialize_TFIDF_post_similarity_startpoint()
 # initialize_SBERT_post_similarity_startpoint()
 # initialize_combined_similarity_redis_startpoint()
-# handle_unprocessed_inserted_posts()
-# update_similarity_for_posts()

@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, text
 import urllib
+from collections import defaultdict
 
 params = urllib.parse.quote_plus(
     "DRIVER={ODBC Driver 17 for SQL Server};"
@@ -146,4 +147,24 @@ def get_post_user_mapping():
             return {str(row[0]): str(row[1]) for row in result}
     except Exception as e:
         print(f"❌ Failed to fetch post-user mapping: {e}")
+        return {}
+
+
+def get_user_followings_map() -> dict[str, set[str]]:
+    """Fetches a mapping of user_id -> set of user_ids they follow."""
+    try:
+        with engine.connect() as conn:
+            query = text("SELECT UserIdFollowing, UserIdFollowed FROM Follows")
+            result = conn.execute(query).fetchall()
+
+            followings = defaultdict(set)
+            for row in result:
+                follower = str(row[0])
+                followed = str(row[1])
+                followings[follower].add(followed)
+
+            return followings
+
+    except Exception as e:
+        print(f"❌ Failed to fetch user followings: {e}")
         return {}
