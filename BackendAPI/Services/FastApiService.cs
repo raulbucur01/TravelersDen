@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using Microsoft.Extensions.Options;
 using BackendAPI.Models;
-using BackendAPI.DTOs.FastApi;
+using BackendAPI.DTOs.FastApiRelated.FastApiService;
 
 namespace BackendAPI.Services
 {
@@ -20,7 +20,7 @@ namespace BackendAPI.Services
             _fastApiBaseUrl = fastApiSettings.Value.BaseUrl;
         }
 
-        public async Task<SimilarPostsResponseDTO?> GetSimilarPostsAsync(string postId)
+        public async Task<SimilarPostsFastApiResponseDTO?> GetSimilarPostsAsync(string postId)
         {
             try
             {
@@ -34,7 +34,7 @@ namespace BackendAPI.Services
 
                 string responseContent = await response.Content.ReadAsStringAsync();
 
-                return JsonSerializer.Deserialize<SimilarPostsResponseDTO>(responseContent, _jsonOptions);
+                return JsonSerializer.Deserialize<SimilarPostsFastApiResponseDTO>(responseContent, _jsonOptions);
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace BackendAPI.Services
             }
         }
 
-        public async Task<SimilarUsersResponseDTO?> GetSimilarUsersAsync(string userId)
+        public async Task<SimilarUsersFastApiResponseDTO?> GetSimilarUsersAsync(string userId)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace BackendAPI.Services
 
                 string responseContent = await response.Content.ReadAsStringAsync();
 
-                return JsonSerializer.Deserialize<SimilarUsersResponseDTO>(responseContent, _jsonOptions);
+                return JsonSerializer.Deserialize<SimilarUsersFastApiResponseDTO>(responseContent, _jsonOptions);
             }
             catch (Exception ex)
             {
@@ -64,7 +64,7 @@ namespace BackendAPI.Services
             }
         }
 
-        public async Task<GeneratedItineraryFromFastApiDTO?> GenerateItineraryAsync(string destination, int days, List<string> preferences)
+        public async Task<GeneratedItineraryFastApiDTO?> GenerateItineraryAsync(string destination, int days, List<string> preferences)
         {
             try
             {
@@ -86,7 +86,7 @@ namespace BackendAPI.Services
 
                 string responseContent = await response.Content.ReadAsStringAsync();
 
-                return JsonSerializer.Deserialize<GeneratedItineraryFromFastApiDTO>(responseContent, _jsonOptions);
+                return JsonSerializer.Deserialize<GeneratedItineraryFastApiDTO>(responseContent, _jsonOptions);
             }
             catch (Exception ex)
             {
@@ -94,7 +94,7 @@ namespace BackendAPI.Services
             }
         }
 
-        public async Task<List<RawItineraryActivityDTO>> RegenerateDayActivitiesAsync(string destination, List<string> excludedActivities)
+        public async Task<List<RawItineraryActivityFastApiDTO>> RegenerateDayActivitiesAsync(string destination, List<string> excludedActivities)
         {
             try
             {
@@ -115,9 +115,9 @@ namespace BackendAPI.Services
 
                 string responseContent = await response.Content.ReadAsStringAsync();
 
-                var result = JsonSerializer.Deserialize<List<RawItineraryActivityDTO>>(responseContent, _jsonOptions);
+                var result = JsonSerializer.Deserialize<List<RawItineraryActivityFastApiDTO>>(responseContent, _jsonOptions);
 
-                return result ?? new List<RawItineraryActivityDTO>();
+                return result ?? new List<RawItineraryActivityFastApiDTO>();
             }
             catch (Exception ex)
             {

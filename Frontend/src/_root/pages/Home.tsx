@@ -6,6 +6,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import { QUERY_KEYS } from "@/api/tanstack-query/queryKeys";
+import { SuggestedUsers } from "@/components/recommendation-related/SuggestedUsers";
 
 const Home = () => {
   const queryClient = useQueryClient();
@@ -66,7 +67,7 @@ const Home = () => {
         </div>
       </div>
 
-      <div className="home-creators">Suggested Users</div>
+      <SuggestedUsers />
     </div>
   );
 };

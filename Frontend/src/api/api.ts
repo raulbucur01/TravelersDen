@@ -18,6 +18,7 @@ import {
   NewGeneratedItineraryResponse,
   ItineraryActivity,
   RegenerateDayActivitiesRequest,
+  SimilarUser,
 } from "@/types";
 import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
 
@@ -1084,9 +1085,13 @@ export async function saveGeneratedItineraryChanges(
 }
 
 // user recomendations
-export async function getSimilarUsers(userId: string) {
+export async function getSimilarUsers(
+  userId: string
+): Promise<SimilarUser[] | undefined> {
   try {
-    const response = await apiClient.get(`/users/${userId}/similar-users`);
+    const response = await apiClient.get<SimilarUser[]>(
+      `/users/${userId}/similar-users`
+    );
 
     return response.data;
   } catch (error) {

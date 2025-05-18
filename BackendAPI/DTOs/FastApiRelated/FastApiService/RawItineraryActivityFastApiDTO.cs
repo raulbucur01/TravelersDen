@@ -1,6 +1,6 @@
-﻿namespace BackendAPI.DTOs.FastApi
+﻿namespace BackendAPI.DTOs.FastApiRelated.FastApiService
 {
-    public class RawItineraryActivityDTO
+    public class RawItineraryActivityFastApiDTO
     {
         public string Title { get; set; }
         public string Description { get; set; }

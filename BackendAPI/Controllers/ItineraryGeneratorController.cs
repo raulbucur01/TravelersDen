@@ -1,7 +1,7 @@
 ﻿using BackendAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using BackendAPI.DTOs.FastApi;
+using BackendAPI.DTOs.FastApiRelated;
 using BackendAPI.Models.ItineraryGenerator;
 
 namespace BackendAPI.Controllers

@@ -1,4 +1,4 @@
-﻿namespace BackendAPI.DTOs.FastApi
+﻿namespace BackendAPI.DTOs.FastApiRelated
 {
     public class GeneratedItineraryDTO
     {

@@ -3,6 +3,7 @@ using BackendAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using BackendAPI.DTOs.Users;
 using BackendAPI.Services;
+using BackendAPI.DTOs.FastApiRelated;
 
 namespace BackendAPI.Controllers
 {
@@ -361,7 +362,7 @@ namespace BackendAPI.Controllers
                         .Where(u => u.UserId != id)
                         .OrderBy(u => u.UserId)  // Order by UserId to ensure randomness
                         .Take(10)
-                        .Select(u => new
+                        .Select(u => new SimilarUserDTO
                         {
                             UserId = u.UserId,
                             Name = u.Name,
@@ -388,7 +389,7 @@ namespace BackendAPI.Controllers
 
                 var similarUsers = await _context.Users
                     .Where(u => similarUserIds.Contains(u.UserId))
-                    .Select(u => new
+                    .Select(u => new SimilarUserDTO
                     {
                         UserId = u.UserId,
                         Name = u.Name,

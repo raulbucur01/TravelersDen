@@ -1,6 +1,6 @@
-﻿namespace BackendAPI.DTOs.FastApi
+﻿namespace BackendAPI.DTOs.FastApiRelated.FastApiService
 {
-    public class GeneratedItineraryFromFastApiDTO
+    public class GeneratedItineraryFastApiDTO
     {
         public string Destination { get; set; }
         public List<DayDTO> Days { get; set; }

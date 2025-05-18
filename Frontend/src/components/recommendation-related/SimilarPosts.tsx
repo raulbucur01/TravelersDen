@@ -8,10 +8,21 @@ type SimilarPostsProps = {
 };
 
 const SimilarPosts = ({ postId }: SimilarPostsProps) => {
-  const { data: similarPosts, isPending: similarPostsLoading } =
-    useGetSimilarPosts(postId);
+  const {
+    data: similarPosts,
+    isPending: similarPostsLoading,
+    isError: isSimilarPostsError,
+  } = useGetSimilarPosts(postId);
 
-  if (similarPostsLoading || !similarPosts) return <Loader />;
+  if (similarPostsLoading) return <Loader />;
+
+  if (isSimilarPostsError) {
+    return (
+      <div className="hidden xl:block w-1/3 max-w-md text-red-500 mt-4">
+        Failed to load similar posts.
+      </div>
+    );
+  }
 
   return (
     <div className="hidden xl:block w-1/3 max-w-md overflow-y-auto custom-scrollbar">

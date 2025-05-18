@@ -1,6 +1,6 @@
-﻿namespace BackendAPI.DTOs.FastApi
+﻿namespace BackendAPI.DTOs.FastApiRelated.FastApiService
 {
-    public class SimilarPostsResponseDTO
+    public class SimilarPostsFastApiResponseDTO
     {
         public string PostId { get; set; }
         public List<string> SimilarPostIds { get; set; }

@@ -257,3 +257,14 @@ export type RegenerateDayActivitiesRequest = {
   itineraryId: string;
   dayId: string;
 };
+
+export type SimilarUser = {
+  userId: string;
+  name: string;
+  username: string;
+  email: string;
+  imageUrl: string;
+  bio: string;
+  followedBy?: string | null; // optional because it's nullable in C#
+  mutualCount: number;
+};
