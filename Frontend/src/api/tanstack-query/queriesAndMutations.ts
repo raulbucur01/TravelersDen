@@ -723,5 +723,7 @@ export const useGetSimilarUsers = (userId: string) => {
     queryKey: [QUERY_KEYS.GET_SIMILAR_USERS, userId],
     queryFn: () => getSimilarUsers(userId),
     enabled: !!userId,
+    refetchOnMount: true,
+    staleTime: 0,
   });
 };

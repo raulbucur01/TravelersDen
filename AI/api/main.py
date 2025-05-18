@@ -39,8 +39,8 @@ def periodic_post_similarity_update_task():
 
 
 # Schedule the periodic similarity update
-# scheduler.add_job(periodic_post_similarity_update_task, "interval", minutes=3)
-# scheduler.add_job(periodic_user_similarity_update_task, "interval", minutes=2)
+scheduler.add_job(periodic_post_similarity_update_task, "interval", minutes=3)
+scheduler.add_job(periodic_user_similarity_update_task, "interval", minutes=2)
 
 
 @asynccontextmanager
@@ -50,8 +50,8 @@ async def lifespan(app: FastAPI):
     print("⏳ Starting Scheduler...")
     scheduler.start()  # Start scheduler when FastAPI starts
     print("✅ Scheduler started")
-    # periodic_post_similarity_update_task()
-    # periodic_user_similarity_update_task()
+    periodic_post_similarity_update_task()
+    periodic_user_similarity_update_task()
     yield  # Keep FastAPI running
     print("⏳ Shutting Down Scheduler...")
     scheduler.shutdown()  # Shutdown scheduler when FastAPI stops

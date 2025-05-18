@@ -43,7 +43,7 @@ namespace BackendAPI.Controllers
                     var randomPosts = await _context.Posts
                         .Where(p => p.PostId != id)
                         .OrderBy(p => p.PostId)
-                        .Take(5)
+                        .Take(10)
                         .Select(p => new
                         {
                             PostId = p.PostId,

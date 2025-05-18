@@ -41,9 +41,6 @@ export const formatToRelativeDate = (timestamp: string = ""): string => {
   const date: Date = new Date(timestamp);
   const now: Date = new Date();
 
-  console.log("now: ", new Date().toISOString());
-  console.log("createdAt: ", new Date(timestamp).toISOString());
-
   const diff: number = now.getTime() - date.getTime();
   const diffInSeconds: number = diff / 1000;
   const diffInMinutes: number = diffInSeconds / 60;

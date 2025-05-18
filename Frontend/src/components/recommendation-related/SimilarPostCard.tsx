@@ -9,9 +9,7 @@ type SimilarPostCardProps = {
 };
 
 const SimilarPostCard = ({ post }: SimilarPostCardProps) => {
-  const { data: postCreator, isPending: isPostCreatorLoading } = useGetUserById(
-    post.userId
-  );
+  const { data: postCreator } = useGetUserById(post.userId);
 
   // Convert tags into an array
   const separatedPostTags = post?.tags?.replace(/ /g, "").split(",") || [];
