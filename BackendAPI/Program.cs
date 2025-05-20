@@ -12,81 +12,6 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//// Add authentication with JWT Bearer
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddJwtBearer(options =>
-//    {
-//        options.Events = new JwtBearerEvents
-//        {
-//            OnMessageReceived = async context =>
-//            {
-//                var token = context.Request.Cookies["AppwriteJWT"];
-//                //Console.WriteLine("\n\n\n TOKEN: " + token + "\n\n\n");
-
-//                if (string.IsNullOrEmpty(token))
-//                {
-//                    context.NoResult();
-//                    return;
-//                }
-
-//                try
-//                {
-//                    var appwriteEndpoint = builder.Configuration["Appwrite:Endpoint"];
-//                    var appwriteProjectId = builder.Configuration["Appwrite:ProjectId"];
-
-//                    if (string.IsNullOrEmpty(appwriteEndpoint) || string.IsNullOrEmpty(appwriteProjectId))
-//                    {
-//                        throw new InvalidOperationException("Appwrite configuration values (Endpoint or ProjectId) are missing in appsettings.json.");
-//                    }
-
-//                    var client = new Client()
-//                        .SetEndpoint(appwriteEndpoint)
-//                        .SetProject(appwriteProjectId)
-//                        .SetJWT(token);
-
-//                    var account = new Account(client);
-//                    var user = await account.Get();
-
-//                    if (user != null)
-//                    {
-//                        var claims = new List<System.Security.Claims.Claim>
-//                        {
-//                            new System.Security.Claims.Claim("UserId", user.Id),
-//                            new System.Security.Claims.Claim("Email", user.Email)
-//                        };
-
-//                        var identity = new System.Security.Claims.ClaimsIdentity(claims, JwtBearerDefaults.AuthenticationScheme);
-//                        context.Principal = new System.Security.Claims.ClaimsPrincipal(identity);
-//                        context.Success();
-//                    }
-//                    else
-//                    {
-//                        context.Fail("Invalid token");
-//                    }
-//                }
-//                catch (Exception ex)
-//                {
-//                    Console.WriteLine("Token validation error: " + ex.Message);
-//                    context.Fail("Invalid token");
-//                }
-//            }
-//        };
-
-//        options.TokenValidationParameters = new TokenValidationParameters
-//        {
-//            ValidateIssuer = false,
-//            ValidateAudience = false,
-//            ValidateLifetime = false,
-//            ValidateIssuerSigningKey = false,
-//            SignatureValidator = (token, _) => new System.IdentityModel.Tokens.Jwt.JwtSecurityToken(token) // Bypass default JWT validation
-//        };
-//    });
-
-//builder.Services.AddAuthorizationBuilder()
-//    .SetFallbackPolicy(new AuthorizationPolicyBuilder()
-//        .RequireAuthenticatedUser()
-//        .Build());
-
 // binds and validates the JwtSettings section from appsettings.json
 // fails on startup if the settings are invalid or missing
 builder.Services.AddOptions<JwtSettings>()
@@ -165,17 +90,17 @@ builder.Services.AddHttpClient<FastApiService>(client =>
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Add CORS support
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-    {
-        policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:52679")  // Frontend URL
-            .AllowCredentials()      
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
+//// Add CORS support
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("AllowAll", policy =>
+//    {
+//        policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:52679")  // Frontend URL
+//            .AllowCredentials()      
+//            .AllowAnyHeader()
+//            .AllowAnyMethod();
+//    });
+//});
 
 // Register the Swagger generator
 builder.Services.AddSwaggerGen(c =>
@@ -205,7 +130,7 @@ app.UseSwaggerUI(c =>
 });
 
 // Use CORS middleware to enable cross-origin requests
-app.UseCors("AllowAll");  // Apply the "AllowAll" policy
+//app.UseCors("AllowAll");  // Apply the "AllowAll" policy
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

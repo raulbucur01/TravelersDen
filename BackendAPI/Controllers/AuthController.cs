@@ -33,7 +33,7 @@ namespace BackendAPI.Controllers
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.None,
+                    SameSite = SameSiteMode.Strict,
                     Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
                     Path = "/",
                 });
@@ -72,7 +72,7 @@ namespace BackendAPI.Controllers
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.None,
+                    SameSite = SameSiteMode.Strict,
                     Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
                     Path = "/",
                 });
@@ -102,7 +102,7 @@ namespace BackendAPI.Controllers
                 {
                     HttpOnly = true,
                     Secure = true,
-                    SameSite = SameSiteMode.None,
+                    SameSite = SameSiteMode.Strict,
                     Path = "/",
                 });
 

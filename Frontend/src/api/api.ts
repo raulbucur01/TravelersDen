@@ -25,9 +25,6 @@ import { appwriteConfig, avatars, storage, apiConfig } from "./config";
 import axios from "axios";
 import { extractAppwriteStorageFileIdFromUrl } from "@/lib/utils";
 
-const API_BASE_URL = apiConfig.backendApiUrl;
-const TOMTOM_API_KEY = apiConfig.tomTomApiKey;
-
 // utility
 export const processFiles = async (files: File[]) => {
   const results: { url: string; type: string }[] = [];
@@ -129,7 +126,7 @@ async function deleteFilesFromAppwrite(fileUrls: string[]): Promise<boolean> {
 // utility
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: "/",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
@@ -675,7 +672,9 @@ export async function getCommentLikeCount(commentId: string) {
 export async function getMapSearchResults(query: string) {
   try {
     const response = await axios.get(
-      `https://api.tomtom.com/search/2/search/${query}.json?key=${TOMTOM_API_KEY}&limit=${5}`
+      `https://api.tomtom.com/search/2/search/${query}.json?key=${
+        apiConfig.tomTomApiKey
+      }&limit=${5}`
     );
 
     return response.data;
