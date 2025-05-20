@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { SigninValidation } from "@/lib/validation";
 import Loader from "@/components/shared/Loader";
 import { useToast } from "@/hooks/use-toast";
-import { useSignInAccount } from "@/api/tanstack-query/queriesAndMutations";
+import { useSignIn } from "@/api/tanstack-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 
 const SigninForm = () => {
@@ -24,8 +24,11 @@ const SigninForm = () => {
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
 
-  const { mutateAsync: signInAccount, isPending: isSigningIn } =
-    useSignInAccount();
+  const {
+    mutateAsync: signInAccount,
+    isPending: isSigningIn,
+    isError: isSignInError,
+  } = useSignIn();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SigninValidation>>({
@@ -43,7 +46,7 @@ const SigninForm = () => {
       password: values.password,
     });
 
-    if (!session) {
+    if (isSignInError) {
       return toast({
         title: "Sign In failed, Please try again.",
         variant: "destructive",

@@ -25,18 +25,18 @@ const AuthContext = createContext<ContextType>(INITIAL_STATE);
 
 const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User>(INITIAL_USER);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const navigate = useNavigate();
 
-  const checkAuthUser = async () => {
+  const checkAuthUser = async (): Promise<boolean> => {
     try {
       const currentAccount = await getCurrentUser();
 
       if (currentAccount) {
         setUser({
-          userId: currentAccount.id,
+          userId: currentAccount.userId,
           name: currentAccount.name,
           username: currentAccount.username,
           email: currentAccount.email,
@@ -49,31 +49,28 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return true;
       }
 
+      setUser(INITIAL_USER);
+      setIsAuthenticated(false);
       return false;
     } catch (error) {
-      console.log(error);
+      console.log("Auth check failed:", error);
+      setUser(INITIAL_USER);
+      setIsAuthenticated(false);
       return false;
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Runs on initial render to:
-  // Redirect unauthenticated users to the sign-in page by checking cookieFallback in localStorage.
-  // Call checkAuthUser to verify if a session is active.
   useEffect(() => {
-    if (
-      localStorage.getItem("cookieFallback") === "[]" ||
-      localStorage.getItem("cookieFallback") === null
-    ) {
-      navigate("/sign-in");
-      return;
-    }
-
-    checkAuthUser();
+    checkAuthUser().then((authenticated) => {
+      if (!authenticated) {
+        navigate("/sign-in");
+      }
+    });
   }, []);
 
-  const value = {
+  const value: ContextType = {
     user,
     setUser,
     isLoading,
@@ -82,7 +79,11 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkAuthUser,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {!isLoading && children}
+    </AuthContext.Provider>
+  );
 };
 
 export default AuthProvider;

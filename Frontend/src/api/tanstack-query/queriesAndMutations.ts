@@ -5,10 +5,10 @@ import {
   useInfiniteQuery,
 } from "@tanstack/react-query";
 import {
-  createUserAccount,
+  register,
   getCurrentUser,
-  signInAccount,
-  signOutAccount,
+  signIn,
+  signOut,
   createNormalPost,
   createItineraryPost,
   likePost,
@@ -65,22 +65,21 @@ import {
 } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
 
-export const useCreateUserAccount = () => {
+export const useRegister = () => {
   return useMutation({
-    mutationFn: (user: NewUser) => createUserAccount(user),
+    mutationFn: (user: NewUser) => register(user),
   });
 };
 
-export const useSignInAccount = () => {
+export const useSignIn = () => {
   return useMutation({
-    mutationFn: (user: { email: string; password: string }) =>
-      signInAccount(user),
+    mutationFn: (user: { email: string; password: string }) => signIn(user),
   });
 };
 
-export const useSignOutAccount = () => {
+export const useSignOut = () => {
   return useMutation({
-    mutationFn: signOutAccount,
+    mutationFn: signOut,
   });
 };
 

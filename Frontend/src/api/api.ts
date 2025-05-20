@@ -20,7 +20,7 @@ import {
   RegenerateDayActivitiesRequest,
   SimilarUser,
 } from "@/types";
-import { appwriteConfig, account, avatars, storage, apiConfig } from "./config";
+import { appwriteConfig, avatars, storage, apiConfig } from "./config";
 
 import axios from "axios";
 import { extractAppwriteStorageFileIdFromUrl } from "@/lib/utils";
@@ -128,10 +128,6 @@ async function deleteFilesFromAppwrite(fileUrls: string[]): Promise<boolean> {
 }
 // utility
 
-// ~~~~~~~~~~~~~~~~~~ SIGN IN & SIGN OUT with JWT Handling ~~~~~~~~~~~~~~~~~~
-// Axios instance with base URL
-// When you make a request using axios or fetch, and the withCredentials flag is enabled,
-// the browser automatically includes the cookie in a header if the request's domain matches the cookie's domain
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
@@ -140,171 +136,65 @@ const apiClient = axios.create({
   },
 });
 
-window.addEventListener("load", async () => {
+export async function signIn(user: { email: string; password: string }) {
   try {
-    const storedSession = localStorage.getItem("cookieFallback");
-    if (storedSession === "[]") {
-      return; // Exit early if no stored session (avoids unnecessary request)
-    }
+    const response = await apiClient.post("/auth/login", user);
 
-    // Check if an active session exists
-    const session = await account.getSession("current");
-
-    if (!session) {
-      return; // Exit early if no active session
-    }
-
-    const jwt = await account.createJWT();
-    if (!jwt?.jwt) throw new Error("Failed to get JWT.");
-
-    const payload = JSON.parse(atob(jwt.jwt.split(".")[1]));
-    const exp = payload.exp * 1000;
-
-    await apiClient.post("/auth/set-cookie", {
-      token: jwt.jwt,
-      expiration: exp,
-    });
-
-    setTimeout(refreshJWT, exp - Date.now() - 60000);
-  } catch (error) {
-    console.error("Auto-refresh JWT error:", error);
-  }
-});
-
-async function refreshJWT() {
-  try {
-    console.log("Refreshing JWT...");
-    const jwt = await account.createJWT();
-    if (!jwt?.jwt) throw new Error("Failed to refresh JWT.");
-
-    const payload = JSON.parse(atob(jwt.jwt.split(".")[1]));
-    const exp = payload.exp * 1000;
-
-    await apiClient.post("/auth/set-cookie", {
-      token: jwt.jwt,
-      expiration: exp,
-    });
-
-    setTimeout(refreshJWT, exp - Date.now() - 60000);
-  } catch (error) {
-    console.error("JWT refresh error:", error);
-  }
-}
-
-export async function signInAccount(user: { email: string; password: string }) {
-  try {
-    const session = await account.createEmailPasswordSession(
-      user.email,
-      user.password
-    );
-
-    if (!session) throw new Error("Failed to create session.");
-
-    const jwt = await account.createJWT();
-
-    if (!jwt) throw new Error("Failed to create JWT.");
-
-    const payload = JSON.parse(atob(jwt.jwt.split(".")[1]));
-    const exp = payload.exp * 1000; // Convert expiration to milliseconds
-
-    await apiClient.post("/auth/set-cookie", {
-      token: jwt.jwt,
-      expiration: exp,
-    });
-
-    setTimeout(refreshJWT, exp - Date.now() - 60000);
-
-    return session;
+    return response;
   } catch (error) {
     console.log(error);
   }
 }
 
-export async function signOutAccount() {
+export async function signOut() {
   try {
-    const session = await account.deleteSession("current");
+    const response = await apiClient.post("/auth/logout");
 
-    if (!session) throw Error;
-
-    await apiClient.post("/auth/logout");
-
-    return session;
+    return response;
   } catch (error) {
     console.log(error);
   }
 }
 
-// ~~~~~~~~~~~~~~~~~~ SIGN IN & SIGN OUT with JWT Handling ~~~~~~~~~~~~~~~~~~
-
-export async function createUserAccount(user: NewUser) {
+export async function register(user: NewUser) {
   try {
-    const newAccount = await account.create(
-      ID.unique(),
-      user.email,
-      user.password,
-      user.name
-    );
-
-    if (!newAccount) throw Error;
-
     const avatarUrl = avatars.getInitials(user.name);
 
-    const newUser = await saveUserToDB({
-      id: newAccount.$id,
-      name: newAccount.name,
-      email: newAccount.email,
+    const newUser = {
+      name: user.name,
+      email: user.email,
       username: user.username,
+      password: user.password,
       imageUrl: avatarUrl.href,
-    });
+    };
 
-    if (!newUser) throw Error;
+    const response = await apiClient.post("/auth/register", newUser);
 
-    return newUser;
+    return response;
   } catch (error) {
     console.log(error);
     return error;
   }
 }
 
-export async function saveUserToDB(user: {
-  id: string;
-  name: string;
-  email: string;
-  imageUrl: string;
-  username: string;
-}) {
-  try {
-    const response = await apiClient.post("/users", {
-      userID: user.id,
-      email: user.email,
-      name: user.name,
-      imageUrl: user.imageUrl,
-      username: user.username,
-    });
-
-    return response.data;
-  } catch (error) {
-    console.log(error, "error saving to DB");
-    return null;
-  }
-}
-
 export async function getCurrentUser() {
   try {
-    const currentAccount = await account.get();
+    const response = await apiClient.get("/auth/current-user");
 
-    if (!currentAccount) throw new Error("No authenticated user found.");
+    if (!response) throw new Error("Failed to fetch current user.");
 
-    const currentUser = await getUserById(currentAccount.$id);
+    const currentUserId = response.data.userId;
+
+    const currentUser = await getUserById(currentUserId);
 
     if (!currentUser) {
       throw new Error("No user found.");
     }
 
     return {
-      id: currentAccount.$id,
-      name: currentAccount.name || "",
-      email: currentAccount.email,
+      userId: currentUser.userId,
+      name: currentUser.name || "",
+      email: currentUser.email,
       username: currentUser.username,
       imageUrl: currentUser.imageUrl || "",
       bio: "",
@@ -806,12 +696,6 @@ export async function deleteUser(userId: string) {
 
 export async function updateUser(profileInfo: UpdateUserProfile) {
   try {
-    const updateResponse = await account.updateName(profileInfo.name);
-
-    if (!updateResponse) {
-      throw new Error("Failed to update name in appwrite account");
-    }
-
     let imageUrl = profileInfo.previousImageUrl; // Default to current image URL
 
     // CASE 1: No new image & previous image was an initials avatar -> Generate new initials avatar

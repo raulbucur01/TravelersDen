@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/button";
-import { useSignOutAccount } from "@/api/tanstack-query/queriesAndMutations";
+import { useSignOut } from "@/api/tanstack-query/queriesAndMutations";
 import { INITIAL_USER, useUserContext } from "@/context/AuthContext";
 import { sidebarLinks } from "@/constants";
 import { NavLink as NavLinkType } from "@/types";
@@ -15,7 +15,7 @@ const LeftSidebar = () => {
     mutateAsync: signOut,
     isSuccess,
     isPending: isSigningOut,
-  } = useSignOutAccount();
+  } = useSignOut();
 
   useEffect(() => {
     if (isSuccess) {

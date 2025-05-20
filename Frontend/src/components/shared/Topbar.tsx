@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/button";
-import { useSignOutAccount } from "@/api/tanstack-query/queriesAndMutations";
+import { useSignOut } from "@/api/tanstack-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 
 const Topbar = () => {
   const navigate = useNavigate();
   const { user } = useUserContext();
-  const { mutateAsync: signOut, isSuccess } = useSignOutAccount();
+  const { mutateAsync: signOut, isSuccess } = useSignOut();
 
   useEffect(() => {
     if (isSuccess) navigate(0);

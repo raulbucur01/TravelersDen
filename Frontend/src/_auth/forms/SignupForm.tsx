@@ -3,8 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import {
-  useCreateUserAccount,
-  useSignInAccount,
+  useRegister,
+  useSignIn,
 } from "@/api/tanstack-query/queriesAndMutations";
 import { useUserContext } from "@/context/AuthContext";
 
@@ -27,11 +27,9 @@ const SignupForm = () => {
   const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
   const navigate = useNavigate();
 
-  const { mutateAsync: createUserAccount, isPending: isCreatingAccount } =
-    useCreateUserAccount();
+  const { mutateAsync: register, isPending: isCreatingAccount } = useRegister();
 
-  const { mutateAsync: signInAccount, isPending: isSigningIn } =
-    useSignInAccount();
+  const { mutateAsync: signIn, isPending: isSigningIn } = useSignIn();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidation>>({
@@ -46,7 +44,7 @@ const SignupForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
-    const newUser = await createUserAccount(values);
+    const newUser = await register(values);
 
     if (!newUser) {
       return toast({
@@ -55,7 +53,7 @@ const SignupForm = () => {
       });
     }
 
-    const session = await signInAccount({
+    const session = await signIn({
       email: values.email,
       password: values.password,
     });
