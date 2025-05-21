@@ -120,7 +120,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
-
 // Automatically open Swagger UI in the browser when the app starts
 if (app.Environment.IsDevelopment())
 {

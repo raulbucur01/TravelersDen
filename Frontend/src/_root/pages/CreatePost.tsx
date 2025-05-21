@@ -6,7 +6,7 @@ const CreatePost = () => {
   const [activeTab, setActiveTab] = useState("normal");
 
   return (
-    <div className="flex flex-1 justify-center bg-dm-dark min-h-screen">
+    <div className="flex flex-1 justify-center min-h-screen">
       <div className="common-container bg-dm-dark-2 shadow-lg rounded-lg p-6">
         {/* Header */}
         <div className="max-w-5xl flex items-center justify-center gap-3">

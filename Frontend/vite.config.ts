@@ -1,10 +1,25 @@
 import path from "path";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import history from "connect-history-api-fallback";
 import fs from "fs";
+import type { Connect } from "vite";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: "spa-fallback",
+      configureServer(server) {
+        server.middlewares.use(
+          history({
+            disableDotRule: true,
+            htmlAcceptHeaders: ["text/html", "application/xhtml+xml"],
+          }) as Connect.NextHandleFunction
+        );
+      },
+    },
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -43,6 +58,9 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+    },
+    fs: {
+      strict: false,
     },
   },
 });

@@ -478,3 +478,7 @@ body {
 .react-select__input-container {
   font-size: 0.875rem !important; /* text-sm */
 }
+
+body {
+  background-color: #070c0d; /* Tailwind gray-100 */
+}
