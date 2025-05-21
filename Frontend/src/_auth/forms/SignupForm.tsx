@@ -1,13 +1,8 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
-import {
-  useRegister,
-  useSignIn,
-} from "@/api/tanstack-query/queriesAndMutations";
-import { useUserContext } from "@/context/AuthContext";
-
+import { Link } from "react-router-dom";
+import { useRegister } from "@/api/tanstack-query/queriesAndMutations";
 import {
   Form,
   FormControl,
@@ -18,18 +13,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SignupValidation } from "@/lib/validation";
+import { SignupValidation } from "@/utilities/validation";
 import Loader from "@/components/shared/Loader";
-import { useToast } from "@/hooks/use-toast";
 
 const SignupForm = () => {
-  const { toast } = useToast();
-  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
-  const navigate = useNavigate();
-
   const { mutateAsync: register, isPending: isCreatingAccount } = useRegister();
-
-  const { mutateAsync: signIn, isPending: isSigningIn } = useSignIn();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidation>>({
@@ -44,38 +32,7 @@ const SignupForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
-    const newUser = await register(values);
-
-    if (!newUser) {
-      return toast({
-        title: "Sign Up failed, Please try again.",
-        variant: "destructive",
-      });
-    }
-
-    const session = await signIn({
-      email: values.email,
-      password: values.password,
-    });
-
-    if (!session) {
-      return toast({
-        title: "Sign Up failed, Please try again.",
-        variant: "destructive",
-      });
-    }
-
-    const isLoggedIn = await checkAuthUser();
-
-    if (isLoggedIn) {
-      form.reset();
-      navigate("/");
-    } else {
-      return toast({
-        title: "Sign Up failed, Please try again.",
-        variant: "destructive",
-      });
-    }
+    await register(values); // errors handled in useRegister
   }
 
   return (

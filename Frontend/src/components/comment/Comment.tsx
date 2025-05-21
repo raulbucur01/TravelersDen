@@ -2,7 +2,7 @@ import { IComment, ICommentReply, User } from "@/types";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import CommentForm from "./CommentForm";
-import { formatToRelativeDate } from "@/lib/utils";
+import { formatToRelativeDate } from "@/utilities/utils";
 import { useDeleteComment } from "@/api/tanstack-query/queriesAndMutations";
 import Loader from "../shared/Loader";
 import CommentStats from "./CommentStats";

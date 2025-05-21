@@ -64,16 +64,65 @@ import {
   GeneratedItinerary,
 } from "@/types";
 import { QUERY_KEYS } from "./queryKeys";
+import { useToast } from "@/hooks/use-toast";
+import { useUserContext } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export const useRegister = () => {
+  const { toast } = useToast();
+  const { checkAuthUser } = useUserContext();
+  const navigate = useNavigate();
+
   return useMutation({
     mutationFn: (user: NewUser) => register(user),
+    onSuccess: async () => {
+      const loggedIn = await checkAuthUser();
+      if (loggedIn) {
+        navigate("/");
+      } else {
+        toast({
+          title: "Authentication error",
+          description: "Could not log you in after registration.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Sign Up failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 };
 
 export const useSignIn = () => {
+  const { toast } = useToast();
+  const { checkAuthUser } = useUserContext();
+  const navigate = useNavigate();
+
   return useMutation({
     mutationFn: (user: { email: string; password: string }) => signIn(user),
+    onSuccess: async () => {
+      const loggedIn = await checkAuthUser();
+      if (loggedIn) {
+        navigate("/");
+      } else {
+        toast({
+          title: "Authentication error",
+          description: "Could not log you in.",
+          variant: "destructive",
+        });
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Sign In failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 };
 

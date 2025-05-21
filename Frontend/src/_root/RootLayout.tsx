@@ -3,7 +3,7 @@ import LeftSidebar from "@/components/shared/LeftSidebar";
 import { motion } from "framer-motion";
 import Topbar from "@/components/shared/Topbar";
 import { Outlet } from "react-router-dom";
-import { pageTransitionAnimation } from "@/lib/utils";
+import { pageTransitionAnimation } from "@/utilities/utils";
 
 const RootLayout = () => {
   return (

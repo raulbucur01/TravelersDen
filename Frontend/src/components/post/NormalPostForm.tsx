@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
-import { NormalPostValidation } from "@/lib/validation";
+import { NormalPostValidation } from "@/utilities/validation";
 import {
   useCreateNormalPost,
   useUpdateNormalPost,

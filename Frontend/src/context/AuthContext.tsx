@@ -1,7 +1,6 @@
 import { getCurrentUser } from "@/api/api";
 import { ContextType, User } from "@/types";
-import { createContext, useContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { createContext, useContext, useState } from "react";
 
 export const INITIAL_USER = {
   userId: "",
@@ -28,9 +27,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const navigate = useNavigate();
-
   const checkAuthUser = async (): Promise<boolean> => {
+    setIsLoading(true);
     try {
       const currentAccount = await getCurrentUser();
 
@@ -62,14 +60,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  useEffect(() => {
-    checkAuthUser().then((authenticated) => {
-      if (!authenticated) {
-        navigate("/sign-in");
-      }
-    });
-  }, []);
-
   const value: ContextType = {
     user,
     setUser,
@@ -79,11 +69,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     checkAuthUser,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {!isLoading && children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export default AuthProvider;

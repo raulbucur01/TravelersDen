@@ -23,7 +23,10 @@ import {
 import { appwriteConfig, avatars, storage, apiConfig } from "./config";
 
 import axios from "axios";
-import { extractAppwriteStorageFileIdFromUrl } from "@/lib/utils";
+import {
+  extractAppwriteStorageFileIdFromUrl,
+  extractAxiosError,
+} from "@/utilities/utils";
 
 // utility
 export const processFiles = async (files: File[]) => {
@@ -138,8 +141,8 @@ export async function signIn(user: { email: string; password: string }) {
     const response = await apiClient.post("/auth/login", user);
 
     return response;
-  } catch (error) {
-    console.log(error);
+  } catch (error: any) {
+    throw new Error(extractAxiosError(error));
   }
 }
 
@@ -168,9 +171,8 @@ export async function register(user: NewUser) {
     const response = await apiClient.post("/auth/register", newUser);
 
     return response;
-  } catch (error) {
-    console.log(error);
-    return error;
+  } catch (error: any) {
+    throw new Error(extractAxiosError(error));
   }
 }
 

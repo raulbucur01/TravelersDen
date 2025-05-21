@@ -1,4 +1,4 @@
-import { getZoomBasedOnType } from "@/lib/utils";
+import { getZoomBasedOnType } from "@/utilities/utils";
 import { ISuggestionInfo } from "@/types";
 
 type MapSearchSuggestionsProps = {

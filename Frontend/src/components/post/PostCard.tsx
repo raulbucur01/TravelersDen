@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { formatToRelativeDate } from "@/lib/utils";
+import { formatToRelativeDate } from "@/utilities/utils";
 import { useUserContext } from "@/context/AuthContext";
 import PostStats from "../shared/PostStats";
 import { BasePost } from "@/types";

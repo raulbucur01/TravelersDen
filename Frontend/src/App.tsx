@@ -18,6 +18,8 @@ import "./globals.css";
 import { Routes, Route, useLocation } from "react-router-dom";
 import { Toaster } from "@/components/ui/toaster";
 import ItineraryEditor from "./_root/pages/ItineraryEditor";
+import PublicRoute from "./utilities/routing/PublicRoute";
+import ProtectedRoute from "./utilities/routing/ProtectedRoute";
 
 const App = () => {
   const location = useLocation();
@@ -25,12 +27,24 @@ const App = () => {
   return (
     <main className="flex h-screen">
       <Routes key={location.pathname} location={location}>
-        <Route element={<AuthLayout />}>
+        <Route
+          element={
+            <PublicRoute>
+              <AuthLayout />
+            </PublicRoute>
+          }
+        >
           <Route path="/sign-in" element={<SigninForm />} />
           <Route path="/sign-up" element={<SignupForm />} />
         </Route>
 
-        <Route element={<RootLayout />}>
+        <Route
+          element={
+            <ProtectedRoute>
+              <RootLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route index element={<Home />} />
           <Route path="/explore" element={<Explore />} />
           <Route path="/saved" element={<Saved />} />

@@ -325,7 +325,6 @@ const ItineraryEditor = () => {
     }
   }
 
-  console.log(editedItinerary.days[1]);
   return (
     <div className="p-6 max-w-6xl mx-auto">
       {/* Destination Title */}

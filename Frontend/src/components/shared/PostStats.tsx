@@ -11,7 +11,11 @@ import { useState, useEffect } from "react";
 import Loader from "./Loader";
 import { BasePost } from "@/types";
 import { useNavigate } from "react-router-dom";
-import { formatCommentCount, formatCount, formatLikeCount } from "@/lib/utils";
+import {
+  formatCommentCount,
+  formatCount,
+  formatLikeCount,
+} from "@/utilities/utils";
 
 type PostStatsProps = {
   post: BasePost;

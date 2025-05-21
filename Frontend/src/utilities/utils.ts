@@ -3,6 +3,17 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { MotionProps } from "framer-motion";
 
+/**
+ *  Extracts an error message from an Axios error object.
+ */
+export function extractAxiosError(error: any): string {
+  return (
+    error?.response?.data?.message ||
+    error?.message ||
+    "Something went wrong. Please try again."
+  );
+}
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }

@@ -1,4 +1,4 @@
-import { formatToRelativeDate } from "@/lib/utils";
+import { formatToRelativeDate } from "@/utilities/utils";
 import { GeneratedItinerary } from "@/types";
 import CustomizableAlertDialog from "../reusable/CustomizableAlertDialog";
 import { Button } from "../ui/button";

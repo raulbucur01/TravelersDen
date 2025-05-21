@@ -3,10 +3,8 @@ using Microsoft.OpenApi.Models;
 using System.Diagnostics;
 using BackendAPI.Models;
 using BackendAPI.Services;
-using Appwrite;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using Appwrite.Services;
 using Microsoft.AspNetCore.Authorization;
 using System.Text;
 
@@ -90,18 +88,6 @@ builder.Services.AddHttpClient<FastApiService>(client =>
 // Add services to the container.
 builder.Services.AddControllers();
 
-//// Add CORS support
-//builder.Services.AddCors(options =>
-//{
-//    options.AddPolicy("AllowAll", policy =>
-//    {
-//        policy.WithOrigins("http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:52679")  // Frontend URL
-//            .AllowCredentials()      
-//            .AllowAnyHeader()
-//            .AllowAnyMethod();
-//    });
-//});
-
 // Register the Swagger generator
 builder.Services.AddSwaggerGen(c =>
 {
@@ -128,9 +114,6 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Travel App API V1");
     c.RoutePrefix = string.Empty;  // Set to empty string to serve Swagger UI at the root (http://localhost:5000/)
 });
-
-// Use CORS middleware to enable cross-origin requests
-//app.UseCors("AllowAll");  // Apply the "AllowAll" policy
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

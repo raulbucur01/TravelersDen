@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
-import { ItineraryPostValidation } from "@/lib/validation";
+import { ItineraryPostValidation } from "@/utilities/validation";
 import { Models } from "appwrite";
 import {
   useCreateItineraryPost,

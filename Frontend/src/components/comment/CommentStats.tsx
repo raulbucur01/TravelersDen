@@ -7,7 +7,7 @@ import {
 import { IComment, ICommentReply } from "@/types";
 import { useEffect, useState } from "react";
 import Loader from "../shared/Loader";
-import { formatLikeCount } from "@/lib/utils";
+import { formatLikeCount } from "@/utilities/utils";
 
 type CommentStatsProps = {
   comment: IComment | ICommentReply;

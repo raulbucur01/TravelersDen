@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import {
   Form,
@@ -13,22 +13,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { SigninValidation } from "@/lib/validation";
+import { SigninValidation } from "@/utilities/validation";
 import Loader from "@/components/shared/Loader";
-import { useToast } from "@/hooks/use-toast";
 import { useSignIn } from "@/api/tanstack-query/queriesAndMutations";
-import { useUserContext } from "@/context/AuthContext";
 
 const SigninForm = () => {
-  const { toast } = useToast();
-  const { checkAuthUser, isLoading: isUserLoading } = useUserContext();
-  const navigate = useNavigate();
-
-  const {
-    mutateAsync: signInAccount,
-    isPending: isSigningIn,
-    isError: isSignInError,
-  } = useSignIn();
+  const { mutateAsync: signInAccount, isPending: isSigningIn } = useSignIn();
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SigninValidation>>({
@@ -41,29 +31,10 @@ const SigninForm = () => {
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof SigninValidation>) {
-    const session = await signInAccount({
+    await signInAccount({
       email: values.email,
       password: values.password,
     });
-
-    if (isSignInError) {
-      return toast({
-        title: "Sign In failed, Please try again.",
-        variant: "destructive",
-      });
-    }
-
-    const isLoggedIn = await checkAuthUser();
-
-    if (isLoggedIn) {
-      form.reset();
-      navigate("/");
-    } else {
-      return toast({
-        title: "Sign In failed, Please try again.",
-        variant: "destructive",
-      });
-    }
   }
 
   return (

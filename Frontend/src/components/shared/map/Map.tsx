@@ -10,7 +10,7 @@ import { Button } from "../../ui/button";
 import MapSearchSuggestions from "./MapSearchSuggestions";
 import { ISuggestionInfo, TravelMode } from "@/types";
 import { useDebounce } from "use-debounce";
-import { formatMapSearchSuggestions } from "@/lib/utils";
+import { formatMapSearchSuggestions } from "@/utilities/utils";
 import { createRoot } from "react-dom/client";
 import MapPopup from "./MapPopup";
 import { apiConfig } from "@/api/config";
@@ -45,11 +45,7 @@ const Map = ({
 }: MapProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery] = useDebounce(searchQuery, 300);
-  const {
-    data: mapSearchResults,
-    refetch: refetchSearchResults,
-    isPending: isGettingSearchResults,
-  } = useGetMapSearchResults(searchQuery);
+  const { refetch: refetchSearchResults } = useGetMapSearchResults(searchQuery);
 
   // map
   const API_KEY = apiConfig.tomTomApiKey;

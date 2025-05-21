@@ -1,5 +1,5 @@
 import Map from "@/components/shared/map/Map";
-import { getAllTripCoordinates } from "@/lib/utils";
+import { getAllTripCoordinates } from "@/utilities/utils";
 import { DisplayedTripStep } from "@/types";
 
 type TripSummaryDisplayProps = {

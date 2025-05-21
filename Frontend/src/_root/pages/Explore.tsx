@@ -2,13 +2,10 @@ import {
   useGetRecentPosts,
   useSearchPosts,
 } from "@/api/tanstack-query/queriesAndMutations";
-import { QUERY_KEYS } from "@/api/tanstack-query/queryKeys";
 import SearchPostList from "@/components/explore/SearchPostList";
 import Loader from "@/components/shared/Loader";
 import { Input } from "@/components/ui/input";
-import { BasePost } from "@/types";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useDebounce } from "use-debounce";
 
@@ -69,10 +66,6 @@ const Explore = () => {
   const isLoading =
     (showSearchResults ? isSearchedPostsLoading : isRecentPostsLoading) &&
     posts.length === 0;
-
-  console.log("posts", posts);
-  console.log("searchedPosts", searchedPosts);
-  console.log("recentPosts", recentPosts);
 
   return (
     <div className="explore-container">

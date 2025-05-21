@@ -11,8 +11,6 @@ export const SuggestedUsers = () => {
     isError: isSimilarUsersError,
   } = useGetSimilarUsers(currentUser.userId);
 
-  console.log(similarUsers);
-
   return (
     <div className="home-creators">
       <h1 className="text-2xl font-bold text-dm-light">Suggested Users</h1>

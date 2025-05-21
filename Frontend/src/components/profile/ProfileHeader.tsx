@@ -1,4 +1,4 @@
-import { formatCount } from "@/lib/utils";
+import { formatCount } from "@/utilities/utils";
 import ExpandableText from "../reusable/ExpandableText";
 import { useUserContext } from "@/context/AuthContext";
 import {
