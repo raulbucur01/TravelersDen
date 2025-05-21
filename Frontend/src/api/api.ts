@@ -19,6 +19,7 @@ import {
   ItineraryActivity,
   RegenerateDayActivitiesRequest,
   SimilarUser,
+  User,
 } from "@/types";
 import { appwriteConfig, avatars, storage, apiConfig } from "./config";
 
@@ -176,28 +177,19 @@ export async function register(user: NewUser) {
   }
 }
 
-export async function getCurrentUser() {
+export async function getCurrentUser(): Promise<User | null> {
   try {
     const response = await apiClient.get("/auth/current-user");
 
-    if (!response) throw new Error("Failed to fetch current user.");
-
-    const currentUserId = response.data.userId;
-
-    const currentUser = await getUserById(currentUserId);
-
-    if (!currentUser) {
-      throw new Error("No user found.");
-    }
-
-    return {
-      userId: currentUser.userId,
-      name: currentUser.name || "",
-      email: currentUser.email,
-      username: currentUser.username,
-      imageUrl: currentUser.imageUrl || "",
-      bio: "",
+    const user: User = {
+      userId: response.data.userId,
+      name: response.data.name,
+      username: response.data.username,
+      email: response.data.email,
+      imageUrl: response.data.imageUrl,
     };
+
+    return user;
   } catch (error) {
     console.error("Error fetching current user:", error);
     return null;

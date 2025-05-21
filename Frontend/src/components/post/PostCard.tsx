@@ -73,7 +73,7 @@ const PostCard = ({ post }: PostCardProps) => {
         </div>
       </div>
 
-      <Link to={`/posts/${post.postId}`}>
+      <Link to={`/post-details/${post.postId}`}>
         <div className="small-medium lg:base-medium py-5">
           <ExpandableText
             text={post.caption}

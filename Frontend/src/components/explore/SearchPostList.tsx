@@ -38,7 +38,7 @@ const SearchPostList = ({
 
           {/* Full Overlay Link for Navigation */}
           <Link
-            to={`/posts/${post.postId}`}
+            to={`/post-details/${post.postId}`}
             className="absolute inset-0 z-10"
           />
 

@@ -83,7 +83,7 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
         });
       }
 
-      return navigate(`/posts/${post.postId}`);
+      return navigate(`/post-details/${post.postId}`);
     }
 
     const newPost = await createPost({

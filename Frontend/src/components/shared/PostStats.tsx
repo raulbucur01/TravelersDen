@@ -86,7 +86,7 @@ const PostStats = ({ post, userId, usedIn = "postcard" }: PostStatsProps) => {
   return (
     <div
       className="relative flex justify-between gap-7 items-center z-20 cursor-pointer px-4 py-2"
-      onClick={() => navigate(`/posts/${post.postId}`)}
+      onClick={() => navigate(`/post-details/${post.postId}`)}
     >
       {/* Like Section - Left-aligned */}
       <div className="flex items-center gap-1">
@@ -122,7 +122,7 @@ const PostStats = ({ post, userId, usedIn = "postcard" }: PostStatsProps) => {
             height={25}
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/posts/${post.postId}`);
+              navigate(`/post-details/${post.postId}`);
             }}
             className="cursor-pointer"
           />

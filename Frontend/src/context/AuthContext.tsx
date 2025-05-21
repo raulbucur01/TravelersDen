@@ -2,13 +2,12 @@ import { getCurrentUser } from "@/api/api";
 import { ContextType, User } from "@/types";
 import { createContext, useContext, useState } from "react";
 
-export const INITIAL_USER = {
+export const INITIAL_USER: User = {
   userId: "",
   name: "",
   username: "",
   email: "",
   imageUrl: "",
-  bio: "",
 };
 
 const INITIAL_STATE = {
@@ -39,7 +38,6 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           username: currentAccount.username,
           email: currentAccount.email,
           imageUrl: currentAccount.imageUrl,
-          bio: currentAccount.bio,
         });
 
         setIsAuthenticated(true);

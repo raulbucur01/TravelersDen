@@ -3,6 +3,7 @@ using BackendAPI.Models;
 using BackendAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
@@ -14,11 +15,13 @@ namespace BackendAPI.Controllers
     {
         private readonly AuthService _authService;
         private readonly JwtSettings _jwtSettings;
+        private readonly AppDbContext _context;
 
-        public AuthController(AuthService authService, IOptions<JwtSettings> jwtSettings)
+        public AuthController(AuthService authService, IOptions<JwtSettings> jwtSettings, AppDbContext context)
         {
             _authService = authService;
             _jwtSettings = jwtSettings.Value;
+            _context = context;
         }
 
         [AllowAnonymous]
@@ -115,7 +118,7 @@ namespace BackendAPI.Controllers
         }
 
         [HttpGet("current-user")]
-        public IActionResult GetCurrentUser()
+        public async Task<IActionResult> GetCurrentUser()
         {
             try
             {
@@ -129,31 +132,29 @@ namespace BackendAPI.Controllers
                 // extract user-related claims from the JWT token
                 // these claims were added when the token was generated
                 var idClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-                //var nameClaim = User.FindFirst(ClaimTypes.Name)?.Value;
-                //var usernameClaim = User.FindFirst("username")?.Value;
-                //var emailClaim = User.FindFirst(ClaimTypes.Email)?.Value;
-                //var imageUrlClaim = User.FindFirst("imageUrl")?.Value;
-
 
                 // check if the claims are not null or empty
-                if (
-                    //string.IsNullOrEmpty(emailClaim)
-                    string.IsNullOrEmpty(idClaim)
-                    //|| string.IsNullOrEmpty(nameClaim)
-                    //|| string.IsNullOrEmpty(usernameClaim)
-                    //|| string.IsNullOrEmpty(imageUrlClaim)
-                    )
+                if (string.IsNullOrEmpty(idClaim)
+)
                 {
-                    return Unauthorized("Invalid or missing claims!");
+                    return Unauthorized("Missing Id claim");
+                }
+
+                // get fresh user data from the database
+                var currentUserData = await _context.Users.FirstOrDefaultAsync(u => u.UserId == idClaim);
+
+                if (currentUserData == null)
+                {
+                    return NotFound("User not found");
                 }
 
                 return Ok(new CurrentUserDTO
                 {
                     UserId = idClaim,
-                    //Name = nameClaim,
-                    //Username = usernameClaim,
-                    //Email = emailClaim,
-                    //ImageUrl = imageUrlClaim
+                    Name = currentUserData.Name,
+                    Username = currentUserData.Username,
+                    Email = currentUserData.Email,
+                    ImageUrl = currentUserData.ImageUrl
                 });
             }
             catch (Exception ex)

@@ -43,7 +43,7 @@ const SimilarPostCard = ({ post }: SimilarPostCardProps) => {
 
       {/* Bottom 3/4 Section (Slideshow Background & Caption + Tags) */}
       <Link
-        to={`/posts/${post.postId}`}
+        to={`/post-details/${post.postId}`}
         className="absolute left-0 w-full h-3/4 overflow-hidden"
       >
         {/* Background Media Slideshow */}

@@ -25,10 +25,6 @@ namespace BackendAPI.Services
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.UserId),
-                new Claim(ClaimTypes.Name, user.Name),
-                new Claim("username", user.Username),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("imageUrl", user.ImageUrl),
             };
 
             // configure token properties

@@ -41,7 +41,7 @@ const ProfilePostsGrid = ({
     <div className="flex justify-center">
       <div className="grid grid-cols-3 gap-4 p-4 max-w-[75%] w-full">
         {displayedPosts.map((post, index) => (
-          <Link to={`/posts/${post.postId}`} key={index}>
+          <Link to={`/post-details/${post.postId}`} key={index}>
             <div className="relative group">
               <img
                 src={post.firstMediaUrl}

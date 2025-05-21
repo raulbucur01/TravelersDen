@@ -130,7 +130,7 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
         });
       }
 
-      return navigate(`/posts/${post.postId}`);
+      return navigate(`/post-details/${post.postId}`);
     }
 
     const formattedValues = {
