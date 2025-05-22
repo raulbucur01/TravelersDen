@@ -6,7 +6,7 @@ using BackendAPI.DTOs.Comments;
 namespace BackendAPI.Controllers
 {
     [ApiController]
-    [Route("comments")]
+    [Route("api/comments")]
     public class CommentsController : Controller
     {
         private readonly AppDbContext _context; // Your DbContext

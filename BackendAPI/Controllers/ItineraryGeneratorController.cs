@@ -7,7 +7,7 @@ using BackendAPI.Models.ItineraryGenerator;
 namespace BackendAPI.Controllers
 {
     [ApiController]
-    [Route("itinerary-generator")]
+    [Route("api/itinerary-generator")]
     public class ItineraryGeneratorController : ControllerBase
     {
         private readonly AppDbContext _context;

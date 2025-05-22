@@ -15,6 +15,13 @@ export default defineConfig({
           history({
             disableDotRule: true,
             htmlAcceptHeaders: ["text/html", "application/xhtml+xml"],
+            // Skip API routes from SPA fallback
+            rewrites: [
+              {
+                from: /^\/api\/.*$/,
+                to: (context) => context.parsedUrl.pathname || "/",
+              },
+            ],
           }) as Connect.NextHandleFunction
         );
       },
@@ -32,31 +39,13 @@ export default defineConfig({
     },
     port: 5173,
     proxy: {
-      // Proxy backend calls to .NET API
-      "/auth": {
+      // Single catch-all for API routes to forward to .NET backend
+      "/api": {
         target: "https://localhost:7007",
         changeOrigin: true,
         secure: false,
-      },
-      "/users": {
-        target: "https://localhost:7007",
-        changeOrigin: true,
-        secure: false,
-      },
-      "/posts": {
-        target: "https://localhost:7007",
-        changeOrigin: true,
-        secure: false,
-      },
-      "/comments": {
-        target: "https://localhost:7007",
-        changeOrigin: true,
-        secure: false,
-      },
-      "/itinerary-generator": {
-        target: "https://localhost:7007",
-        changeOrigin: true,
-        secure: false,
+        // Preserve /api prefix in backend requests
+        rewrite: (path) => path,
       },
     },
     fs: {

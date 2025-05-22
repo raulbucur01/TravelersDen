@@ -9,7 +9,7 @@ using BackendAPI.Services;
 namespace BackendAPI.Controllers
 {
     [ApiController]
-    [Route("posts")]
+    [Route("api/posts")]
     public class PostsController : Controller
     {
         private readonly AppDbContext _context; // Your DbContext

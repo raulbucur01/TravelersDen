@@ -8,7 +8,7 @@ using BackendAPI.DTOs.FastApiRelated;
 namespace BackendAPI.Controllers
 {
     [ApiController]
-    [Route("users")]
+    [Route("api/users")]
     public class UsersController : Controller
     {
         private readonly AppDbContext _context;
@@ -341,12 +341,11 @@ namespace BackendAPI.Controllers
 
                 if (similarUsersResponse == null)
                 {
-                    return NotFound("No similar users found.");
+                    return NotFound("Error getting similar users from FastAPI");
                 }
 
                 var similarUserIds = similarUsersResponse.SimilarUserIds;
-                Console.WriteLine($"Similar User IDs: {string.Join(", ", similarUserIds)}");
-
+                
                 // Get IDs the current user follows
                 var followedUserIds = await _context.Follows
                     .Where(f => f.UserIdFollowing == id)
@@ -356,10 +355,9 @@ namespace BackendAPI.Controllers
                 // If no similar users are found, return randomly selected users
                 if (!similarUserIds.Any())
                 {
-                    int totalCount = await _context.Users.CountAsync();
-
                     var randomUsers = await _context.Users
-                        .Where(u => u.UserId != id)
+                        // ensure we dont select the current user or already followed users
+                        .Where(u => u.UserId != id && !followedUserIds.Contains(u.UserId))
                         .OrderBy(u => u.UserId)  // Order by UserId to ensure randomness
                         .Take(10)
                         .Select(u => new SimilarUserDTO
@@ -387,6 +385,7 @@ namespace BackendAPI.Controllers
                     return Ok(randomUsers);
                 }
 
+                // NOTE: FastAPI backend already sends user ids that are not the current user and not already followed by the current user
                 var similarUsers = await _context.Users
                     .Where(u => similarUserIds.Contains(u.UserId))
                     .Select(u => new SimilarUserDTO

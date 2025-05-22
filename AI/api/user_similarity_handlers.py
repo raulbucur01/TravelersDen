@@ -50,6 +50,7 @@ def compute_user_similarity_scores(
         followed_users = users_and_followed_ids.get(user_a, set())
 
         for user_b in user_ids:
+            # exclude users they follow already and themselves
             if user_a == user_b or user_b in followed_users:
                 continue
 

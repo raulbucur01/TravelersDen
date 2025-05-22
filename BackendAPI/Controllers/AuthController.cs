@@ -10,7 +10,7 @@ using System.Security.Claims;
 namespace BackendAPI.Controllers
 {
     [ApiController]
-    [Route("auth")]
+    [Route("api/auth")]
     public class AuthController : Controller
     {
         private readonly AuthService _authService;

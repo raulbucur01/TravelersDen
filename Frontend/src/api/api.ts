@@ -130,7 +130,7 @@ async function deleteFilesFromAppwrite(fileUrls: string[]): Promise<boolean> {
 // utility
 
 const apiClient = axios.create({
-  baseURL: "/",
+  baseURL: "/api",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
