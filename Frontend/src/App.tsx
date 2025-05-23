@@ -20,48 +20,61 @@ import { Toaster } from "@/components/ui/toaster";
 import ItineraryEditor from "./_root/pages/ItineraryEditor";
 import PublicRoute from "./utilities/routing/PublicRoute";
 import ProtectedRoute from "./utilities/routing/ProtectedRoute";
+import { useUserContext } from "./context/AuthContext";
+import { useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 
 const App = () => {
   const location = useLocation();
+  const { isLoading, checkAuthUser } = useUserContext();
+
+  useEffect(() => {
+    checkAuthUser(); // global auth check, this avoids checking again each time we visit a route
+  }, []);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <main className="flex h-screen">
-      <Routes key={location.pathname} location={location}>
-        <Route
-          element={
-            <PublicRoute>
-              <AuthLayout />
-            </PublicRoute>
-          }
-        >
-          <Route path="/sign-in" element={<SigninForm />} />
-          <Route path="/sign-up" element={<SignupForm />} />
-        </Route>
-
-        <Route
-          element={
-            <ProtectedRoute>
-              <RootLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<Home />} />
-          <Route path="/explore" element={<Explore />} />
-          <Route path="/saved" element={<Saved />} />
-          <Route path="/all-users" element={<AllUsers />} />
-          <Route path="/create-post" element={<CreatePost />} />
-          <Route path="/post-details/:id" element={<PostDetails />} />
-          <Route path="/profile/:id/*" element={<Profile />} />
-          <Route path="/map" element={<MapPage />} />
-          <Route path="/update-post/:id" element={<UpdatePost />} />
+      <AnimatePresence mode="wait">
+        <Routes key={location.pathname} location={location}>
           <Route
-            path="/itinerary-generator-dashboard"
-            element={<ItineraryGeneratorDashboard />}
-          />
-          <Route path="itinerary-editor/:id?" element={<ItineraryEditor />} />
-        </Route>
-      </Routes>
+            element={
+              <PublicRoute>
+                <AuthLayout />
+              </PublicRoute>
+            }
+          >
+            <Route path="/sign-in" element={<SigninForm />} />
+            <Route path="/sign-up" element={<SignupForm />} />
+          </Route>
 
+          <Route
+            element={
+              <ProtectedRoute>
+                <RootLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Home />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/saved" element={<Saved />} />
+            <Route path="/all-users" element={<AllUsers />} />
+            <Route path="/create-post" element={<CreatePost />} />
+            <Route path="/post-details/:id" element={<PostDetails />} />
+            <Route path="/profile/:id/*" element={<Profile />} />
+            <Route path="/map" element={<MapPage />} />
+            <Route path="/update-post/:id" element={<UpdatePost />} />
+            <Route
+              path="/itinerary-generator-dashboard"
+              element={<ItineraryGeneratorDashboard />}
+            />
+            <Route path="itinerary-editor/:id?" element={<ItineraryEditor />} />
+          </Route>
+        </Routes>
+      </AnimatePresence>
       <Toaster />
     </main>
   );
