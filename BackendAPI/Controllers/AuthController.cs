@@ -32,14 +32,7 @@ namespace BackendAPI.Controllers
             {
                 var token = await _authService.Authenticate(loginRequest.Email, loginRequest.Password);
 
-                Response.Cookies.Append("jwt", token, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
-                    Path = "/",
-                });
+                AppendCookieToResponse(token);
 
                 return Ok();
             }
@@ -71,14 +64,7 @@ namespace BackendAPI.Controllers
 
                 var token = await _authService.Register(user);
 
-                Response.Cookies.Append("jwt", token, new CookieOptions
-                {
-                    HttpOnly = true,
-                    Secure = true,
-                    SameSite = SameSiteMode.Strict,
-                    Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
-                    Path = "/",
-                });
+                AppendCookieToResponse(token);
 
                 return Ok();
             }
@@ -161,6 +147,18 @@ namespace BackendAPI.Controllers
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+
+        private void AppendCookieToResponse(string token)
+        {
+            Response.Cookies.Append("jwt", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(_jwtSettings.ExpirationInMinutes),
+                Path = "/"
+            });
         }
     }
 }
