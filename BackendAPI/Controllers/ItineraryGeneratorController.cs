@@ -95,7 +95,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var itineraryId = await _itineraryGeneratorzService.GenerateItineraryAsync(request);
+                var itineraryId = await _itineraryGeneratorService.GenerateItineraryAsync(request);
                 return Ok(new { ItineraryId = itineraryId });
             }
             catch (InvalidOperationException ex)
