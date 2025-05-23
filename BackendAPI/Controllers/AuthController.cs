@@ -52,17 +52,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                // map the RegisterRequestDTO to User model
-                var user = new User
-                {
-                    Name = registerRequest.Name,
-                    Email = registerRequest.Email,
-                    Username = registerRequest.Username,
-                    Password = registerRequest.Password,
-                    ImageUrl = registerRequest.ImageUrl,
-                };
-
-                var token = await _authService.Register(user);
+                var token = await _authService.Register(registerRequest);
 
                 AppendCookieToResponse(token);
 

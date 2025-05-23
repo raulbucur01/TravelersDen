@@ -11,12 +11,7 @@ namespace BackendAPI.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public string? Bio {  get; set; }
-        public string? Gender { get; set; }
-        public int? Age { get; set; }
-        public string? Interests { get; set; }
         public string ImageUrl { get; set; }
-        public string? City { get; set; }
-        public string? Country { get; set; }
         public int FollowerCount { get; set; }
         public int FollowingCount { get; set; }
         public int PostCount { get; set; }

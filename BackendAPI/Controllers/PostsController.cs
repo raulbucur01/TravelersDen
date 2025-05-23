@@ -12,7 +12,7 @@ namespace BackendAPI.Controllers
     [Route("api/posts")]
     public class PostsController : Controller
     {
-        private readonly AppDbContext _context; // Your DbContext
+        private readonly AppDbContext _context;
         private readonly FastApiService _fastApiService;
 
         public PostsController(AppDbContext context, FastApiService fastApiService)

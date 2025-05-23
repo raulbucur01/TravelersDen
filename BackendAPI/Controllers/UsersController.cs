@@ -11,44 +11,11 @@ namespace BackendAPI.Controllers
     [Route("api/users")]
     public class UsersController : Controller
     {
-        private readonly AppDbContext _context;
-        private readonly FastApiService _fastApiService;
+        private readonly UserService _userService;
 
-        public UsersController(AppDbContext context, FastApiService fastApiService)
+        public UsersController(UserService userService)
         {
-            _context = context;
-            _fastApiService = fastApiService;
-        }
-
-        // POST: api/User
-        [HttpPost]
-        public async Task<IActionResult> CreateUser(CreateUserDTO userDto)
-        {
-            try
-            {
-                var user = new User
-                {
-                    UserId = userDto.UserId,
-                    Name = userDto.Name,
-                    Username = userDto.Username,
-                    Email = userDto.Email,
-                    ImageUrl = userDto.ImageUrl
-                    // Other fields remain null/default
-                };
-
-                // Add user to the database
-                _context.Users.Add(user);
-                await _context.SaveChangesAsync();
-
-                // Return a success response
-                return StatusCode(200, "User Created");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
-                // Handle any errors
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
+            _userService = userService;
         }
 
         [HttpPut("{id}")]
@@ -56,26 +23,16 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var user = await _context.Users.FindAsync(id);
-
-                if (user == null)
-                {
-                    return NotFound(new { Message = "User not found." });
-                }
-
-                user.Name = updateUserDto.Name;
-                user.Username = updateUserDto.Username;
-                user.Bio = updateUserDto.Bio;
-                user.ImageUrl = updateUserDto.ImageUrl;
-
-                await _context.SaveChangesAsync();
+                var updatedUser = await _userService.UpdateUserAsync(id, updateUserDto);
 
                 return Ok(new { UserId = id, updateUserDto.ImageUrl });
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
             catch (Exception ex)
             {
-                Console.WriteLine($"Inner Exception: {ex.InnerException?.Message}");
-                // Handle any errors
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -85,39 +42,16 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                // Search for the user with the given id
-                var user = await _context.Users
-                    .Where(u => u.UserId == id)
-                    .Select(u => new
-                    {
-                        UserId = u.UserId,
-                        Name = u.Name,
-                        Username = u.Username,
-                        Email = u.Email,
-                        Bio = u.Bio,
-                        Gender = u.Gender ?? "",
-                        Age = u.Age ?? 0,
-                        Interests = u.Interests ?? "",
-                        ImageUrl = u.ImageUrl,
-                        City = u.City ?? "",
-                        Country = u.Country ?? "",
-                        FollowerCount = u.FollowerCount,
-                        FollowingCount = u.FollowingCount,
-                        PostCount = u.PostCount,
-                    })
-                    .FirstOrDefaultAsync();
+                var user = await _userService.GetUserByIdAsync(id);
 
-                if (user == null)
-                {
-                    return NotFound(new { Message = "User not found." });
-                }
-
-                // Return the user's data
                 return Ok(user);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
-                // Handle unexpected errors
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -125,21 +59,20 @@ namespace BackendAPI.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(string id)
         {
-            // remove all related follows
-            var follows = _context.Follows.Where(f => f.UserIdFollowing == id || f.UserIdFollowed == id);
-            _context.Follows.RemoveRange(follows);
-
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
+            try
             {
-                return NotFound(new { Message = "User not found." });
+                var deletedUserId = await _userService.DeleteUserAsync(id);
+
+                return Ok(new { UserId = deletedUserId });
             }
-
-            _context.Users.Remove(user);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { UserId = id });
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("{id}/followers")]
@@ -147,24 +80,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var totalFollowers = await _context.Follows.Where(f => f.UserIdFollowed == id).CountAsync();
-
-                var followers = await _context.Follows
-                    .Where(f => f.UserIdFollowed == id)
-                    .OrderByDescending(f => f.FollowedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(f => new
-                    {
-                        f.FollowingUser.UserId,
-                        f.FollowingUser.Name,
-                        f.FollowingUser.Username,
-                        f.FollowingUser.ImageUrl,
-                    })
-                    .ToListAsync();
-
-                bool hasMore = (page * pageSize) < totalFollowers;
-
+                var (followers, hasMore) = await _userService.GetFollowersAsync(id, page, pageSize);
                 return Ok(new { followers, hasMore });
             }
             catch (Exception ex)
@@ -178,24 +94,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var totalFollowing = await _context.Follows.Where(f => f.UserIdFollowing == id).CountAsync();
-
-                var following = await _context.Follows
-                    .Where(f => f.UserIdFollowing == id)
-                    .OrderByDescending(f => f.FollowedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(f => new
-                    {
-                        f.FollowedUser.UserId,
-                        f.FollowedUser.Name,
-                        f.FollowedUser.Username,
-                        f.FollowedUser.ImageUrl,
-                    })
-                    .ToListAsync();
-
-                bool hasMore = (page * pageSize) < totalFollowing;
-
+                var (following, hasMore) = await _userService.GetFollowingAsync(id, page, pageSize);
                 return Ok(new { following, hasMore });
             }
             catch (Exception ex)
@@ -209,24 +108,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var totalPosts = await _context.Posts.Where(p => p.UserId == id).CountAsync();
-
-                var posts = await _context.Posts
-                    .Where(p => p.UserId == id)
-                    .OrderByDescending(p => p.CreatedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(p => new
-                    {
-                        p.PostId,
-                        FirstMediaUrl = p.Media
-                        .Select(m => m.AppwriteFileUrl)
-                        .FirstOrDefault(),
-                        p.IsItinerary,
-                    }).ToListAsync();
-
-                bool hasMore = (page * pageSize) < totalPosts;
-
+                var (posts, hasMore) = await _userService.GetUserPostsAsync(id, page, pageSize);
                 return Ok(new { posts, hasMore });
             }
             catch (Exception ex)
@@ -236,79 +118,39 @@ namespace BackendAPI.Controllers
         }
 
         [HttpPost("follow")]
-        public async Task<IActionResult> Follow(FollowRequestDTO createFollowDTO)
+        public async Task<IActionResult> Follow([FromBody] FollowRequestDTO createFollowDTO)
         {
             try
             {
-                var newFollow = new Follows
-                {
-                    UserIdFollowing = createFollowDTO.UserIdFollowing,
-                    UserIdFollowed = createFollowDTO.UserIdFollowed,
-                    FollowedAt = DateTime.UtcNow,
-                };
-
-                _context.Follows.Add(newFollow);
-
-                var users = await _context.Users
-                .Where(u => u.UserId == createFollowDTO.UserIdFollowing || u.UserId == createFollowDTO.UserIdFollowed)
-                .ToListAsync();
-
-                var userFollowing = users.FirstOrDefault(u => u.UserId == createFollowDTO.UserIdFollowing);
-                var userFollowed = users.FirstOrDefault(u => u.UserId == createFollowDTO.UserIdFollowed);
-
-                if (userFollowing == null || userFollowed == null)
-                {
-                    return NotFound("One or both users not found.");
-                }
-
-                userFollowed.FollowerCount++;
-                userFollowing.FollowingCount++;
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new { createFollowDTO.UserIdFollowing, createFollowDTO.UserIdFollowed });
+                var (followerId, followedId) = await _userService.CreateFollowAsync(createFollowDTO);
+                return Ok(new { UserIdFollowing = followerId, UserIdFollowed = followedId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+
 
         [HttpDelete("unfollow/{userIdUnfollowing}/{userIdFollowed}")]
         public async Task<IActionResult> Unfollow(string userIdUnfollowing, string userIdFollowed)
         {
             try
             {
-                // Find the follow record to remove
-                var followRecord = await _context.Follows
-                    .FirstOrDefaultAsync(f => f.UserIdFollowing == userIdUnfollowing && f.UserIdFollowed == userIdFollowed);
-
-                if (followRecord == null)
-                {
-                    return NotFound("Follow not found.");
-                }
-
-                // Remove the follow from the database
-                _context.Follows.Remove(followRecord);
-
-                var users = await _context.Users
-                .Where(u => u.UserId == userIdUnfollowing || u.UserId == userIdFollowed)
-                .ToListAsync();
-
-                var userUnfollowing = users.FirstOrDefault(u => u.UserId == userIdUnfollowing);
-                var userFollowed = users.FirstOrDefault(u => u.UserId == userIdFollowed);
-
-                if (userUnfollowing == null || userFollowed == null)
-                {
-                    return NotFound("One or both users not found.");
-                }
-
-                userFollowed.FollowerCount--;
-                userUnfollowing.FollowingCount--;
-
-                await _context.SaveChangesAsync();
-
-                return Ok(new { userIdUnfollowing, userIdFollowed });
+                var (unfollowerId, unfollowedId) = await _userService.RemoveFollowAsync(userIdUnfollowing, userIdFollowed);
+                return Ok(new { userIdUnfollowing = unfollowerId, userIdFollowed = unfollowedId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -316,14 +158,13 @@ namespace BackendAPI.Controllers
             }
         }
 
+
         [HttpGet("{id1}/is-following/{id2}")]
         public async Task<IActionResult> IsFollowing(string id1, string id2)
         {
             try
             {
-                bool isFollowing = await _context.Follows
-                    .AnyAsync(f => f.UserIdFollowing == id1 && f.UserIdFollowed == id2);
-
+                bool isFollowing = await _userService.IsUserFollowingAsync(id1, id2);
                 return Ok(new { isFollowing });
             }
             catch (Exception ex)
@@ -332,84 +173,18 @@ namespace BackendAPI.Controllers
             }
         }
 
+
         [HttpGet("{id}/similar-users")]
         public async Task<IActionResult> GetSimilarUsers(string id)
         {
             try
             {
-                var similarUsersResponse = await _fastApiService.GetSimilarUsersAsync(id);
-
-                if (similarUsersResponse == null)
-                {
-                    return NotFound("Error getting similar users from FastAPI");
-                }
-
-                var similarUserIds = similarUsersResponse.SimilarUserIds;
-                
-                // Get IDs the current user follows
-                var followedUserIds = await _context.Follows
-                    .Where(f => f.UserIdFollowing == id)
-                    .Select(f => f.UserIdFollowed)
-                    .ToListAsync();
-
-                // If no similar users are found, return randomly selected users
-                if (!similarUserIds.Any())
-                {
-                    var randomUsers = await _context.Users
-                        // ensure we dont select the current user or already followed users
-                        .Where(u => u.UserId != id && !followedUserIds.Contains(u.UserId))
-                        .OrderBy(u => u.UserId)  // Order by UserId to ensure randomness
-                        .Take(10)
-                        .Select(u => new SimilarUserDTO
-                        {
-                            UserId = u.UserId,
-                            Name = u.Name,
-                            Username = u.Username,
-                            Email = u.Email,
-                            ImageUrl = u.ImageUrl,
-                            Bio = u.Bio,
-                            FollowedBy = _context.Follows
-                                .Where(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
-                                .Select(f => _context.Users
-                                    .Where(us => us.UserId == f.UserIdFollowing)
-                                    .Select(us => us.Username)
-                                    .FirstOrDefault())
-                                .FirstOrDefault(),
-
-                            MutualCount = _context.Follows
-                                 .Count(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
-
-                        })
-                        .ToListAsync();
-
-                    return Ok(randomUsers);
-                }
-
-                // NOTE: FastAPI backend already sends user ids that are not the current user and not already followed by the current user
-                var similarUsers = await _context.Users
-                    .Where(u => similarUserIds.Contains(u.UserId))
-                    .Select(u => new SimilarUserDTO
-                    {
-                        UserId = u.UserId,
-                        Name = u.Name,
-                        Username = u.Username,
-                        Email = u.Email,
-                        ImageUrl = u.ImageUrl,
-                        Bio = u.Bio,
-                        FollowedBy = _context.Follows
-                                .Where(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
-                                .Select(f => _context.Users
-                                    .Where(us => us.UserId == f.UserIdFollowing)
-                                    .Select(us => us.Username)
-                                    .FirstOrDefault())
-                                .FirstOrDefault(),
-
-                        MutualCount = _context.Follows
-                                 .Count(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
-                    })
-                    .ToListAsync();
-
+                var similarUsers = await _userService.GetSimilarUsersAsync(id);
                 return Ok(similarUsers);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return NotFound(new { Message = ex.Message });
             }
             catch (Exception ex)
             {

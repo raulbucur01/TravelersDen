@@ -1,4 +1,6 @@
-﻿using BackendAPI.Models;
+﻿using BackendAPI.DTOs.Auth;
+using BackendAPI.Models;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace BackendAPI.Services
 {
@@ -20,8 +22,18 @@ namespace BackendAPI.Services
             return _tokenService.GenerateToken(user);
         }
 
-        public async Task<string> Register(User user)
+        public async Task<string> Register(RegisterRequestDTO registerRequest)
         {
+            // map the RegisterRequestDTO to User model
+            var user = new User
+            {
+                Name = registerRequest.Name,
+                Email = registerRequest.Email,
+                Username = registerRequest.Username,
+                Password = registerRequest.Password,
+                ImageUrl = registerRequest.ImageUrl,
+            };
+
             var registeredUser = await _userService.RegisterUser(user);
 
             return _tokenService.GenerateToken(registeredUser);
