@@ -163,7 +163,7 @@ const ProfileHeader = ({ userId }: { userId: string }) => {
       <img
         src={user.imageUrl || "/assets/icons/profile-placeholder.svg"}
         alt={user.username}
-        className="xl:h-40 xl:w-40 h-32 w-32 object-cover rounded-full self-start"
+        className="xl:h-40 xl:w-40 h-32 w-32 object-cover rounded-full self-start aspect-square"
       />
 
       <div className="flex flex-1 flex-col gap-6">
