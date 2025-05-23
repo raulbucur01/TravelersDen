@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using BackendAPI.Models;
 using BackendAPI.DTOs.Comments;
+using BackendAPI.Services;
 
 namespace BackendAPI.Controllers
 {
@@ -10,10 +11,12 @@ namespace BackendAPI.Controllers
     public class CommentsController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly CommentService _commentService;
 
-        public CommentsController(AppDbContext context)
+        public CommentsController(AppDbContext context, CommentService commentService)
         {
             _context = context;
+            _commentService = commentService;
         }
 
         [HttpPost]
@@ -21,21 +24,9 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var comment = new Comment
-                {
-                    UserId = commentDto.UserId,
-                    PostId = commentDto.PostId,
-                    Mention = commentDto.Mention,
-                    MentionedUserId = commentDto.MentionedUserId,
-                    Body = commentDto.Body,
-                    ParentCommentId = commentDto.ParentCommentId,  // Can be null for top-level comments
-                    CreatedAt = DateTime.UtcNow
-                };
+                var newCommentPostId = await _commentService.CreateCommentAsync(commentDto);
 
-                _context.Comments.Add(comment);
-                await _context.SaveChangesAsync();
-
-                return StatusCode(201, new { comment.PostId });
+                return StatusCode(201, new { newCommentPostId });
             }
             catch (Exception ex)
             {
@@ -48,47 +39,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var comments = await _context.Comments
-                    .Where(c => c.PostId == postId && c.ParentCommentId == null)  // Get top-level comments
-                    .OrderBy(c => c.CreatedAt)  // Order by creation time
-                    .Select(c => new
-                    {
-                        c.CommentId,
-                        c.PostId,
-                        c.Body,
-                        CreatedAt = c.CreatedAt.ToLocalTime().ToString("o"),
-                        c.LikesCount,
-                        User = new
-                        {
-                            c.User.UserId,
-                            c.User.Username,
-                            c.User.ImageUrl,
-                            c.User.Name
-                        },
-                        Replies = _context.Comments
-                            .Where(reply => reply.ParentCommentId == c.CommentId)  // Get replies to the current comment
-                            .OrderBy(reply => reply.CreatedAt)
-                            .Select(reply => new
-                            {
-                                reply.CommentId,
-                                reply.PostId,
-                                reply.ParentCommentId,
-                                reply.Mention,
-                                reply.MentionedUserId,
-                                reply.Body,
-                                CreatedAt = reply.CreatedAt.ToLocalTime().ToString("o"),
-                                reply.LikesCount,
-                                User = new
-                                {
-                                    reply.User.UserId,
-                                    reply.User.Username,
-                                    reply.User.ImageUrl,
-                                    reply.User.Name
-                                }
-                            })
-                            .ToList()
-                    })
-                    .ToListAsync();
+                var comments = await _commentService.GetCommentsForPostAsync(postId);
 
                 return Ok(comments);
             }
@@ -104,28 +55,13 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var comment = await _context.Comments
-                    .Include(c => c.Replies) // Include replies for cascading delete
-                    .FirstOrDefaultAsync(c => c.CommentId == commentId);
+                var deletedCommentPostId = await _commentService.DeleteCommentAsync(commentId);
 
-                if (comment == null)
-                {
-                    return NotFound("Comment not found.");
-                }
-
-                string postId = comment.PostId;
-
-                // Recursively delete replies first
-                foreach (var reply in comment.Replies)
-                {
-                    _context.Comments.Remove(reply);
-                }
-
-                // Remove the comment itself
-                _context.Comments.Remove(comment);
-                await _context.SaveChangesAsync();
-
-                return StatusCode(201, new { comment.PostId });
+                return StatusCode(201, new { deletedCommentPostId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -138,21 +74,13 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var comment = await _context.Comments
-                    .FirstOrDefaultAsync(c => c.CommentId == commentId);
+                var updatedCommentPostId = await _commentService.EditCommentAsync(commentId, editCommentDto);
 
-                if (comment == null)
-                {
-                    return NotFound("Comment not found.");
-                }
-
-                comment.Body = editCommentDto.Body;
-                comment.Mention = editCommentDto?.Mention;
-                comment.MentionedUserId = editCommentDto?.MentionedUserId;
-                comment.CreatedAt = DateTime.UtcNow;
-                await _context.SaveChangesAsync();
-
-                return StatusCode(201, new { comment.PostId });
+                return StatusCode(201, new { updatedCommentPostId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -165,10 +93,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var likes = await _context.CommentLikes
-                    .Where(like => like.CommentId == id)
-                    .Select(like => like.UserId)
-                    .ToListAsync();
+                var likes = await _commentService.GetCommentLikesAsync(id);
 
                 return Ok(likes);
             }
@@ -183,32 +108,17 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var existingLike = await _context.CommentLikes
-                    .FirstOrDefaultAsync(cl => cl.UserId == createLikeDTO.UserId && cl.CommentId == createLikeDTO.CommentId);
-
-                if (existingLike != null)
-                {
-                    return BadRequest("User has already liked this comment.");
-                }
-
-                var newLike = new CommentLike
-                {
-                    UserId = createLikeDTO.UserId,
-                    CommentId = createLikeDTO.CommentId,
-                };
-
-                _context.CommentLikes.Add(newLike);
-
-                var comment = await _context.Comments.FindAsync(createLikeDTO.CommentId);
-                if (comment == null)
-                {
-                    return NotFound("Comment not found.");
-                }
-
-                comment.LikesCount++; // Increment the LikesCount
-                await _context.SaveChangesAsync();
+                await _commentService.LikeCommentAsync(createLikeDTO);
 
                 return StatusCode(201, new { createLikeDTO.CommentId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -221,28 +131,13 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                // Find the like record to remove
-                var likeRecord = await _context.CommentLikes
-                    .FirstOrDefaultAsync(cl => cl.CommentId == commentId && cl.UserId == userId);
-
-                if (likeRecord == null)
-                {
-                    return NotFound("Like not found.");
-                }
-
-                // Remove the like from the database
-                _context.CommentLikes.Remove(likeRecord);
-
-                var comment = await _context.Comments.FindAsync(commentId);
-                if (comment == null)
-                {
-                    return NotFound("Comment not found.");
-                }
-
-                comment.LikesCount--; // Decrement the LikesCount
-                await _context.SaveChangesAsync();
+                await _commentService.UnlikeCommentAsync(userId, commentId);
 
                 return StatusCode(201, new { commentId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
@@ -255,16 +150,13 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var comment = await _context.Comments
-                    .Where(p => p.CommentId == id)
-                    .FirstOrDefaultAsync();
+                var likesCount = await _commentService.GetCommentLikesAsync(id);
 
-                if (comment == null)
-                {
-                    return NotFound(new { Message = "Comment not found." });
-                }
-
-                return Ok(new { LikeCount = comment.LikesCount });
+                return Ok(new { LikeCount = likesCount });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
             }
             catch (Exception ex)
             {
