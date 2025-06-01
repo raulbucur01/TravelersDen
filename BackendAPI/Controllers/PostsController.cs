@@ -42,7 +42,7 @@ namespace BackendAPI.Controllers
             {
                 await _postService.CreateNormalPostAsync(postDto);
 
-                return Ok();
+                return Ok("Post created");
             }
             catch (Exception ex)
             {
@@ -57,7 +57,7 @@ namespace BackendAPI.Controllers
             {
                 await _postService.CreateItineraryPostAsync(postDto);
 
-                return Ok();
+                return Ok("Post created");
             }
             catch (KeyNotFoundException ex)
             {
