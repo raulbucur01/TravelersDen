@@ -126,7 +126,7 @@ namespace BackendAPI.Services
             return comment.PostId;
         }
 
-        public async Task<List<string>> GetCommentLikeCountAsync(string commentId)
+        public async Task<List<string>> GetCommentLikesAsync(string commentId)
         {
             var likes = await _context.CommentLikes
                     .Where(like => like.CommentId == commentId)

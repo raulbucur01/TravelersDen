@@ -91,7 +91,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var likes = await _commentService.GetCommentLikeCountAsync(id);
+                var likes = await _commentService.GetCommentLikesAsync(id);
 
                 return Ok(likes);
             }
@@ -148,7 +148,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var likeCount = await _commentService.GetCommentLikeCountAsync(id);
+                var likeCount = await _commentService.GetLikeCountAsync(id);
 
                 return Ok(new { LikeCount = likeCount });
             }

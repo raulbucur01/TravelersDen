@@ -325,9 +325,11 @@ namespace BackendAPI.Services
                 return randomUsers;
             }
 
-            // NOTE: FastAPI backend already sends user ids that are not the current user and not already followed by the current user
+            // NOTE: FastAPI backend already sends user ids that are not the current user and not already followed by the current user,
+            // but we still filter them here to ensure the that if a user followed another user after the FastAPI call,
+            // they won't appear in the similar users list.
             var similarUsers = await _context.Users
-                .Where(u => similarUserIds.Contains(u.UserId))
+                .Where(u => similarUserIds.Contains(u.UserId) && u.UserId != userId && !followedUserIds.Contains(u.UserId))
                 .Select(u => new SimilarUserDTO
                 {
                     UserId = u.UserId,

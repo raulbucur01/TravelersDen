@@ -13,8 +13,8 @@ type MediaSlideshowProps = {
 
 const MediaSlideshow = ({
   mediaUrls,
-  minInterval = 2000, // Default: 2 seconds
-  maxInterval = 5000, // Default: 5 seconds
+  minInterval = 9000, // Default: 2 seconds
+  maxInterval = 10000, // Default: 5 seconds
   customStyles = {},
 }: MediaSlideshowProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
