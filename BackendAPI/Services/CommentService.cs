@@ -1,5 +1,4 @@
-﻿using Appwrite;
-using BackendAPI.DTOs.Comments;
+﻿using BackendAPI.DTOs.Comments;
 using BackendAPI.Models;
 using Microsoft.EntityFrameworkCore;
 

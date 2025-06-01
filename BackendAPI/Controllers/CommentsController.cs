@@ -10,12 +10,10 @@ namespace BackendAPI.Controllers
     [Route("api/comments")]
     public class CommentsController : Controller
     {
-        private readonly AppDbContext _context;
         private readonly CommentService _commentService;
 
-        public CommentsController(AppDbContext context, CommentService commentService)
+        public CommentsController(CommentService commentService)
         {
-            _context = context;
             _commentService = commentService;
         }
 

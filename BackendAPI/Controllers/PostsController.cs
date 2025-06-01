@@ -12,13 +12,11 @@ namespace BackendAPI.Controllers
     [Route("api/posts")]
     public class PostsController : Controller
     {
-        private readonly AppDbContext _context;
-        private readonly FastApiService _fastApiService;
+        private readonly PostService _postService;
 
-        public PostsController(AppDbContext context, FastApiService fastApiService)
+        public PostsController(PostService postService)
         {
-            _context = context;
-            _fastApiService = fastApiService;
+            _postService = postService;
         }
 
         [HttpGet("{id}/similar-posts")]
@@ -26,64 +24,16 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var similarPostsResponse = await _fastApiService.GetSimilarPostsAsync(id);
-
-                if (similarPostsResponse == null)
-                {
-                    return NotFound("No similar posts found.");
-                }
-
-                var similarPostIds = similarPostsResponse.SimilarPostIds;
-
-                // If no similar posts found yet, then return randomly
-                if (!similarPostIds.Any())
-                {
-                    int totalCount = await _context.Posts.CountAsync();
-
-                    var randomPosts = await _context.Posts
-                        .Where(p => p.PostId != id)
-                        .OrderBy(p => p.PostId)
-                        .Take(10)
-                        .Select(p => new
-                        {
-                            PostId = p.PostId,
-                            UserId = p.UserId,
-                            Caption = p.Caption,
-                            Body = p.Body,
-                            MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
-                            Location = p.Location,
-                            Tags = p.Tags,
-                            CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"),
-                            LikesCount = p.LikesCount,
-                            IsItinerary = p.IsItinerary,
-                        })
-                        .ToListAsync();
-
-                    return Ok(randomPosts);
-                }
-
-                var similarPosts = await _context.Posts
-                    .Where(p => similarPostIds.Contains(p.PostId))
-                    .Select(p => new
-                    {
-                        PostId = p.PostId,
-                        UserId = p.UserId,
-                        Caption = p.Caption,
-                        Body = p.Body,
-                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
-                        Location = p.Location,
-                        Tags = p.Tags,
-                        CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                        LikesCount = p.LikesCount,
-                        IsItinerary = p.IsItinerary,
-                    })
-                    .ToListAsync();
+                var similarPosts = await _postService.GetSimilarPostsAsync(id);
 
                 return Ok(similarPosts);
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
             catch (Exception ex)
             {
-                // Log the error and return a generic error response
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
@@ -93,48 +43,9 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var post = new Post
-                {
-                    UserId = postDto.UserId,
-                    Caption = postDto.Caption,
-                    Body = postDto.Body,
-                    Location = postDto.Location,
-                    Tags = postDto.Tags,
-                    CreatedAt = DateTime.UtcNow,
-                    LikesCount = 0,
-                };
+                await _postService.CreateNormalPostAsync(postDto);
 
-                post.IsItinerary = false;
-
-                // Add post to the database
-                _context.Posts.Add(post);
-                await _context.SaveChangesAsync();
-
-                // Add media files to the post (photo/video URLs and types)
-                foreach (var fileData in postDto.Files)
-                {
-                    var postMedia = new PostMedia
-                    {
-                        PostId = post.PostId,
-                        AppwriteFileUrl = fileData.Url,
-                        MediaType = fileData.Type,  // Get the media type directly from the object
-                    };
-
-                    _context.PostMedia.Add(postMedia);
-                }
-
-                // increment user post count
-                var userCreating = await _context.Users.FindAsync(postDto.UserId);
-
-                if (userCreating == null) {
-                    return NotFound("User creating not found. Can't update post count!");
-                }
-
-                userCreating.PostCount++;
-
-                await _context.SaveChangesAsync();
-
-                return StatusCode(200, "Post Created");
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -145,102 +56,19 @@ namespace BackendAPI.Controllers
         [HttpPost("itinerary")]
         public async Task<IActionResult> CreateItineraryPost(CreateItineraryPostDTO postDto)
         {
-            using (var transaction = await _context.Database.BeginTransactionAsync())
+            try
             {
-                try
-                {
-                    // Create post
-                    var post = new Post
-                    {
-                        UserId = postDto.UserId,
-                        Caption = postDto.Caption,
-                        Body = postDto.Body,
-                        Location = postDto.Location,
-                        Tags = postDto.Tags,
-                        CreatedAt = DateTime.UtcNow,
-                        LikesCount = 0,
-                        IsItinerary = true
-                    };
+                await _postService.CreateItineraryPostAsync(postDto);
 
-                    _context.Posts.Add(post);
-                    await _context.SaveChangesAsync();
-
-                    // Collect related entities
-                    var postMediaList = postDto.Files.Select(file => new PostMedia
-                    {
-                        PostId = post.PostId,
-                        AppwriteFileUrl = file.Url,
-                        MediaType = file.Type
-                    }).ToList();
-
-                    var tripStepList = new List<TripStep>();
-                    var tripStepMediaList = new List<TripStepMedia>();
-
-                    foreach (var step in postDto.TripSteps)
-                    {
-                        var tripStep = new TripStep
-                        {
-                            PostId = post.PostId,
-                            StepNumber = step.StepNumber,
-                            Latitude = step.Latitude,
-                            Longitude = step.Longitude,
-                            Zoom = step.Zoom,
-                            Price = step.Price,
-                            Description = step.Description
-                        };
-                        tripStepList.Add(tripStep);
-
-                        if (step.Files != null)
-                        {
-                            tripStepMediaList.AddRange(step.Files.Select(file => new TripStepMedia
-                            {
-                                TripStepId = tripStep.TripStepId, // Updated later during save
-                                AppwriteFileUrl = file.Url,
-                                MediaType = file.Type
-                            }));
-                        }
-                    }
-
-                    var accommodationList = postDto.Accommodations.Select(acc => new Accommodation
-                    {
-                        PostId = post.PostId,
-                        Name = acc.Name,
-                        Description = acc.Description,
-                        Latitude = acc.Latitude,
-                        Longitude = acc.Longitude,
-                        StartDate = acc.StartDate,
-                        EndDate = acc.EndDate,
-                        PricePerNight = acc.PricePerNight,
-                        TotalPrice = acc.TotalPrice,
-                        Link = acc.Link
-                    }).ToList();
-
-                    // Add all entities in batch
-                    _context.PostMedia.AddRange(postMediaList);
-                    _context.TripSteps.AddRange(tripStepList);
-                    _context.TripStepMedia.AddRange(tripStepMediaList);
-                    _context.Accommodations.AddRange(accommodationList);
-
-                    // increment user post count
-                    var userCreating = await _context.Users.FindAsync(postDto.UserId);
-
-                    if (userCreating == null)
-                    {
-                        return NotFound("User creating not found. Can't update post count!");
-                    }
-
-                    userCreating.PostCount++;
-
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
-                    return StatusCode(201, new { post.PostId });
-                }
-                catch (Exception ex)
-                {
-                    await transaction.RollbackAsync();
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
-                }
+                return Ok();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
@@ -249,44 +77,13 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var post = await _context.Posts.Include(p => p.Media)
-                    .FirstOrDefaultAsync(p => p.PostId == id);
-
-                if (post == null)
-                {
-                    return NotFound(new { Message = "Post not found." });
-                }
-
-                // Update basic post details
-                post.Caption = postDto.Caption;
-                post.Body = postDto.Body;
-                post.Location = postDto.Location;
-                post.Tags = postDto.Tags;
-
-                // delete the media the user deleted if any
-                var urlsToDelete = postDto.DeletedFiles;
-                if (urlsToDelete.Any()) // Avoid executing if no files are marked for deletion
-                {
-                    await _context.PostMedia
-                        .Where(m => urlsToDelete.Contains(m.AppwriteFileUrl))
-                        .ExecuteDeleteAsync();
-                }
-
-                // add the newly added media if any
-                var mediaToAdd = postDto.NewFiles;
-                if (mediaToAdd.Any())
-                {
-                    _context.PostMedia.AddRange(mediaToAdd.Select(media => new PostMedia
-                    {
-                        PostId = id,
-                        AppwriteFileUrl = media.Url,
-                        MediaType = media.Type
-                    }));
-                }
-
-                await _context.SaveChangesAsync();
+                await _postService.UpdateNormalPostAsync(id, postDto);
 
                 return StatusCode(201, new { PostId = id });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -297,125 +94,34 @@ namespace BackendAPI.Controllers
         [HttpPut("itinerary/{id}")]
         public async Task<IActionResult> UpdateItineraryPost(string id, UpdateItineraryPostDTO postDto)
         {
-            using (var transaction = await _context.Database.BeginTransactionAsync())
+            try
             {
-                try
-                {
-                    var post = await _context.Posts
-                        .Include(p => p.Media)
-                        .Include(p => p.Accommodations)
-                        .Include(p => p.TripSteps)
-                        .FirstOrDefaultAsync(p => p.PostId == id);
+                await _postService.UpdateItineraryPostAsync(id, postDto);
 
-                    if (post == null)
-                    {
-                        return NotFound(new { Message = "Post not found." });
-                    }
-
-                    // Update basic post details
-                    post.Caption = postDto.Caption;
-                    post.Body = postDto.Body;
-                    post.Location = postDto.Location;
-                    post.Tags = postDto.Tags;
-
-                    // Remove old TripSteps and Accommodations
-                    _context.TripSteps.RemoveRange(post.TripSteps);
-                    _context.Accommodations.RemoveRange(post.Accommodations);
-                    _context.PostMedia.RemoveRange(post.Media);
-
-                    // Collect related entities
-                    var postMediaList = postDto.Files.Select(file => new PostMedia
-                    {
-                        PostId = post.PostId,
-                        AppwriteFileUrl = file.Url,
-                        MediaType = file.Type
-                    }).ToList();
-
-                    var tripStepList = new List<TripStep>();
-                    var tripStepMediaList = new List<TripStepMedia>();
-
-                    foreach (var step in postDto.TripSteps)
-                    {
-                        var tripStep = new TripStep
-                        {
-                            PostId = post.PostId,
-                            StepNumber = step.StepNumber,
-                            Latitude = step.Latitude,
-                            Longitude = step.Longitude,
-                            Zoom = step.Zoom,
-                            Price = step.Price,
-                            Description = step.Description
-                        };
-                        tripStepList.Add(tripStep);
-
-                        if (step.Files != null)
-                        {
-                            tripStepMediaList.AddRange(step.Files.Select(file => new TripStepMedia
-                            {
-                                TripStepId = tripStep.TripStepId, // Updated later during save
-                                AppwriteFileUrl = file.Url,
-                                MediaType = file.Type
-                            }));
-                        }
-                    }
-
-                    var accommodationList = postDto.Accommodations.Select(acc => new Accommodation
-                    {
-                        PostId = post.PostId,
-                        Name = acc.Name,
-                        Description = acc.Description,
-                        Latitude = acc.Latitude,
-                        Longitude = acc.Longitude,
-                        StartDate = acc.StartDate,
-                        EndDate = acc.EndDate,
-                        PricePerNight = acc.PricePerNight,
-                        TotalPrice = acc.TotalPrice,
-                        Link = acc.Link
-                    }).ToList();
-
-                    // Add all entities in batch
-                    _context.PostMedia.AddRange(postMediaList);
-                    _context.TripSteps.AddRange(tripStepList);
-                    _context.TripStepMedia.AddRange(tripStepMediaList);
-                    _context.Accommodations.AddRange(accommodationList);
-
-                    await _context.SaveChangesAsync();
-                    await transaction.CommitAsync();
-
-                    return StatusCode(201, new { PostId = id });
-                }
-                catch (Exception ex)
-                {
-                    return StatusCode(500, $"Internal server error: {ex.Message}");
-                }
+                return StatusCode(201, new { PostId = id });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePost(string id)
         {
-            try {
-                var post = await _context.Posts.FindAsync(id);
+            try
+            {
+                var result = await _postService.DeletePostAsync(id);
 
-                if (post == null)
-                {
-                    return NotFound(new { Message = "Post not found." });
-                }
-
-                // decrement user post count
-                var userDeleting = await _context.Users.FindAsync(post.UserId);
-
-                if (userDeleting == null)
-                {
-                    return NotFound("User deleting not found. Can't update post count!");
-                }
-
-                userDeleting.PostCount--;
-
-                _context.Posts.Remove(post);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { PostId = id, userDeleting.UserId });
+                return Ok(new { result.PostId, result.UserId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -424,19 +130,11 @@ namespace BackendAPI.Controllers
         }
 
         [HttpGet("{id}/related-itinerary-media-urls")]
-        public async Task<IActionResult> GetRelatedItineraryMediaUrls(string id) {
+        public async Task<IActionResult> GetRelatedItineraryMediaUrls(string id)
+        {
             try
             {
-                // Query the TripSteps where PostId matches the provided id
-                var tripSteps = await _context.TripSteps
-                    .Where(ts => ts.PostId == id)
-                    .Include(ts => ts.Media)
-                    .ToListAsync(); ;
-
-                var mediaUrls = tripSteps
-                    .SelectMany(ts => ts.Media)
-                    .Select(media => media.AppwriteFileUrl)
-                    .ToArray();
+                var mediaUrls = await _postService.GetRelatedItineraryMediaUrlsAsync(id);
 
                 return Ok(mediaUrls);
             }
@@ -452,33 +150,16 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var post = await _context.Posts
-                    .Where(p => p.PostId == id)
-                    .Select(p => new
-                    {
-                        PostId = p.PostId,
-                        UserId = p.UserId,
-                        Caption = p.Caption,
-                        Body = p.Body,
-                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
-                        Location = p.Location,
-                        Tags = p.Tags,
-                        CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                        LikesCount = p.LikesCount,
-                        IsItinerary = p.IsItinerary
-                    })
-                    .FirstOrDefaultAsync();
-
-                if (post == null)
-                {
-                    return NotFound(new { Message = "Post not found." });
-                }
+                var post = await _postService.GetPostByIdAsync(id);
 
                 return Ok(post);
             }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(new { Message = ex.Message });
+            }
             catch (Exception ex)
             {
-                // Log the error and return a generic error response
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
@@ -488,35 +169,12 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var totalPosts = await _context.Posts.CountAsync();
+                var (recentPosts, hasMore) = await _postService.GetRecentPostsAsync(page, pageSize);
 
-                var recentPosts = await _context.Posts
-                    .OrderByDescending(p => p.CreatedAt) // Order by CreatedAt in descending order
-                    .Skip((page - 1) * pageSize) // Skip posts from previous pages
-                    .Take(pageSize) // Take only the requested number of posts
-                    .Select(p => new
-                    {
-                        PostId = p.PostId,
-                        UserId = p.UserId,
-                        Caption = p.Caption,
-                        Body = p.Body,
-                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
-                        Location = p.Location,
-                        Tags = p.Tags,
-                        CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                        LikesCount = p.LikesCount,
-                        IsItinerary = p.IsItinerary,
-                    })
-                    .ToListAsync();
-
-                bool hasMore = (page * pageSize) < totalPosts; // Check if there are more posts to fetch
-
-                // Return the list of posts as a response
                 return Ok(new { posts = recentPosts, hasMore });
             }
             catch (Exception ex)
             {
-                // Log the error and return a generic error response
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
@@ -526,10 +184,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var likes = await _context.Likes
-                    .Where(like => like.PostId == id)
-                    .Select(like => like.UserId)
-                    .ToListAsync();
+                var likes = await _postService.GetPostLikesAsync(id);
 
                 return Ok(likes);
             }
@@ -544,10 +199,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var saves = await _context.Saves
-                    .Where(save => save.PostId == id)
-                    .Select(save => save.UserId)
-                    .ToListAsync();
+                var saves = await _postService.GetPostSavesAsync(id);
 
                 return Ok(saves);
             }
@@ -562,24 +214,9 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var newLike = new Likes 
-                {
-                    UserId = createLikeDTO.UserId,
-                    PostId = createLikeDTO.PostId,
-                };
+                var postIdLiked = await _postService.LikePostAsync(createLikeDTO);
 
-                _context.Likes.Add(newLike);
-
-                var post = await _context.Posts.FindAsync(createLikeDTO.PostId);
-                if (post == null)
-                {
-                    return NotFound("Post not found.");
-                }
-
-                post.LikesCount++; // Increment the LikesCount
-                await _context.SaveChangesAsync();
-
-                return Ok(new { newLike.PostId });
+                return Ok(new { PostId = postIdLiked });
             }
             catch (Exception ex)
             {
@@ -592,28 +229,13 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                // Find the like record to remove
-                var likeRecord = await _context.Likes
-                    .FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
+                var postIdUnliked = await _postService.UnlikePostAsync(userId, postId);
 
-                if (likeRecord == null)
-                {
-                    return NotFound("Like not found.");
-                }
-
-                // Remove the like from the database
-                _context.Likes.Remove(likeRecord);
-
-                var post = await _context.Posts.FindAsync(postId);
-                if (post == null)
-                {
-                    return NotFound("Post not found.");
-                }
-
-                post.LikesCount--; 
-                await _context.SaveChangesAsync();
-
-                return Ok(new { postId });
+                return Ok(new { PostId = postIdUnliked });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -621,22 +243,18 @@ namespace BackendAPI.Controllers
             }
         }
 
-
         [HttpPost("save")]
         public async Task<IActionResult> SavePost(SaveRequestDTO createSaveDTO)
         {
             try
             {
-                var newSave = new Saves
-                {
-                    UserId = createSaveDTO.UserId,
-                    PostId = createSaveDTO.PostId,
-                };
+                var savedPostId = await _postService.SavePostAsync(createSaveDTO);
 
-                _context.Saves.Add(newSave);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { newSave.PostId });
+                return Ok(new { PostId = savedPostId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -649,20 +267,13 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                // Find the save record to remove
-                var saveRecord = await _context.Saves
-                    .FirstOrDefaultAsync(s => s.PostId == postId && s.UserId == userId);
-
-                if (saveRecord == null)
-                {
-                    return NotFound("Save record not found.");
-                }
-
-                // Remove the save from the database
-                _context.Saves.Remove(saveRecord);
-                await _context.SaveChangesAsync();
-
-                return Ok(new { postId });
+                var unsavedPostId = await _postService.UnsavePostAsync(userId, postId);
+                
+                return Ok(new { PostId = unsavedPostId });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -675,16 +286,13 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var post = await _context.Posts
-                    .Where(p => p.PostId == id)
-                    .FirstOrDefaultAsync();
+                var likeCount = await _postService.GetLikeCountAsync(id);
 
-                if (post == null)
-                {
-                    return NotFound(new { Message = "Post not found." });
-                }
-
-                return Ok(new { LikeCount = post.LikesCount });
+                return Ok(new { LikeCount = likeCount });
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -697,57 +305,16 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                // Fetch the itinerary steps and accommodations for the given post ID
-                var itineraryDetails = new
-                {
-                    TripSteps = await _context.TripSteps
-                        .Where(ts => ts.PostId == id)
-                        .OrderBy(ts => ts.StepNumber) // Ensure steps are ordered
-                        .Select(ts => new
-                        {
-                            TripStepId = ts.TripStepId,
-                            StepNumber = ts.StepNumber,
-                            Latitude = ts.Latitude,
-                            Longitude = ts.Longitude,
-                            Zoom = ts.Zoom,
-                            Price = ts.Price,
-                            Description = ts.Description,
-                            MediaUrls = ts.Media.Select(m => new
-                            {
-                                Url = m.AppwriteFileUrl,
-                                Type = m.MediaType
-                            }).ToList()
-                        })
-                        .ToListAsync(),
-                    Accommodations = await _context.Accommodations
-                        .Where(a => a.PostId == id)
-                        .Select(a => new
-                        {
-                            Name = a.Name,
-                            Description = a.Description,
-                            Latitude = a.Latitude,
-                            Longitude = a.Longitude,
-                            StartDate = a.StartDate,
-                            EndDate = a.EndDate,
-                            PricePerNight = a.PricePerNight,
-                            TotalPrice = a.TotalPrice,
-                            Link = a.Link
-                        })
-                        .ToListAsync()
-                };
+                var itineraryDetails = await _postService.GetItineraryDetailsAsync(id);
 
-                // Check if any data is available
-                if (itineraryDetails.TripSteps.Count == 0 && itineraryDetails.Accommodations.Count == 0)
-                {
-                    return NotFound(new { Message = "No itinerary details found for this post." });
-                }
-
-                // Return the itinerary details
                 return Ok(itineraryDetails);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
-                // Log the error and return a generic error response
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
@@ -757,31 +324,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var query = _context.Posts
-                .Where(p => p.Caption.Contains(searchTerm)
-                        || p.Tags.Contains(searchTerm)
-                        || p.Body.Contains(searchTerm));
-
-                var totalMatchingPosts = await query.CountAsync();
-
-                var posts = await _context.Posts
-                    .Where(p => p.Caption.Contains(searchTerm)
-                                || p.Tags.Contains(searchTerm)
-                                || p.Body.Contains(searchTerm))
-                    .OrderByDescending(p => p.CreatedAt)
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .Select(p => new
-                    {
-                        PostId = p.PostId,
-                        UserId = p.UserId,
-                        Caption = p.Caption,
-                        MediaUrls = p.Media.Select(m => new { url = m.AppwriteFileUrl, type = m.MediaType }).ToList(),
-                        LikesCount = p.LikesCount,
-                    })
-                    .ToListAsync();
-
-                bool hasMore = (page * pageSize) < totalMatchingPosts;
+                var (posts, hasMore) = await _postService.SearchPostsAsync(searchTerm, page, pageSize);
 
                 return Ok(new { posts, hasMore });
             }
@@ -793,71 +336,11 @@ namespace BackendAPI.Controllers
 
         // base posts for initializing the app
         [HttpPost("import")]
-        public IActionResult ImportPosts()
+        public async Task<IActionResult> ImportPosts()
         {
             try
             {
-                _context.Database.SetCommandTimeout(180); // Timeout in seconds
-
-                string filePath = Path.Combine(Directory.GetCurrentDirectory(), "posts.csv");
-
-                if (!System.IO.File.Exists(filePath))
-                    return NotFound("CSV file not found!");
-                
-                // list of user IDs
-                var userIds = new List<string>
-                {
-                    "68110844002953351eff",
-                    "68285d6d00158b4f9757",
-                    "68285d8200115078bb9c",
-                    "68285e900012edcb5e68",
-                    "68285ebd0038d5474c16",
-                    "68285f3700325f52df3d",
-                    "68285f81003c56f4f634",
-                    "68285fa100265bc29013"
-                };
-
-                var random = new Random();
-
-                using (var reader = new StreamReader(filePath))
-                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
-                {
-                    var posts = csv.GetRecords<PostCsvModel>().ToList();
-
-                    // Convert CSV data to Post entities
-                    var newPosts = posts.Select(p =>
-                    {
-                        string generatedPostId = Guid.NewGuid().ToString();
-                        string randomUserId = userIds[random.Next(userIds.Count)];
-
-                        return new Post
-                        {
-                            PostId = generatedPostId,
-                            UserId = randomUserId,
-                            Caption = p.Caption.Length > 2200 ? p.Caption.Substring(0, 2200) : p.Caption,
-                            Body = p.Body.Length > 2200 ? p.Body.Substring(0, 2200) : p.Body,
-                            Location = p.Location,
-                            Tags = p.Tags,
-                            CreatedAt = DateTime.UtcNow,
-                            LikesCount = 0,
-                            IsItinerary = false,
-                            Media = new List<PostMedia>
-                        {
-                            new PostMedia
-                            {
-                                MediaId = Guid.NewGuid().ToString(),
-                                PostId = generatedPostId,
-                                AppwriteFileUrl = "https://fra.cloud.appwrite.io/v1/storage/buckets/6811081b002327ad7fef/files/681108be0035cc74888c/view?project=6740c57e0035d48d554d&mode=admin",
-                                MediaType = "Photo"
-                            }
-                        }
-                        };
-                    }).ToList();
-
-                    // Add to DB
-                    _context.Posts.AddRange(newPosts);
-                    _context.SaveChanges();
-                }
+                await _postService.ImportPostsFromCsvAsync();
 
                 return Ok("CSV imported successfully!");
             }

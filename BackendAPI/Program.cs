@@ -79,6 +79,8 @@ builder.Services.Configure<FastApiSettings>(builder.Configuration.GetSection("Fa
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ItineraryGeneratorService>();
+builder.Services.AddScoped<CommentService>();
 
 builder.Services.AddHttpClient<FastApiService>(client =>
 {

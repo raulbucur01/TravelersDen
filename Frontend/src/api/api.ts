@@ -781,7 +781,7 @@ export async function getFollowers({
     const response = await apiClient.get(`/users/${userId}/followers`, {
       params: {
         page: pageParam,
-        pageSize: 10,
+        pageSize: 5,
       },
     });
 
@@ -802,7 +802,7 @@ export async function getFollowing({
     const response = await apiClient.get(`/users/${userId}/following`, {
       params: {
         page: pageParam,
-        pageSize: 10,
+        pageSize: 5,
       },
     });
 
