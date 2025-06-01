@@ -81,6 +81,7 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ItineraryGeneratorService>();
 builder.Services.AddScoped<CommentService>();
+builder.Services.AddScoped<PostService>();
 
 builder.Services.AddHttpClient<FastApiService>(client =>
 {

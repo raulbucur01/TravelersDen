@@ -43,7 +43,7 @@ const PostStats = ({ post, userId, usedIn = "postcard" }: PostStatsProps) => {
 
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [likeCount, setLikeCount] = useState(post.likesCount);
+  const [likeCount, setLikeCount] = useState(post.likeCount);
 
   useEffect(() => {
     if (likeCountData) {

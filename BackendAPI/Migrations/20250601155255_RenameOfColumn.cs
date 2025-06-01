@@ -5,24 +5,24 @@
 namespace BackendAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class DayRename : Migration
+    public partial class RenameOfColumn : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "DayNumber",
-                table: "ItineraryDays",
-                newName: "Day");
+                name: "LikesCount",
+                table: "Comments",
+                newName: "LikeCount");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.RenameColumn(
-                name: "Day",
-                table: "ItineraryDays",
-                newName: "DayNumber");
+                name: "LikeCount",
+                table: "Comments",
+                newName: "LikesCount");
         }
     }
 }

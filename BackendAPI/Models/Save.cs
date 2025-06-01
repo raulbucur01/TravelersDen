@@ -1,6 +1,6 @@
 ﻿namespace BackendAPI.Models
 {
-    public class Saves
+    public class Save
     {
         public string UserId { get; set; }
         public string PostId { get; set; }

@@ -24,7 +24,7 @@ const CommentStats = ({ comment, userId }: CommentStatsProps) => {
   const { data: likeCountData } = useGetCommentLikeCount(comment.commentId);
 
   const [isLiked, setIsLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(comment.likesCount);
+  const [likeCount, setLikeCount] = useState(comment.likeCount);
 
   // Update state when data is fetched
   useEffect(() => {

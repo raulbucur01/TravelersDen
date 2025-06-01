@@ -47,7 +47,7 @@ namespace BackendAPI.Services
                         Location = p.Location,
                         Tags = p.Tags,
                         CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"),
-                        LikesCount = p.LikesCount,
+                        LikeCount = p.LikeCount,
                         IsItinerary = p.IsItinerary,
                     })
                     .ToListAsync();
@@ -67,7 +67,7 @@ namespace BackendAPI.Services
                     Location = p.Location,
                     Tags = p.Tags,
                     CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                    LikesCount = p.LikesCount,
+                    LikeCount = p.LikeCount,
                     IsItinerary = p.IsItinerary,
                 })
                 .ToListAsync();
@@ -92,7 +92,7 @@ namespace BackendAPI.Services
                 Location = postDto.Location,
                 Tags = postDto.Tags,
                 CreatedAt = DateTime.UtcNow,
-                LikesCount = 0,
+                LikeCount = 0,
                 IsItinerary = false,
             };
 
@@ -141,7 +141,7 @@ namespace BackendAPI.Services
                         Location = postDto.Location,
                         Tags = postDto.Tags,
                         CreatedAt = DateTime.UtcNow,
-                        LikesCount = 0,
+                        LikeCount = 0,
                         IsItinerary = true
                     };
 
@@ -408,7 +408,7 @@ namespace BackendAPI.Services
                         Location = p.Location,
                         Tags = p.Tags,
                         CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                        LikesCount = p.LikesCount,
+                        LikeCount = p.LikeCount,
                         IsItinerary = p.IsItinerary
                     })
                     .FirstOrDefaultAsync();
@@ -439,7 +439,7 @@ namespace BackendAPI.Services
                     Location = p.Location,
                     Tags = p.Tags,
                     CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
-                    LikesCount = p.LikesCount,
+                    LikeCount = p.LikeCount,
                     IsItinerary = p.IsItinerary,
                 })
                 .ToListAsync();
@@ -478,7 +478,7 @@ namespace BackendAPI.Services
                 throw new KeyNotFoundException("Post not found.");
             }
 
-            var newLike = new Likes
+            var newLike = new Like
             {
                 UserId = createLikeDTO.UserId,
                 PostId = createLikeDTO.PostId,
@@ -486,7 +486,7 @@ namespace BackendAPI.Services
 
             _context.Likes.Add(newLike);
 
-            post.LikesCount++; // Increment the LikesCount
+            post.LikeCount++; // Increment the LikesCount
 
             await _context.SaveChangesAsync();
 
@@ -516,7 +516,7 @@ namespace BackendAPI.Services
                 throw new InvalidOperationException("Post for existing like not found. Data inconsistency.");
             }
 
-            post.LikesCount = Math.Max(0, post.LikesCount - 1); // prevent negative values
+            post.LikeCount = Math.Max(0, post.LikeCount - 1); // prevent negative values
 
             await _context.SaveChangesAsync();
 
@@ -532,7 +532,7 @@ namespace BackendAPI.Services
                 throw new KeyNotFoundException("Post not found.");
             }
 
-            var newSave = new Saves
+            var newSave = new Save
             {
                 UserId = createSaveDTO.UserId,
                 PostId = createSaveDTO.PostId,
@@ -574,7 +574,7 @@ namespace BackendAPI.Services
                 throw new KeyNotFoundException("Post not found.");
             }
 
-            return post.LikesCount;
+            return post.LikeCount;
         }
 
         public async Task<GetItineraryDetailsDTO> GetItineraryDetailsAsync(string postId)
@@ -648,7 +648,7 @@ namespace BackendAPI.Services
                     UserId = p.UserId,
                     Caption = p.Caption,
                     MediaUrls = p.Media.Select(m => new MediaDTO { Url = m.AppwriteFileUrl, Type = m.MediaType }).ToList(),
-                    LikesCount = p.LikesCount,
+                    LikeCount = p.LikeCount,
                 })
                 .ToListAsync();
 
@@ -657,39 +657,35 @@ namespace BackendAPI.Services
             return (posts, hasMore);
         }
 
-        public async Task ImportPostsFromCsvAsync()
+        public void ImportPostsFromCsv()
         {
             _context.Database.SetCommandTimeout(180); // Timeout in seconds
 
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), "posts.csv");
+            string csvFilePath = Path.Combine(Directory.GetCurrentDirectory(), "posts.csv");
+            string mediaFilePath = Path.Combine(Directory.GetCurrentDirectory(), "file-urls.txt");
 
-            if (!System.IO.File.Exists(filePath))
+            if (!File.Exists(csvFilePath))
                 throw new FileNotFoundException("CSV file not found.");
 
-            // list of user IDs
-            var userIds = new List<string>
-                {
-                    "193ddda1-d27f-4937-a157-f9b048efc0c0",
-                    "2f51f85f-0318-454f-9e46-42f3b765eae4",
-                    "4badddf7-cec0-4ac1-8868-0baaa10f6e72",
-                    "4ed610ea-fe89-4f5d-8bb2-3b68c7a498c9",
-                    "538eae3e-a050-453f-82f5-43aba590c8e2",
-                    "579f35cf-4e95-4ba5-b697-8ab32bf0d29d",
-                    "591a97de-98b9-42a0-9fce-df548e22049c",
-                    "6b01e2e4-47f9-4726-be3d-7fbd5afc0dd7",
-                    "89ea89c2-88f5-48b7-a091-f62dc5327e5e",
-                    "ab2da3c5-a194-4301-b179-b24c808c8441",
-                    "baa146df-c7e4-4e5d-a440-afbf4fd2d43a",
-                    "d2d86aee-bc1b-4f2b-8f2d-639bf029a54b",
-                    "d6fec827-cfb2-4266-8bca-7f3a7848df06",
-                    "fd635d3a-61d0-4b86-87fd-7faac7e615d4",
-                };
+            if (!File.Exists(mediaFilePath))
+                throw new FileNotFoundException("Media file list not found.");
 
-            var photoUrls = new List<string> { };
+            // Load all media file URLs
+            var photoUrls = File.ReadAllLines(mediaFilePath)
+                                .Where(url => !string.IsNullOrWhiteSpace(url))
+                                .ToList();
+
+            if (photoUrls.Count == 0)
+                throw new Exception("No photo URLs found.");
+
+            // get all user ids
+            var userIds = _context.Users
+                .Select(u => u.UserId)
+                .ToList();
 
             var random = new Random();
 
-            using (var reader = new StreamReader(filePath))
+            using (var reader = new StreamReader(csvFilePath))
             using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
                 var posts = csv.GetRecords<PostCsvModel>().ToList();
@@ -700,6 +696,10 @@ namespace BackendAPI.Services
                     string generatedPostId = Guid.NewGuid().ToString();
                     string randomUserId = userIds[random.Next(userIds.Count)];
 
+                    // Pick 1–5 random unique photo URLs
+                    int photoCount = random.Next(1, 6);
+                    var selectedUrls = photoUrls.OrderBy(x => random.Next()).Take(photoCount).ToList();
+
                     return new Post
                     {
                         PostId = generatedPostId,
@@ -709,18 +709,15 @@ namespace BackendAPI.Services
                         Location = p.Location,
                         Tags = p.Tags,
                         CreatedAt = DateTime.UtcNow,
-                        LikesCount = 0,
+                        LikeCount = 0,
                         IsItinerary = false,
-                        Media = new List<PostMedia>
+                        Media = selectedUrls.Select(url => new PostMedia
                         {
-                            new PostMedia
-                            {
-                                MediaId = Guid.NewGuid().ToString(),
-                                PostId = generatedPostId,
-                                AppwriteFileUrl = "https://fra.cloud.appwrite.io/v1/storage/buckets/6811081b002327ad7fef/files/681108be0035cc74888c/view?project=6740c57e0035d48d554d&mode=admin",
-                                MediaType = "Photo"
-                            }
-                        }
+                            MediaId = Guid.NewGuid().ToString(),
+                            PostId = generatedPostId,
+                            AppwriteFileUrl = url,
+                            MediaType = "Photo"
+                        }).ToList()
                     };
                 }).ToList();
 

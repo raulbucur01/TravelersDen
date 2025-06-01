@@ -103,7 +103,7 @@ export type BasePost = {
   location?: string;
   tags?: string;
   createdAt: string;
-  likesCount: number;
+  likeCount: number;
   isItinerary: boolean;
 };
 
@@ -116,7 +116,7 @@ export type ItineraryPost = {
   location?: string;
   tags?: string;
   createdAt: string;
-  likesCount: number;
+  likeCount: number;
   isItinerary: boolean;
 
   tripSteps: TripStep[];
@@ -168,7 +168,7 @@ export interface ICommentReply {
   mentionedUserId: string;
   body: string;
   createdAt: string;
-  likesCount: number;
+  likeCount: number;
   user: ICommentCreator;
 }
 
@@ -179,7 +179,7 @@ export interface IComment {
   mentionedUserId: string;
   body: string;
   createdAt: string;
-  likesCount: number;
+  likeCount: number;
   user: ICommentCreator;
   replies: ICommentReply[];
 }

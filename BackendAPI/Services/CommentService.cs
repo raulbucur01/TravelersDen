@@ -44,7 +44,7 @@ namespace BackendAPI.Services
                         PostId = c.PostId,
                         Body = c.Body,
                         CreatedAt = c.CreatedAt.ToLocalTime().ToString("o"),
-                        LikesCount = c.LikesCount,
+                        LikeCount = c.LikeCount,
                         User = new CommentUserDTO
                         {
                             UserId = c.User.UserId,
@@ -64,7 +64,7 @@ namespace BackendAPI.Services
                                 MentionedUserId = reply.MentionedUserId,
                                 Body = reply.Body,
                                 CreatedAt = reply.CreatedAt.ToLocalTime().ToString("o"),
-                                LikesCount = reply.LikesCount,
+                                LikeCount = reply.LikeCount,
                                 User = new CommentUserDTO
                                 {
                                     UserId = c.User.UserId,
@@ -126,7 +126,7 @@ namespace BackendAPI.Services
             return comment.PostId;
         }
 
-        public async Task<List<string>> GetCommentLikesAsync(string commentId)
+        public async Task<List<string>> GetCommentLikeCountAsync(string commentId)
         {
             var likes = await _context.CommentLikes
                     .Where(like => like.CommentId == commentId)
@@ -161,7 +161,7 @@ namespace BackendAPI.Services
                 throw new KeyNotFoundException("Comment not found.");
             }
 
-            comment.LikesCount++;
+            comment.LikeCount++;
 
             await _context.SaveChangesAsync();
         }
@@ -187,7 +187,7 @@ namespace BackendAPI.Services
                 throw new KeyNotFoundException("Comment not found.");
             }
 
-            comment.LikesCount--;
+            comment.LikeCount--;
 
             await _context.SaveChangesAsync();
         }
@@ -203,7 +203,7 @@ namespace BackendAPI.Services
                 throw new KeyNotFoundException("Comment not found.");
             }
 
-            return comment.LikesCount;
+            return comment.LikeCount;
         }
     }
 }

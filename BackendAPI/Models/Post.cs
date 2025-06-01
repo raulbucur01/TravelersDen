@@ -12,7 +12,7 @@ namespace BackendAPI.Models
         public string Location { get; set; }
         public string Tags { get; set; }
         public DateTime CreatedAt { get; set; } // Timestamp for post creation
-        public int LikesCount { get; set; } // Keeps track of likes
+        public int LikeCount { get; set; } // Keeps track of likes
         public bool IsItinerary { get; set; }
 
         public User User { get; set; } // Navigation property

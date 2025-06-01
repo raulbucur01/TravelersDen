@@ -218,7 +218,7 @@ namespace BackendAPI.Services
             }
 
             // Add new follow
-            var newFollow = new Follows
+            var newFollow = new Follow
             {
                 UserIdFollowing = followDto.UserIdFollowing,
                 UserIdFollowed = followDto.UserIdFollowed,

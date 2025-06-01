@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackendAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250310162956_BioAndFollowerCountInUser")]
-    partial class BioAndFollowerCountInUser
+    [Migration("20250601142313_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -127,7 +127,113 @@ namespace BackendAPI.Migrations
                     b.ToTable("CommentLikes");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.DeletedPost", b =>
+            modelBuilder.Entity("BackendAPI.Models.Follow", b =>
+                {
+                    b.Property<string>("UserIdFollowing")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserIdFollowed")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("FollowedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("UserIdFollowing", "UserIdFollowed");
+
+                    b.HasIndex("UserIdFollowed");
+
+                    b.ToTable("Follows");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ItineraryGenerator.Itinerary", b =>
+                {
+                    b.Property<string>("ItineraryId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Destination")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("ItineraryId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Itineraries");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ItineraryGenerator.ItineraryActivity", b =>
+                {
+                    b.Property<string>("ActivityId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ItineraryDayId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ActivityId");
+
+                    b.HasIndex("ItineraryDayId");
+
+                    b.ToTable("ItineraryActivities");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ItineraryGenerator.ItineraryDay", b =>
+                {
+                    b.Property<string>("DayId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Day")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ItineraryId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("DayId");
+
+                    b.HasIndex("ItineraryId");
+
+                    b.ToTable("ItineraryDays");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.Like", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("PostId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "PostId");
+
+                    b.HasIndex("PostId");
+
+                    b.ToTable("Likes");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.LogsForSimilarityUpdates.DeletedPost", b =>
                 {
                     b.Property<string>("DeletionId")
                         .HasColumnType("nvarchar(450)");
@@ -147,84 +253,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("DeletedPosts");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Follows", b =>
-                {
-                    b.Property<string>("UserIdFollowing")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("UserIdFollowed")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("FollowedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("UserIdFollowing", "UserIdFollowed");
-
-                    b.HasIndex("UserIdFollowed");
-
-                    b.ToTable("Follows");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.Likes", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("PostId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("UserId", "PostId");
-
-                    b.HasIndex("PostId");
-
-                    b.ToTable("Likes");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.Post", b =>
-                {
-                    b.Property<string>("PostId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Body")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Caption")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsItinerary")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("LikesCount")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("PostId");
-
-                    b.HasIndex("CreatedAt")
-                        .IsDescending();
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Posts");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.PostChange", b =>
+            modelBuilder.Entity("BackendAPI.Models.LogsForSimilarityUpdates.PostChange", b =>
                 {
                     b.Property<string>("ChangeId")
                         .HasColumnType("nvarchar(450)");
@@ -258,6 +287,50 @@ namespace BackendAPI.Migrations
                     b.ToTable("PostChanges");
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.Post", b =>
+                {
+                    b.Property<string>("PostId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Caption")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsItinerary")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LikeCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tags")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("PostId");
+
+                    b.HasIndex("CreatedAt")
+                        .IsDescending();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Posts");
+                });
+
             modelBuilder.Entity("BackendAPI.Models.PostMedia", b =>
                 {
                     b.Property<string>("MediaId")
@@ -282,7 +355,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("PostMedia");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Saves", b =>
+            modelBuilder.Entity("BackendAPI.Models.Save", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -360,17 +433,7 @@ namespace BackendAPI.Migrations
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<int?>("Age")
-                        .HasColumnType("int");
-
                     b.Property<string>("Bio")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("City")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
@@ -380,19 +443,23 @@ namespace BackendAPI.Migrations
                     b.Property<int>("FollowerCount")
                         .HasColumnType("int");
 
-                    b.Property<string>("Gender")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("FollowingCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Interests")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PostCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("Username")
                         .IsRequired()
@@ -467,7 +534,7 @@ namespace BackendAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Follows", b =>
+            modelBuilder.Entity("BackendAPI.Models.Follow", b =>
                 {
                     b.HasOne("BackendAPI.Models.User", "FollowedUser")
                         .WithMany()
@@ -488,7 +555,40 @@ namespace BackendAPI.Migrations
                     b.Navigation("FollowingUser");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Likes", b =>
+            modelBuilder.Entity("BackendAPI.Models.ItineraryGenerator.Itinerary", b =>
+                {
+                    b.HasOne("BackendAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ItineraryGenerator.ItineraryActivity", b =>
+                {
+                    b.HasOne("BackendAPI.Models.ItineraryGenerator.ItineraryDay", "ItineraryDay")
+                        .WithMany("Activities")
+                        .HasForeignKey("ItineraryDayId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ItineraryDay");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ItineraryGenerator.ItineraryDay", b =>
+                {
+                    b.HasOne("BackendAPI.Models.ItineraryGenerator.Itinerary", "Itinerary")
+                        .WithMany("Days")
+                        .HasForeignKey("ItineraryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Itinerary");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.Like", b =>
                 {
                     b.HasOne("BackendAPI.Models.Post", "Post")
                         .WithMany()
@@ -509,6 +609,17 @@ namespace BackendAPI.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("BackendAPI.Models.LogsForSimilarityUpdates.PostChange", b =>
+                {
+                    b.HasOne("BackendAPI.Models.Post", "Post")
+                        .WithMany()
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Post");
+                });
+
             modelBuilder.Entity("BackendAPI.Models.Post", b =>
                 {
                     b.HasOne("BackendAPI.Models.User", "User")
@@ -519,17 +630,6 @@ namespace BackendAPI.Migrations
                         .HasConstraintName("FK_Posts_UserID");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("BackendAPI.Models.PostChange", b =>
-                {
-                    b.HasOne("BackendAPI.Models.Post", "Post")
-                        .WithMany()
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Post");
                 });
 
             modelBuilder.Entity("BackendAPI.Models.PostMedia", b =>
@@ -544,7 +644,7 @@ namespace BackendAPI.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Saves", b =>
+            modelBuilder.Entity("BackendAPI.Models.Save", b =>
                 {
                     b.HasOne("BackendAPI.Models.Post", "Post")
                         .WithMany()
@@ -590,6 +690,16 @@ namespace BackendAPI.Migrations
             modelBuilder.Entity("BackendAPI.Models.Comment", b =>
                 {
                     b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ItineraryGenerator.Itinerary", b =>
+                {
+                    b.Navigation("Days");
+                });
+
+            modelBuilder.Entity("BackendAPI.Models.ItineraryGenerator.ItineraryDay", b =>
+                {
+                    b.Navigation("Activities");
                 });
 
             modelBuilder.Entity("BackendAPI.Models.Post", b =>

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BackendAPI.DTOs.Posts;
 using BackendAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BackendAPI.Controllers
 {
@@ -331,12 +332,13 @@ namespace BackendAPI.Controllers
         }
 
         // base posts for initializing the app
+        [AllowAnonymous]
         [HttpPost("import")]
-        public async Task<IActionResult> ImportPosts()
+        public IActionResult ImportPosts()
         {
             try
             {
-                await _postService.ImportPostsFromCsvAsync();
+                _postService.ImportPostsFromCsv();
 
                 return Ok("CSV imported successfully!");
             }

@@ -17,7 +17,7 @@
         public string? MentionedUserId { get; set; }
         public string Body { get; set; }
         public string CreatedAt { get; set; }
-        public int LikesCount { get; set; }
+        public int LikeCount { get; set; }
         public CommentUserDTO User { get; set; }
     }
 
@@ -27,7 +27,7 @@
         public string PostId { get; set; }
         public string Body { get; set; }
         public string CreatedAt { get; set; }
-        public int LikesCount { get; set; }
+        public int LikeCount { get; set; }
         public CommentUserDTO User { get; set; }
         public List<CommentReplyDTO> Replies { get; set; } = new List<CommentReplyDTO>();
     }

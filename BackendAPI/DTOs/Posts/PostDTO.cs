@@ -10,7 +10,7 @@
         public string Location { get; set; }
         public string Tags { get; set; }
         public string CreatedAt { get; set; }
-        public int LikesCount { get; set; }
+        public int LikeCount { get; set; }
         public bool IsItinerary { get; set; }
     }
 

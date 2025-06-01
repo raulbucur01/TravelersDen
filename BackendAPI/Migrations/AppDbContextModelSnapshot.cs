@@ -77,7 +77,7 @@ namespace BackendAPI.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("LikesCount")
+                    b.Property<int>("LikeCount")
                         .HasColumnType("int");
 
                     b.Property<string>("Mention")
@@ -124,7 +124,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("CommentLikes");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Follows", b =>
+            modelBuilder.Entity("BackendAPI.Models.Follow", b =>
                 {
                     b.Property<string>("UserIdFollowing")
                         .HasColumnType("nvarchar(450)");
@@ -215,7 +215,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("ItineraryDays");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Likes", b =>
+            modelBuilder.Entity("BackendAPI.Models.Like", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -303,7 +303,7 @@ namespace BackendAPI.Migrations
                     b.Property<bool>("IsItinerary")
                         .HasColumnType("bit");
 
-                    b.Property<int>("LikesCount")
+                    b.Property<int>("LikeCount")
                         .HasColumnType("int");
 
                     b.Property<string>("Location")
@@ -352,7 +352,7 @@ namespace BackendAPI.Migrations
                     b.ToTable("PostMedia");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Saves", b =>
+            modelBuilder.Entity("BackendAPI.Models.Save", b =>
                 {
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
@@ -531,7 +531,7 @@ namespace BackendAPI.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Follows", b =>
+            modelBuilder.Entity("BackendAPI.Models.Follow", b =>
                 {
                     b.HasOne("BackendAPI.Models.User", "FollowedUser")
                         .WithMany()
@@ -585,7 +585,7 @@ namespace BackendAPI.Migrations
                     b.Navigation("Itinerary");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Likes", b =>
+            modelBuilder.Entity("BackendAPI.Models.Like", b =>
                 {
                     b.HasOne("BackendAPI.Models.Post", "Post")
                         .WithMany()
@@ -641,7 +641,7 @@ namespace BackendAPI.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("BackendAPI.Models.Saves", b =>
+            modelBuilder.Entity("BackendAPI.Models.Save", b =>
                 {
                     b.HasOne("BackendAPI.Models.Post", "Post")
                         .WithMany()

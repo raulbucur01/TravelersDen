@@ -1,6 +1,6 @@
 ﻿namespace BackendAPI.Models
 {
-    public class Likes
+    public class Like
     {
         public string UserId { get; set; }
         public string PostId { get; set; } 

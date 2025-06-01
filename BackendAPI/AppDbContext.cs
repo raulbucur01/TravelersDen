@@ -9,9 +9,9 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users { get; set; }
     public DbSet<Post> Posts { get; set; }
-    public DbSet<Likes> Likes { get; set; }
+    public DbSet<Like> Likes { get; set; }
     public DbSet<PostMedia> PostMedia { get; set; }
-    public DbSet<Saves> Saves { get; set; }
+    public DbSet<Save> Saves { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<CommentLike> CommentLikes { get; set; }
     public DbSet<Accommodation> Accommodations { get; set; }
@@ -19,13 +19,12 @@ public class AppDbContext : DbContext
     public DbSet<TripStepMedia> TripStepMedia { get; set; }
     public DbSet<PostChange> PostChanges { get; set; }
     public DbSet<DeletedPost> DeletedPosts { get; set; }
-    public DbSet<Follows> Follows { get; set; }
+    public DbSet<Follow> Follows { get; set; }
 
     // Itinerary generator related
     public DbSet<Itinerary> Itineraries { get; set; }
     public DbSet<ItineraryDay> ItineraryDays { get; set; }
     public DbSet<ItineraryActivity> ItineraryActivities { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -71,17 +70,17 @@ public class AppDbContext : DbContext
         });
 
         // follows
-        modelBuilder.Entity<Follows>()
+        modelBuilder.Entity<Follow>()
             .HasKey(f => new { f.UserIdFollowing, f.UserIdFollowed });
 
-        modelBuilder.Entity<Follows>()
+        modelBuilder.Entity<Follow>()
             .HasOne(f => f.FollowingUser)
             .WithMany()
             .HasForeignKey(f => f.UserIdFollowing)
             .HasConstraintName("FK_Follows_UserIDFollowing")
             .OnDelete(DeleteBehavior.Restrict); // handled at delete in code
 
-        modelBuilder.Entity<Follows>()
+        modelBuilder.Entity<Follow>()
             .HasOne(f => f.FollowedUser)
             .WithMany()
             .HasForeignKey(f => f.UserIdFollowed)
@@ -102,10 +101,10 @@ public class AppDbContext : DbContext
            .OnDelete(DeleteBehavior.Cascade); 
 
         // Composite keys for Likes and Saves
-        modelBuilder.Entity<Likes>()
+        modelBuilder.Entity<Like>()
             .HasKey(l => new { l.UserId, l.PostId });
 
-        modelBuilder.Entity<Saves>()
+        modelBuilder.Entity<Save>()
             .HasKey(s => new { s.UserId, s.PostId });
 
         modelBuilder.Entity<CommentLike>()
@@ -127,14 +126,14 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         // Foreign keys for Likes
-        modelBuilder.Entity<Likes>()
+        modelBuilder.Entity<Like>()
             .HasOne(l => l.User)
             .WithMany()
             .HasForeignKey(l => l.UserId)
             .HasConstraintName("FK_Likes_UserID")
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<Likes>()
+        modelBuilder.Entity<Like>()
             .HasOne(l => l.Post)
             .WithMany()
             .HasForeignKey(l => l.PostId)
@@ -142,14 +141,14 @@ public class AppDbContext : DbContext
             .OnDelete(DeleteBehavior.Cascade);
 
         // Foreign keys for Saves
-        modelBuilder.Entity<Saves>()
+        modelBuilder.Entity<Save>()
             .HasOne(s => s.User)
             .WithMany()
             .HasForeignKey(s => s.UserId)
             .HasConstraintName("FK_Saves_UserID")
             .OnDelete(DeleteBehavior.NoAction);
 
-        modelBuilder.Entity<Saves>()
+        modelBuilder.Entity<Save>()
             .HasOne(s => s.Post)
             .WithMany()
             .HasForeignKey(s => s.PostId)

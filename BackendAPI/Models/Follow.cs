@@ -1,6 +1,6 @@
 ﻿namespace BackendAPI.Models
 {
-    public class Follows
+    public class Follow
     {
         public string UserIdFollowing { get; set; }
         public User FollowingUser { get; set; }  

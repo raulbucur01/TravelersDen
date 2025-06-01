@@ -530,7 +530,7 @@ export async function getItineraryDetails(postId: string): Promise<
 export async function getPostLikeCount(postId: string) {
   try {
     const response = await apiClient.get(`/posts/${postId}/like-count`);
-    return response?.data?.likesCount ?? 0;
+    return response?.data?.likeCount ?? 0;
   } catch (error) {
     console.log(error);
     return 0;
@@ -656,7 +656,7 @@ export async function unlikeComment(userId: string, commentId: string) {
 export async function getCommentLikeCount(commentId: string) {
   try {
     const response = await apiClient.get(`/comments/${commentId}/like-count`);
-    return response?.data?.likesCount ?? 0;
+    return response?.data?.likeCount ?? 0;
   } catch (error) {
     console.log(error);
     return 0;

@@ -91,7 +91,7 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var likes = await _commentService.GetCommentLikesAsync(id);
+                var likes = await _commentService.GetCommentLikeCountAsync(id);
 
                 return Ok(likes);
             }
@@ -148,9 +148,9 @@ namespace BackendAPI.Controllers
         {
             try
             {
-                var likesCount = await _commentService.GetCommentLikesAsync(id);
+                var likeCount = await _commentService.GetCommentLikeCountAsync(id);
 
-                return Ok(new { LikeCount = likesCount });
+                return Ok(new { LikeCount = likeCount });
             }
             catch (KeyNotFoundException ex)
             {

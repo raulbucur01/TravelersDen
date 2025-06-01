@@ -10,7 +10,7 @@
         public string? MentionedUserId { get; set; } // the id of the mentioned user
         public string Body { get; set; } // Comment text
         public DateTime CreatedAt { get; set; } // Auto-set to current time
-        public int LikesCount { get; set; } = 0; // Default is 0
+        public int LikeCount { get; set; } = 0; // Default is 0
 
         // Navigation Properties
         public Comment ParentComment { get; set; } // Self-referential relationship
