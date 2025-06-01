@@ -24,7 +24,7 @@ namespace BackendAPI.Controllers
             {
                 var newCommentPostId = await _commentService.CreateCommentAsync(commentDto);
 
-                return StatusCode(201, new { newCommentPostId });
+                return StatusCode(201, new { PostId = newCommentPostId });
             }
             catch (Exception ex)
             {
@@ -55,7 +55,7 @@ namespace BackendAPI.Controllers
             {
                 var deletedCommentPostId = await _commentService.DeleteCommentAsync(commentId);
 
-                return StatusCode(201, new { deletedCommentPostId });
+                return StatusCode(201, new { PostId = deletedCommentPostId });
             }
             catch (KeyNotFoundException ex)
             {
@@ -74,7 +74,7 @@ namespace BackendAPI.Controllers
             {
                 var updatedCommentPostId = await _commentService.EditCommentAsync(commentId, editCommentDto);
 
-                return StatusCode(201, new { updatedCommentPostId });
+                return StatusCode(201, new { PostId = updatedCommentPostId });
             }
             catch (KeyNotFoundException ex)
             {
