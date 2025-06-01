@@ -1,8 +1,4 @@
-﻿using CsvHelper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Globalization;
-using BackendAPI.Models;
+﻿using Microsoft.AspNetCore.Mvc;
 using BackendAPI.DTOs.Posts;
 using BackendAPI.Services;
 
@@ -343,6 +339,10 @@ namespace BackendAPI.Controllers
                 await _postService.ImportPostsFromCsvAsync();
 
                 return Ok("CSV imported successfully!");
+            }
+            catch (FileNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
