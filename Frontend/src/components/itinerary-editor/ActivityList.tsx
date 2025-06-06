@@ -1,13 +1,13 @@
-import { ItineraryActivity } from "@/types";
+import { GeneratedItineraryActivity } from "@/types";
 import SortableActivityItem from "./SortableActivityItem";
 
 interface ActivityListProps {
-  activities: ItineraryActivity[];
+  activities: GeneratedItineraryActivity[];
   dayId: string;
   onEditActivity: (
     dayId: string,
     activityId: string,
-    editedActivity: ItineraryActivity
+    editedActivity: GeneratedItineraryActivity
   ) => void;
   onDeleteActivity: (dayId: string, activityId: string) => void;
   onRegenerateActivity: () => void;

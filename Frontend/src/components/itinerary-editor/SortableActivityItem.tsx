@@ -1,18 +1,18 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import CustomizableDialog from "../reusable/CustomizableDialog";
-import { ItineraryActivity } from "@/types";
+import { GeneratedItineraryActivity } from "@/types";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface SortableActivityItemProps {
-  activity: ItineraryActivity;
+  activity: GeneratedItineraryActivity;
   dayId: string;
   isPlaceholder?: boolean;
   onEditActivity: (
     dayId: string,
     activityId: string,
-    editedActivity: ItineraryActivity
+    editedActivity: GeneratedItineraryActivity
   ) => void;
   onDeleteActivity: (dayId: string, activityId: string) => void;
   onRegenerateActivity: () => void;

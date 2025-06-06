@@ -236,16 +236,16 @@ export type GeneratedItinerary = {
   userId: string;
   destination: string;
   createdAt: string;
-  days: ItineraryDay[];
+  days: GeneratedItineraryDay[];
 };
 
-export type ItineraryDay = {
+export type GeneratedItineraryDay = {
   dayId: string | undefined;
   day: number;
-  activities: ItineraryActivity[];
+  activities: GeneratedItineraryActivity[];
 };
 
-export type ItineraryActivity = {
+export type GeneratedItineraryActivity = {
   activityId?: string | undefined;
   title: string;
   description: string;

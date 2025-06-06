@@ -16,7 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "../ui/textarea";
 import FileUploader from "../shared/FileUploader";
 import { ItineraryPostValidation } from "@/utilities/validation";
-import { Models } from "appwrite";
 import {
   useCreateItineraryPost,
   useGetItineraryDetails,
@@ -26,17 +25,22 @@ import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AccommodationForm from "./AccommodationForm";
 import TripStepForm from "./TripStepForm";
-import { BasePost } from "@/types";
+import { BasePost, GeneratedItinerary } from "@/types";
 import Loader from "../shared/Loader";
 import { useState } from "react";
-import { set } from "date-fns";
+import { convertActivitiesAcrossAllDaysToTripSteps } from "@/utilities/utils";
 
 type ItineraryPostFormProps = {
   post?: BasePost;
   action: "Create" | "Update";
+  generatedItineraryForPrefill?: GeneratedItinerary;
 };
 
-const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
+const ItineraryPostForm = ({
+  post,
+  action,
+  generatedItineraryForPrefill,
+}: ItineraryPostFormProps) => {
   const { mutateAsync: createPost, isPending: isLoadingCreate } =
     useCreateItineraryPost();
   const { mutateAsync: updatePost, isPending: isLoadingUpdate } =
@@ -84,11 +88,12 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
   const form = useForm<z.infer<typeof ItineraryPostValidation>>({
     resolver: zodResolver(ItineraryPostValidation),
     defaultValues: {
-      caption: post ? post?.caption : "",
-      body: post ? post?.body : "",
-      files: post ? post?.mediaUrls : [],
-      location: post ? post?.location : "",
-      tags: post ? post?.tags : "",
+      caption: post?.caption ?? generatedItineraryForPrefill?.destination ?? "",
+      body: post?.body ?? "",
+      files: post?.mediaUrls ?? [],
+      location:
+        post?.location ?? generatedItineraryForPrefill?.destination ?? "",
+      tags: post?.tags ?? generatedItineraryForPrefill?.destination ?? "",
     },
   });
 
@@ -265,7 +270,17 @@ const ItineraryPostForm = ({ post, action }: ItineraryPostFormProps) => {
         />
 
         {action === "Create" ? (
-          <TripStepForm fieldName="tripSteps" action="Create" />
+          <TripStepForm
+            fieldName="tripSteps"
+            action="Create"
+            tripSteps={
+              generatedItineraryForPrefill
+                ? convertActivitiesAcrossAllDaysToTripSteps(
+                    generatedItineraryForPrefill.days
+                  )
+                : undefined
+            }
+          />
         ) : (
           <TripStepForm
             fieldName="tripSteps"

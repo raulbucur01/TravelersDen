@@ -16,7 +16,7 @@ import {
   MediaUrl,
   GeneratedItinerary,
   NewGeneratedItineraryResponse,
-  ItineraryActivity,
+  GeneratedItineraryActivity,
   RegenerateDayActivitiesRequest,
   SimilarUser,
   User,
@@ -677,6 +677,22 @@ export async function getMapSearchResults(query: string) {
   }
 }
 
+export async function getCoordinatesForLocation(location: string) {
+  try {
+    const response = await axios.get(
+      `https://api.tomtom.com/search/2/geocode/${location}.json?key=${
+        apiConfig.tomTomApiKey
+      }&limit=${1}`
+    );
+
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+console.log(getCoordinatesForLocation("San Francisco, CA"));
+
 export async function deleteUser(userId: string) {
   try {
     const response = await apiClient.delete(`/users/${userId}`);
@@ -930,9 +946,9 @@ export async function getGeneratedItineraryById(
 
 export async function regenerateDayActivities(
   regenerateDayActivitiesRequest: RegenerateDayActivitiesRequest
-): Promise<ItineraryActivity[] | undefined> {
+): Promise<GeneratedItineraryActivity[] | undefined> {
   try {
-    const response = await apiClient.post<ItineraryActivity[]>(
+    const response = await apiClient.post<GeneratedItineraryActivity[]>(
       "/itinerary-generator/regenerate-day-activities",
       regenerateDayActivitiesRequest
     );

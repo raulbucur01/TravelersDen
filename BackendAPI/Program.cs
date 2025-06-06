@@ -111,7 +111,7 @@ var app = builder.Build();
 // Enable middleware to serve generated Swagger as a JSON endpoint
 app.UseSwagger();
 
-// Enable middleware to serve Swagger UI (HTML, JS, CSS, etc.), specifying the Swagger JSON endpoint
+// Enable middleware to serve Swagger UI, specifying the Swagger JSON endpoint
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Travel App API V1");

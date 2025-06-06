@@ -1,4 +1,10 @@
-import { DisplayedTripStep, ISuggestionInfo } from "@/types";
+import {
+  DisplayedTripStep,
+  ISuggestionInfo,
+  GeneratedItineraryActivity,
+  GeneratedItineraryDay,
+  TripStep,
+} from "@/types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { MotionProps } from "framer-motion";
@@ -373,4 +379,30 @@ export const getAllTripCoordinates = (
   tripSteps: DisplayedTripStep[]
 ): [number, number][] => {
   return tripSteps.map(({ longitude, latitude }) => [longitude, latitude]);
+};
+
+/**
+ * Converts all activities across all days into trip steps.
+ *
+ * @param {GeneratedItineraryDay[]} days - An array of itinerary days.
+ * @returns {DisplayedTripStep[]} An array of trip steps.
+ */
+export const convertActivitiesAcrossAllDaysToTripSteps = (
+  days: GeneratedItineraryDay[]
+): DisplayedTripStep[] => {
+  const allActivities: GeneratedItineraryActivity[] = days
+    .map((day) => day.activities)
+    .flat();
+
+  return allActivities.map((activity, index) => ({
+    tripStepId: "",
+    stepNumber: index + 1,
+    description: activity.title + "\n\n" + activity.description,
+    locationName: "",
+    price: 0, // or extract from somewhere if available
+    longitude: 0,
+    latitude: 0,
+    zoom: 10,
+    mediaUrls: [],
+  }));
 };

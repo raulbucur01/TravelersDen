@@ -4,7 +4,11 @@ import {
   useSaveGeneratedItineraryChanges,
 } from "@/api/tanstack-query/queriesAndMutations";
 import DayList from "@/components/itinerary-editor/DayList";
-import { GeneratedItinerary, ItineraryActivity, ItineraryDay } from "@/types";
+import {
+  GeneratedItinerary,
+  GeneratedItineraryActivity,
+  GeneratedItineraryDay,
+} from "@/types";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { v4 } from "uuid";
@@ -37,7 +41,7 @@ const ItineraryEditor = () => {
     isPending: isSavingChanges,
   } = useSaveGeneratedItineraryChanges();
 
-  const [editedItinerary, setEditedItinerary] = useState<
+  const [currentItinerary, setCurrentItinerary] = useState<
     GeneratedItinerary | undefined
   >(undefined);
   const [hoveredDayId, setHoveredDayId] = useState<string | null>(null); // for UI
@@ -47,14 +51,14 @@ const ItineraryEditor = () => {
 
   // Sync fetched itinerary into local state when it arrives
   useEffect(() => {
-    if (itinerary && !editedItinerary) {
-      setEditedItinerary(itinerary);
+    if (itinerary && !currentItinerary) {
+      setCurrentItinerary(itinerary);
     }
-  }, [itinerary, editedItinerary]);
+  }, [itinerary, currentItinerary]);
 
   if (isGettingItinerary)
     return <div className="p-4">Loading itinerary...</div>;
-  if (!editedItinerary)
+  if (!currentItinerary)
     return <div className="p-4 text-red-600">Itinerary not found.</div>;
 
   // done by parent
@@ -64,7 +68,7 @@ const ItineraryEditor = () => {
 
   const handleSaveChanges = async () => {
     try {
-      await saveGeneratedItineraryChanges(editedItinerary);
+      await saveGeneratedItineraryChanges(currentItinerary);
 
       toast({
         title: "Success",
@@ -80,25 +84,27 @@ const ItineraryEditor = () => {
   };
 
   const handleTurnIntoPost = () => {
-    console.log("NOT IMPLEMENTED");
+    navigate(`/create-post`, {
+      state: { generatedItineraryForPrefill: currentItinerary },
+    });
   };
 
   // operations inside day list
   const handleAddDay = () => {
-    const newDay: ItineraryDay = {
+    const newDay: GeneratedItineraryDay = {
       dayId: v4(),
-      day: editedItinerary.days.length + 1,
+      day: currentItinerary.days.length + 1,
       activities: [],
     };
 
-    setEditedItinerary({
-      ...editedItinerary,
-      days: [...editedItinerary.days, newDay],
+    setCurrentItinerary({
+      ...currentItinerary,
+      days: [...currentItinerary.days, newDay],
     });
   };
 
   const handleDeleteDay = (dayId: string) => {
-    const updatedDays = editedItinerary.days.filter(
+    const updatedDays = currentItinerary.days.filter(
       (day) => day.dayId !== dayId
     );
 
@@ -108,8 +114,8 @@ const ItineraryEditor = () => {
       day: idx + 1,
     }));
 
-    setEditedItinerary({
-      ...editedItinerary,
+    setCurrentItinerary({
+      ...currentItinerary,
       days: renumberedDays,
     });
   };
@@ -117,7 +123,7 @@ const ItineraryEditor = () => {
   const handleRegenerateDay = async (dayId: string) => {
     setRegeneratingDayId(dayId);
 
-    const regeneratedActivities: ItineraryActivity[] | undefined =
+    const regeneratedActivities: GeneratedItineraryActivity[] | undefined =
       await regenerateDayActivities({
         itineraryId: id || "",
         dayId: dayId,
@@ -140,7 +146,7 @@ const ItineraryEditor = () => {
       })
     );
 
-    setEditedItinerary((prev) => {
+    setCurrentItinerary((prev) => {
       if (!prev) return prev;
 
       const updatedDays = prev.days.map((day) =>
@@ -160,13 +166,16 @@ const ItineraryEditor = () => {
     setRegeneratingDayId(null);
   };
 
-  const handleAddActivity = (dayId: string, activity: ItineraryActivity) => {
+  const handleAddActivity = (
+    dayId: string,
+    activity: GeneratedItineraryActivity
+  ) => {
     const newActivity = {
       ...activity,
       activityId: v4(),
     };
 
-    const updatedDays = editedItinerary.days.map((day) => {
+    const updatedDays = currentItinerary.days.map((day) => {
       if (day.dayId !== dayId) return day;
 
       return {
@@ -175,8 +184,8 @@ const ItineraryEditor = () => {
       };
     });
 
-    setEditedItinerary({
-      ...editedItinerary,
+    setCurrentItinerary({
+      ...currentItinerary,
       days: updatedDays,
     });
   };
@@ -185,9 +194,9 @@ const ItineraryEditor = () => {
   const handleEditActivity = (
     dayId: string,
     activityId: string,
-    editedActivity: ItineraryActivity
+    editedActivity: GeneratedItineraryActivity
   ) => {
-    const updatedDays = editedItinerary.days.map((day) => {
+    const updatedDays = currentItinerary.days.map((day) => {
       if (day.dayId !== dayId) return day;
 
       const updatedActivities = day.activities.map((act) => {
@@ -202,14 +211,14 @@ const ItineraryEditor = () => {
       };
     });
 
-    setEditedItinerary({
-      ...editedItinerary,
+    setCurrentItinerary({
+      ...currentItinerary,
       days: updatedDays,
     });
   };
 
   const handleDeleteActivity = (dayId: string, activityId: string) => {
-    const updatedDays = editedItinerary.days.map((day) => {
+    const updatedDays = currentItinerary.days.map((day) => {
       if (day.dayId !== dayId) return day;
 
       const updatedActivities = day.activities.filter(
@@ -222,8 +231,8 @@ const ItineraryEditor = () => {
       };
     });
 
-    setEditedItinerary({
-      ...editedItinerary,
+    setCurrentItinerary({
+      ...currentItinerary,
       days: updatedDays,
     });
   };
@@ -235,7 +244,7 @@ const ItineraryEditor = () => {
   const handleRevertAllChanges = () => {
     if (!itinerary) return;
 
-    setEditedItinerary(itinerary);
+    setCurrentItinerary(itinerary);
   };
 
   // handle cross-container moves as you drag
@@ -260,7 +269,7 @@ const ItineraryEditor = () => {
     const itemId = active.id as string;
     if (fromId === toId) return;
 
-    setEditedItinerary((prev) => {
+    setCurrentItinerary((prev) => {
       if (!prev) return prev;
       const fromDay = prev.days.find((d) => d.dayId === fromId)!;
       const toDay = prev.days.find((d) => d.dayId === toId)!;
@@ -303,7 +312,7 @@ const ItineraryEditor = () => {
 
     // only handle same-day reordering here
     if (fromId === toId) {
-      setEditedItinerary((prev) => {
+      setCurrentItinerary((prev) => {
         if (!prev) return prev;
         const day = prev.days.find((d) => d.dayId === fromId)!;
         const oldIndex = day.activities.findIndex(
@@ -330,7 +339,7 @@ const ItineraryEditor = () => {
       {/* Destination Title */}
       <h1 className="text-3xl font-bold mb-4">Itinerary Editor</h1>
       <h2 className="text-2xl font-bold mb-8 text-dm-dark-4">
-        Destination: {editedItinerary.destination}
+        Destination: {currentItinerary.destination}
       </h2>
 
       <div className="flex flex-col md:flex-row gap-4">
@@ -342,7 +351,7 @@ const ItineraryEditor = () => {
         >
           {/* Left: Itinerary Editor */}
           <DayList
-            days={editedItinerary.days.sort((a, b) => a.day - b.day)}
+            days={currentItinerary.days.sort((a, b) => a.day - b.day)}
             onAddDay={handleAddDay}
             onAddActivity={handleAddActivity}
             onDeleteDay={handleDeleteDay}
@@ -372,7 +381,10 @@ const ItineraryEditor = () => {
             >
               Revert all changes
             </button>
-            <button className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700">
+            <button
+              className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              onClick={handleTurnIntoPost}
+            >
               Turn Into Post
             </button>
           </div>

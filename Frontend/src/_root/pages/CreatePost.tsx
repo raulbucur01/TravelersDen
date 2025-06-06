@@ -1,9 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NormalPostForm from "@/components/post/NormalPostForm";
 import ItineraryPostForm from "@/components/post/ItineraryPostForm";
+import { useLocation } from "react-router-dom";
 
 const CreatePost = () => {
   const [activeTab, setActiveTab] = useState("normal");
+
+  // used when navigating to this page from itinerary editor to turn the generated itinerary into a post by prefilling the form
+  const location = useLocation();
+  const generatedItineraryForPrefill =
+    location.state?.generatedItineraryForPrefill;
+
+  // set active tab to itinerary if generatedItineraryForPrefill is present
+  useEffect(() => {
+    if (generatedItineraryForPrefill) {
+      setActiveTab("itinerary");
+    }
+  }, [generatedItineraryForPrefill]);
 
   return (
     <div className="flex flex-1 justify-center min-h-screen">
@@ -55,7 +68,17 @@ const CreatePost = () => {
         {/* Conditional Rendering Based on Active Tab */}
         <div className="flex justify-center items-center w-full bg-dm-dark-2 p-4 rounded-b-lg">
           {activeTab === "normal" && <NormalPostForm action="Create" />}
-          {activeTab === "itinerary" && <ItineraryPostForm action="Create" />}
+
+          {activeTab === "itinerary" && !generatedItineraryForPrefill && (
+            <ItineraryPostForm action="Create" />
+          )}
+
+          {activeTab === "itinerary" && generatedItineraryForPrefill && (
+            <ItineraryPostForm
+              action="Create"
+              generatedItineraryForPrefill={generatedItineraryForPrefill}
+            />
+          )}
         </div>
       </div>
     </div>

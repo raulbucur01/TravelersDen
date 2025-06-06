@@ -58,9 +58,12 @@ const TripStepForm = ({
     }
   }, [newTripStepFiles, deletedTripStepFiles, completelyDeletedTripStepFiles]);
 
-  // Prefill the form when updating
+  // Prefill the form when updating or creating using prefilled generated tripsteps
   useEffect(() => {
-    if (action === "Update" && localTripSteps && localTripSteps.length > 0) {
+    const shouldPrefill =
+      (action === "Update" || action === "Create") && localTripSteps.length > 0;
+
+    if (shouldPrefill) {
       replace(localTripSteps);
       localTripSteps.forEach((step, index) => {
         setValue(`${fieldName}.${index}.description`, step.description);

@@ -12,7 +12,7 @@ const SearchPostListUserInfo = ({ userId }: { userId: string }) => {
       <img
         src={user.imageUrl || "/assets/icons/profile-placeholder.svg"}
         alt="creator"
-        className="w-8 h-8 rounded-full"
+        className="w-9 h-9 rounded-full bg-black"
       />
       <p className="line-clamp-1">{user.name}</p>
     </div>

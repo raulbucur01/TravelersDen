@@ -1,4 +1,4 @@
-import { ItineraryActivity, ItineraryDay } from "@/types";
+import { GeneratedItineraryActivity, GeneratedItineraryDay } from "@/types";
 import ActivityList from "./ActivityList";
 import { Button } from "../ui/button";
 import CustomizableDialog from "../reusable/CustomizableDialog";
@@ -10,11 +10,14 @@ import {
 } from "@dnd-kit/sortable";
 
 interface DayList {
-  days: ItineraryDay[];
+  days: GeneratedItineraryDay[];
   hoveredDayId: string | null;
   // called from day list
   onAddDay: () => void;
-  onAddActivity: (dayId: string, itineraryActivity: ItineraryActivity) => void;
+  onAddActivity: (
+    dayId: string,
+    itineraryActivity: GeneratedItineraryActivity
+  ) => void;
   onDeleteDay: (dayId: string) => void;
   onRegenerateDay: (dayId: string) => void;
   regeneratingDayId: string | null;
@@ -22,7 +25,7 @@ interface DayList {
   onEditActivity: (
     dayId: string,
     activityId: string,
-    editedActivity: ItineraryActivity
+    editedActivity: GeneratedItineraryActivity
   ) => void;
   onDeleteActivity: (dayId: string, activityId: string) => void;
   onRegenerateActivity: () => void;
@@ -63,7 +66,7 @@ const DayList = ({
     }
 
     // create new activity and send to parent
-    const newActivity: ItineraryActivity = {
+    const newActivity: GeneratedItineraryActivity = {
       title: newActivityTitle,
       description: newActivityDescription,
       location: newActivityLocation,
