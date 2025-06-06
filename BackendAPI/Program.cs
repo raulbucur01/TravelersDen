@@ -85,7 +85,7 @@ builder.Services.AddScoped<PostService>();
 
 builder.Services.AddHttpClient<FastApiService>(client =>
 {
-    client.Timeout = TimeSpan.FromMinutes(10);  // adjust as needed
+    client.Timeout = TimeSpan.FromMinutes(60);  // adjust as needed
 });
 
 // Add services to the container.
