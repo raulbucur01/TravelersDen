@@ -52,10 +52,10 @@ const ItineraryPostForm = ({
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [newFiles, setNewFiles] = useState<File[]>([]);
+  const [, setNewFiles] = useState<File[]>([]);
   const [deletedFiles, setDeletedFiles] = useState<string[]>([]);
 
-  const [newTripStepFiles, setNewTripStepFiles] = useState<File[]>([]);
+  const [, setNewTripStepFiles] = useState<File[]>([]);
   const [deletedTripStepFiles, setDeletedTripStepFiles] = useState<string[]>(
     []
   );

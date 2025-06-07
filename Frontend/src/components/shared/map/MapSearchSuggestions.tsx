@@ -24,7 +24,7 @@ const MapSearchSuggestions = ({
   };
 
   return (
-    <div className="absolute top-13 left-0 w-full max-h-96 bg-dm-dark border border-dm-secondary rounded-b-lg overflow-auto shadow-lg z-10 custom-scrollbar">
+    <div className="absolute top-13 left-0 w-full max-h-96 bg-dm-dark bg-opacity-95 border border-dm-secondary rounded-b-lg overflow-auto shadow-lg z-10 custom-scrollbar">
       {suggestions.length === 0 ? (
         <p className="p-4 text-dm-light">No suggestions available</p>
       ) : (

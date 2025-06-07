@@ -9,7 +9,7 @@ type TripSummaryDisplayProps = {
 const TripSummaryDisplay = ({ tripSteps }: TripSummaryDisplayProps) => {
   return (
     <div className="flex w-[87%] h-[500px] border border-dm-dark overflow-hidden">
-      <div className="w-full">
+      <div className="w-full h-full relative">
         <Map
           width="100%"
           height="100%"

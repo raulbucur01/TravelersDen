@@ -194,6 +194,21 @@ const Map = ({
     }
   }, []);
 
+  // Ensures the map resizes correctly when the parent container becomes visible
+  useEffect(() => {
+    if (!map || !mapElement.current) return;
+
+    const resizeObserver = new ResizeObserver(() => {
+      map.resize();
+    });
+
+    resizeObserver.observe(mapElement.current);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [map]);
+
   // for update and create mode to keep the zoom state
   useEffect(() => {
     if (onZoomChanged) {
@@ -357,7 +372,6 @@ const Map = ({
     if (map) {
       // Update the map's center
       map.flyTo({
-        // Cast to `any` or a more appropriate type if necessary
         ...({
           center: [longitude, latitude],
           essential: true, // Ensure smooth transitions
