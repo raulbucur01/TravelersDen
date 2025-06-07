@@ -3,11 +3,11 @@ import {
   ISuggestionInfo,
   GeneratedItineraryActivity,
   GeneratedItineraryDay,
-  TripStep,
 } from "@/types";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { MotionProps } from "framer-motion";
+import { getCoordinatesForLocation } from "@/api/api";
 
 /**
  *  Extracts an error message from an Axios error object.
@@ -382,27 +382,64 @@ export const getAllTripCoordinates = (
 };
 
 /**
+ * Cleans up an address string for geocoding.
+ *
+ * @param {string} address - The address string to clean up.
+ * @returns {string} The cleaned up address string.
+ */
+function cleanAddressForGeocoding(address: string): string {
+  return address
+    .replace(/\bs\/n\b/gi, "") // remove "s/n" (case-insensitive, word-boundary safe)
+    .replace(/\s{2,}/g, " ") // collapse extra spaces
+    .trim();
+}
+
+/**
  * Converts all activities across all days into trip steps.
  *
- * @param {GeneratedItineraryDay[]} days - An array of itinerary days.
- * @returns {DisplayedTripStep[]} An array of trip steps.
+ * @param {GeneratedItineraryDay[]} days - An array of itinerary days. Each day contains an array of activities.
+ * @returns {Promise<DisplayedTripStep[]>} A promise that resolves to an array of trip steps with geocoded coordinates.
  */
-export const convertActivitiesAcrossAllDaysToTripSteps = (
+export const convertActivitiesAcrossAllDaysToTripSteps = async (
   days: GeneratedItineraryDay[]
-): DisplayedTripStep[] => {
+): Promise<DisplayedTripStep[]> => {
   const allActivities: GeneratedItineraryActivity[] = days
     .map((day) => day.activities)
     .flat();
 
-  return allActivities.map((activity, index) => ({
-    tripStepId: "",
-    stepNumber: index + 1,
-    description: activity.title + "\n\n" + activity.description,
-    locationName: "",
-    price: 0, // or extract from somewhere if available
-    longitude: 0,
-    latitude: 0,
-    zoom: 10,
-    mediaUrls: [],
-  }));
+  const tripSteps = await Promise.all(
+    allActivities.map(async (activity, index) => {
+      let latitude = 0;
+      let longitude = 0;
+
+      try {
+        const response = await getCoordinatesForLocation(
+          cleanAddressForGeocoding(activity.location)
+        );
+
+        const position = response?.results[0]?.position;
+
+        if (position) {
+          latitude = position.lat;
+          longitude = position.lon;
+        }
+      } catch (error) {
+        console.warn("Geocoding failed for:", activity.title);
+      }
+
+      return {
+        tripStepId: "",
+        stepNumber: index + 1,
+        description: activity.title + "\n\n" + activity.description,
+        locationName: "",
+        price: 0,
+        longitude: longitude,
+        latitude: latitude,
+        zoom: 15,
+        mediaUrls: [],
+      };
+    })
+  );
+
+  return tripSteps;
 };

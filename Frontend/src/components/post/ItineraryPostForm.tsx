@@ -25,9 +25,9 @@ import { useUserContext } from "@/context/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import AccommodationForm from "./AccommodationForm";
 import TripStepForm from "./TripStepForm";
-import { BasePost, GeneratedItinerary } from "@/types";
+import { BasePost, DisplayedTripStep, GeneratedItinerary } from "@/types";
 import Loader from "../shared/Loader";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { convertActivitiesAcrossAllDaysToTripSteps } from "@/utilities/utils";
 
 type ItineraryPostFormProps = {
@@ -62,6 +62,26 @@ const ItineraryPostForm = ({
 
   const [completelyDeletedTripStepFiles, setCompletelyDeletedTripStepFiles] =
     useState<string[]>([]);
+
+  const [tripStepsForPrefill, setTripStepsForPrefill] = useState<
+    DisplayedTripStep[] | undefined
+  >(undefined);
+
+  // this useEffect is used to set the trip steps to prefill by converting all activities across all days to trip steps
+  // (when we are creating a new itinerary post from a generated itinerary)
+  useEffect(() => {
+    const fetchTripSteps = async () => {
+      if (generatedItineraryForPrefill) {
+        const tripSteps = await convertActivitiesAcrossAllDaysToTripSteps(
+          generatedItineraryForPrefill.days
+        );
+
+        setTripStepsForPrefill(tripSteps);
+      }
+    };
+
+    fetchTripSteps();
+  }, [generatedItineraryForPrefill]);
 
   const handleMediaUpdate = (newFiles: File[], deletedFiles: string[]) => {
     setNewFiles(newFiles);
@@ -173,6 +193,18 @@ const ItineraryPostForm = ({
   if (action === "Update" && (isGettingItineraryData || !itineraryData))
     return <Loader />;
 
+  if (
+    action === "Create" &&
+    generatedItineraryForPrefill &&
+    !tripStepsForPrefill
+  ) {
+    return (
+      <div className="w-full flex justify-center py-10">
+        <div className="loader-spinner w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-2" />
+      </div>
+    );
+  }
+
   return (
     <Form {...form}>
       <form
@@ -273,13 +305,7 @@ const ItineraryPostForm = ({
           <TripStepForm
             fieldName="tripSteps"
             action="Create"
-            tripSteps={
-              generatedItineraryForPrefill
-                ? convertActivitiesAcrossAllDaysToTripSteps(
-                    generatedItineraryForPrefill.days
-                  )
-                : undefined
-            }
+            tripSteps={tripStepsForPrefill}
           />
         ) : (
           <TripStepForm

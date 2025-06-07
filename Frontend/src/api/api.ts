@@ -691,8 +691,6 @@ export async function getCoordinatesForLocation(location: string) {
   }
 }
 
-console.log(getCoordinatesForLocation("San Francisco, CA"));
-
 export async function deleteUser(userId: string) {
   try {
     const response = await apiClient.delete(`/users/${userId}`);
