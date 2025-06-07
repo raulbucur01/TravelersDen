@@ -180,7 +180,7 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
                 <Input
                   type="text"
                   className="shad-input"
-                  placeholder="Art, Expression, Learn"
+                  placeholder="e.g. Madrid, Exploring, Spain"
                   {...field}
                 />
               </FormControl>
@@ -191,14 +191,14 @@ const NormalPostForm = ({ post, action }: NormalPostFormProps) => {
         <div className="flex gap-4 items-center justify-end">
           <Button
             type="button"
-            className="shad-button-dark-4"
+            className="bg-dm-dark text-dm-light w-28 mt-6 hover:bg-dm-red"
             onClick={() => navigate("/")}
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            className="shad-button_primary whitespace-nowrap"
+            className="bg-dm-dark text-dm-light w-28 mt-6 hover:bg-dm-secondary"
             disabled={isLoadingCreate || isLoadingUpdate}
           >
             {isLoadingCreate || isLoadingUpdate

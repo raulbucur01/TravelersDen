@@ -255,20 +255,6 @@ const TripStepForm = ({
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={control}
-              name={`${fieldName}.${index}.locationName`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} className="shad-input" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </div>
         </div>
       ))}

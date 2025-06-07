@@ -4,7 +4,6 @@ import { useUserContext } from "@/context/AuthContext";
 import PostStats from "../shared/PostStats";
 import { BasePost } from "@/types";
 import { useGetUserById } from "@/api/tanstack-query/queriesAndMutations";
-import Loader from "../shared/Loader";
 import MediaCarousel from "../reusable/MediaCarousel";
 import ExpandableText from "../reusable/ExpandableText";
 
@@ -22,10 +21,10 @@ const PostCard = ({ post }: PostCardProps) => {
     return;
   }
 
-  // Show a loader or placeholder while fetching the user
   if (isPostCreatorLoading) {
-    return <Loader />;
+    return;
   }
+
   // Convert tags into an array
   const separatedPostTags = post.tags?.replace(/ /g, "").split(",") || [];
 

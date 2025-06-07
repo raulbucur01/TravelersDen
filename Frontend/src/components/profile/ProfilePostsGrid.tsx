@@ -39,24 +39,30 @@ const ProfilePostsGrid = ({
 
   return (
     <div className="flex justify-center">
-      <div className="grid grid-cols-3 gap-4 p-4 max-w-[75%] w-full">
-        {displayedPosts.map((post, index) => (
-          <Link to={`/post-details/${post.postId}`} key={index}>
-            <div className="relative group">
-              <img
-                src={post.firstMediaUrl}
-                alt={`Post ${index}`}
-                className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            </div>
-          </Link>
-        ))}
-
-        {/* Infinite Scroll Trigger */}
-        <div ref={ref} className="text-center col-span-3">
-          {isFetchingNextPage && <Loader />}
+      {displayedPosts.length === 0 ? (
+        <div className="py-10 text-center text-dm-light-2 text-lg font-medium">
+          Nothing to see here!
         </div>
-      </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-4 p-4 max-w-[75%] w-full">
+          {displayedPosts.map((post, index) => (
+            <Link to={`/post-details/${post.postId}`} key={index}>
+              <div className="relative group">
+                <img
+                  src={post.firstMediaUrl}
+                  alt={`Post ${index}`}
+                  className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+            </Link>
+          ))}
+
+          {/* Infinite Scroll Trigger */}
+          <div ref={ref} className="text-center col-span-3">
+            {isFetchingNextPage && <Loader />}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

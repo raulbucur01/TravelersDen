@@ -1,7 +1,7 @@
 const Loader = () => {
   return (
     <div className="flex-center w-full h-full">
-      <img src="/assets/icons/loader.svg" alt="loader" width={24} height={24} />
+      <div className="loader-spinner w-[25px] h-[25px] border-4 border-white border-t-transparent rounded-full animate-spin mb-2" />
     </div>
   );
 };

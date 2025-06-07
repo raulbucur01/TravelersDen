@@ -331,7 +331,7 @@ body {
   }
 
   .shad-input {
-    @apply h-12 bg-dm-dark border-none placeholder:text-dm-secondary focus-visible:ring-1 focus-visible:ring-offset-1 ring-dm-secondary !important;
+    @apply h-12 bg-dm-dark border-none placeholder:text-dm-light-2 focus-visible:ring-1 focus-visible:ring-offset-1 ring-dm-secondary !important;
   }
 
   .shad-textarea {
@@ -343,7 +343,7 @@ body {
   }
 
   .itinerary-textarea {
-    @apply h-20 bg-dm-dark rounded-xl border-none custom-scrollbar focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-dm-secondary !important;
+    @apply h-20 bg-dm-dark rounded-xl placeholder:text-dm-light-2 border-none custom-scrollbar focus-visible:ring-1 focus-visible:ring-offset-1 ring-offset-dm-secondary !important;
   }
 
   /* Button */
@@ -352,7 +352,7 @@ body {
   }
 
   .shad-button_dark_4 {
-    @apply h-12 bg-dm-secondary px-5 text-light-1 flex gap-2 !important;
+    @apply h-12 bg-dm-dark-3 px-5 text-light-1 flex gap-2 !important;
   }
 
   .shad-button_ghost {

@@ -208,7 +208,7 @@ const FileUploader = ({
           <h3 className="base-medium text-dm-light mb-2 mt-6">
             Drag photos or videos here
           </h3>
-          <p className="text-dm-secondary small-regular mb-6">
+          <p className="text-dm-light-2 small-regular mb-6">
             SVG, PNG, JPG, MP4 (up to 6)
           </p>
 
