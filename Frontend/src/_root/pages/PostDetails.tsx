@@ -126,7 +126,7 @@ const PostDetails = () => {
         {post?.isItinerary && !isAtTop && (
           <button
             onClick={handleScrollToTop}
-            className="sticky top-5 right-0 text-dm-dark-4 z-10"
+            className="sticky top-5 right-0 text-dm-light-3 z-10"
           >
             <ChevronUpCircle />
           </button>
@@ -160,7 +160,7 @@ const PostDetails = () => {
                     <p className="base-medium lg:body-bold text-dm-light">
                       {postCreator.name}
                     </p>
-                    <div className="flex-center gap-2 text-dm-dark-4">
+                    <div className="flex-center gap-2 text-dm-light-3">
                       <p className="subtle-semibold lg:small-regular ">
                         {formatToRelativeDate(post!.createdAt)}
                       </p>
@@ -229,7 +229,7 @@ const PostDetails = () => {
                 {separatedPostTags[0] && (
                   <ul className="flex gap-1 mt-2 self-start">
                     {separatedPostTags.map((tag: string) => (
-                      <li key={tag} className="text-dm-dark-4">
+                      <li key={tag} className="text-dm-light-3">
                         #{tag}
                       </li>
                     ))}
@@ -252,7 +252,7 @@ const PostDetails = () => {
         {post?.isItinerary && !isAtBottom && (
           <button
             onClick={handleScrollToBottom}
-            className="sticky bottom-5 left-0 text-dm-dark-4 z-10"
+            className="sticky bottom-5 left-0 text-dm-light-3 z-10"
           >
             <ChevronDownCircle />
           </button>

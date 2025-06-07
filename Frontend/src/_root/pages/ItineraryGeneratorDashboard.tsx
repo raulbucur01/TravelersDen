@@ -63,21 +63,28 @@ const ItineraryGeneratorDashboard = () => {
         AI Trip Itinerary Generator
       </h1>
       {/* Generator Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-        <div className="space-y-4">
+      <div className="flex flex-col md:flex-row items-stretch gap-12">
+        <div className="md:w-[48%] space-y-4 flex flex-col justify-center">
           <h1 className="text-3xl font-bold text-dm-light-2">
             Plan Your Perfect Trip
           </h1>
           <p className="text-lg text-dm-light">
-            Generate your personalized travel itinerary with the help of AI.
-            Select a destination, how many days you want to spend there, pick
-            your preferences and let us handle the planning!
+            Say goodbye to planning stress! <br />
+            Tell us where you want to adventure yourself, how long you plan to
+            stay, and what you love — our AI will craft the perfect trip
+            itinerary for you.
           </p>
         </div>
-        <GeneratorForm
-          onGenerate={handleGenerateItinerary}
-          isLoading={isGenerating}
-        />
+
+        {/* Divider */}
+        <div className="hidden md:block w-[1px] bg-dm-dark-4" />
+
+        <div className="md:w-[48%] space-y-4 flex flex-col justify-center">
+          <GeneratorForm
+            onGenerate={handleGenerateItinerary}
+            isLoading={isGenerating}
+          />
+        </div>
       </div>
 
       {/* History Section */}

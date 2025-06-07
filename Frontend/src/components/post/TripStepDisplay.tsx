@@ -37,7 +37,7 @@ const TripStepDisplay = ({ tripSteps }: TripStepDisplayProps) => {
             </div>
 
             <div className="grid grid-cols-2 gap-x-4 text-left mt-2">
-              <p className="font-medium text-dm-dark-4">
+              <p className="font-medium text-dm-light-3">
                 Price: {tripStep.price}
               </p>
             </div>

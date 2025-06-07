@@ -80,8 +80,10 @@ const Comment = ({
           {/* User Name and Username */}
           <div>
             <Link to={`/profile/${data.user.userId}`}>
-              <span className="text-dm-light font-bold">{data.user.name}</span>
-              <span className="text-dm-dark-4 text-sm ml-2">
+              <span className="text-dm-light font-bold text-lg">
+                {data.user.name}
+              </span>
+              <span className="text-dm-light-3 text-md ml-2">
                 @{data.user.username}
               </span>
             </Link>
@@ -89,17 +91,17 @@ const Comment = ({
         </div>
 
         {/* Date Section */}
-        <span className="text-dm-dark-4 text-sm mr-5">
+        <span className="text-dm-light-3 text-md mr-5">
           {formatToRelativeDate(data.createdAt)}
         </span>
       </div>
 
       {/* Comment Body */}
       <div className="mt-2 mr-5">
-        <p className="text-dm-light text-sm whitespace-pre-wrap break-words leading-relaxed">
+        <p className="text-dm-light text-lg whitespace-pre-wrap break-words leading-relaxed">
           {reply?.mention && (
             <Link to={`/profile/${reply.mentionedUserId}`}>
-              <span className="text-dm-dark-4">{reply.mention} </span>
+              <span className="text-dm-light-3">{reply.mention} </span>
             </Link>
           )}
           {data.body}
@@ -124,7 +126,7 @@ const Comment = ({
             className="hover:text-dm-light text-dm-dark-4"
             onClick={handleEditView}
           >
-            <img src="/assets/icons/edit.svg" alt="edit" className="w-4 h-4" />
+            <img src="/assets/icons/edit.svg" alt="edit" className="w-5 h-5" />
           </button>
         )}
 
@@ -137,7 +139,7 @@ const Comment = ({
               <img
                 src="/assets/icons/delete.svg"
                 alt="delete"
-                className="w-4 h-4"
+                className="w-5 h-5"
               />
             )}
           </button>

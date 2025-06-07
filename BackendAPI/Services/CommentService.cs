@@ -67,10 +67,10 @@ namespace BackendAPI.Services
                                 LikeCount = reply.LikeCount,
                                 User = new CommentUserDTO
                                 {
-                                    UserId = c.User.UserId,
-                                    Username = c.User.Username,
-                                    ImageUrl = c.User.ImageUrl,
-                                    Name = c.User.Name
+                                    UserId = reply.User.UserId,
+                                    Username = reply.User.Username,
+                                    ImageUrl = reply.User.ImageUrl,
+                                    Name = reply.User.Name
                                 }
                             })
                             .ToList()

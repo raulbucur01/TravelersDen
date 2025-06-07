@@ -72,19 +72,19 @@ const AccommodationsDisplay = ({
                 <p className="text-dm-light font-medium">
                   Total Price: ${accommodations[currentIndex].totalPrice}
                 </p>
-                <p className="text-sm text-dm-dark-4">
+                <p className="text-sm text-dm-light-3">
                   (${accommodations[currentIndex].pricePerNight} per night)
                 </p>
               </div>
 
               {/* Date Information */}
               <div className="grid grid-cols-2 gap-x-4 text-left mt-2">
-                <p className="font-medium text-dm-dark-4">Check-in:</p>
+                <p className="font-medium text-dm-light-3">Check-in:</p>
                 <p className="text-dm-light">
                   {formatToLongDate(accommodations[currentIndex].startDate)}
                 </p>
 
-                <p className="font-medium text-dm-dark-4">Check-out:</p>
+                <p className="font-medium text-dm-light-3">Check-out:</p>
                 <p className="text-dm-light">
                   {formatToLongDate(accommodations[currentIndex].endDate)}
                 </p>

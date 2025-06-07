@@ -59,7 +59,7 @@ const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
   };
 
   return (
-    <div className="relative bg-dm-dark shadow-lg rounded-2xl p-6">
+    <div className="relative bg-dm-transparent rounded-2xl p-6">
       {isLoading && (
         <div className="absolute inset-0 z-10 bg-black/60 backdrop-blur-[1px] flex flex-col items-center justify-center text-white text-center">
           <div className="loader-spinner w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin mb-4" />
@@ -83,7 +83,7 @@ const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
             type="text"
             value={destination}
             onChange={(e) => setDestination(e.target.value)}
-            className="w-full p-2 border rounded bg-dm-dark"
+            className="w-full p-2 border rounded-lg bg-dm-dark border-none placeholder:text-dm-dark-4 focus:outline-none"
             placeholder="e.g. Madrid"
           />
         </div>
@@ -96,7 +96,7 @@ const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
             type="number"
             value={isNaN(days) ? "" : days}
             onChange={(e) => setDays(parseInt(e.target.value))}
-            className="w-full p-2 border rounded bg-dm-dark"
+            className="w-full p-2 border rounded-lg bg-dm-dark border-none focus:outline-none"
           />
         </div>
 
@@ -114,12 +114,14 @@ const GeneratorForm = ({ onGenerate, isLoading }: GeneratorFormProps) => {
           />
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
-        >
-          Generate Itinerary
-        </button>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="w-[35%] mt-2 bg-dm-dark-3 text-white py-2 rounded hover:bg-dm-secondary transition"
+          >
+            Generate Itinerary
+          </button>
+        </div>
       </form>
     </div>
   );

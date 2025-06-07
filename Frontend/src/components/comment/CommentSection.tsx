@@ -20,7 +20,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
       {/* Header Section */}
       <div className="space-y-2">
         <h2 className="text-2xl font-semibold text-dm-light">Comments</h2>
-        <p className="text-sm text-dm-dark-4">
+        <p className="text-md text-dm-light-3">
           Join the discussion and share your thoughts!
         </p>
       </div>
@@ -46,7 +46,7 @@ const CommentSection = ({ postId }: CommentSectionProps) => {
             />
           ))
         ) : (
-          <p className="text-center text-dm-dark-4 italic">
+          <p className="text-center text-dm-light-3 italic">
             No comments yet. Be the first to comment!
           </p>
         )}

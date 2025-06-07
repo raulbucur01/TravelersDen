@@ -117,7 +117,7 @@ const CommentForm = ({
         {/* Textarea */}
         <Textarea
           ref={textareaRef}
-          className="bg-dm-dark-2 text-dm-light max-h-6 placeholder:text-dm-dark-4 flex-grow border-none focus:outline-none focus:ring-0 resize-none overflow-hidden"
+          className="bg-dm-dark-2 text-dm-light max-h-6 placeholder:text-dm-light-3 flex-grow border-none focus:outline-none focus:ring-0 resize-none overflow-hidden"
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder={"Add a reply..."}
