@@ -390,6 +390,9 @@ export const getAllTripCoordinates = (
 function cleanAddressForGeocoding(address: string): string {
   return address
     .replace(/\bs\/n\b/gi, "") // remove "s/n" (case-insensitive, word-boundary safe)
+    .replace(/\d{1,5}/g, "") // remove numbers
+    .replace(/[,]{2,}/g, ",") // collapse multiple commas into one
+    .replace(/\s{2,}/g, " ") // collapse multiple spaces into one
     .replace(/\s{2,}/g, " ") // collapse extra spaces
     .trim();
 }
