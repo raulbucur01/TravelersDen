@@ -15,7 +15,7 @@ const AuthLayout = () => {
       />
 
       <section className="absolute inset-0 flex justify-center items-center z-10">
-        <div className="sm:w-420 flex-center flex-col bg-black bg-opacity-70 text-white p-6 rounded-lg shadow-lg">
+        <div className="sm:w-420 flex-center flex-col bg-black bg-opacity-75 text-white p-6 rounded-lg shadow-lg">
           <Outlet />
         </div>
       </section>

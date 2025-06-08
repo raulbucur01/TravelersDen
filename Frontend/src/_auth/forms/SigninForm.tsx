@@ -80,7 +80,10 @@ const SigninForm = () => {
             )}
           />
 
-          <Button type="submit" className="shad-button_primary mt-4">
+          <Button
+            type="submit"
+            className="mt-4 w-40 bg-dm-dark-3 text-dm-light mx-auto hover:bg-dm-dark-4"
+          >
             {isSigningIn ? (
               <div className="flex-center gap-2">
                 <Loader />
@@ -95,7 +98,7 @@ const SigninForm = () => {
             Don't have an account?
             <Link
               to="/sign-up"
-              className="text-primary-500 text-small-semibold ml-1 hover:underline"
+              className="text-dm-light-3 text-small-semibold ml-1 hover:underline"
             >
               Sign up
             </Link>

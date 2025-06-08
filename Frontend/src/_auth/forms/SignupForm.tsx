@@ -15,9 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { SignupValidation } from "@/utilities/validation";
 import Loader from "@/components/shared/Loader";
+import { useState } from "react";
 
 const SignupForm = () => {
   const { mutateAsync: register, isPending: isCreatingAccount } = useRegister();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   // 1. Define your form.
   const form = useForm<z.infer<typeof SignupValidation>>({
@@ -27,12 +31,18 @@ const SignupForm = () => {
       username: "",
       email: "",
       password: "",
+      confirmPassword: "",
     },
   });
 
   // 2. Define a submit handler.
   async function onSubmit(values: z.infer<typeof SignupValidation>) {
-    await register(values); // errors handled in useRegister
+    await register({
+      name: values.name,
+      username: values.username,
+      email: values.email,
+      password: values.password,
+    }); // errors handled in useRegister
   }
 
   return (
@@ -90,6 +100,7 @@ const SignupForm = () => {
               </FormItem>
             )}
           />
+
           <FormField
             control={form.control}
             name="password"
@@ -97,14 +108,73 @@ const SignupForm = () => {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type="password" className="shad-input" {...field} />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      className="shad-input pr-10"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2"
+                    >
+                      <img
+                        src={
+                          showPassword
+                            ? "/assets/icons/show.png"
+                            : "/assets/icons/invisible.png"
+                        }
+                        alt="Toggle visibility"
+                        className="w-5 h-5"
+                      />
+                    </button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="shad-button_primary mt-4">
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showConfirmPassword ? "text" : "password"}
+                      className="shad-input pr-10"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2"
+                    >
+                      <img
+                        src={
+                          showConfirmPassword
+                            ? "/assets/icons/show.png"
+                            : "/assets/icons/invisible.png"
+                        }
+                        alt="Toggle visibility"
+                        className="w-5 h-5"
+                      />
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button
+            type="submit"
+            className="mt-4 w-40 bg-dm-dark-3 text-dm-light mx-auto hover:bg-dm-dark-4"
+          >
             {isCreatingAccount ? (
               <div className="flex-center gap-2">
                 <Loader />
@@ -119,7 +189,7 @@ const SignupForm = () => {
             Already have an account?
             <Link
               to="/sign-in"
-              className="text-primary-500 text-small-semibold ml-1 hover:underline"
+              className="text-dm-light-3 text-small-semibold ml-1 hover:underline"
             >
               Sign in
             </Link>

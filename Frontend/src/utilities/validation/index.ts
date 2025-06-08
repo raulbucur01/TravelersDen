@@ -1,15 +1,17 @@
 import { z } from "zod";
 
-export const SignupValidation = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters" }),
-  username: z
-    .string()
-    .min(2, { message: "Username must be at least 2 characters" }),
-  email: z.string().email(),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters" }),
-});
+export const SignupValidation = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    username: z.string().min(1, "Username is required"),
+    email: z.string().email("Invalid email"),
+    password: z.string().min(6, "Password must be at least 6 characters"),
+    confirmPassword: z.string().min(6, "Confirm your password"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
 
 export const SigninValidation = z.object({
   email: z.string().email(),
