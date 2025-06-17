@@ -94,7 +94,7 @@ const DayList = ({
             <CustomizableDialog
               trigger={
                 <Button
-                  className="px-2 py-1 bg-green-600 text-white text-xl rounded hover:bg-green-700 w-10 h-10"
+                  className="flex items-center justify-center bg-transparent hover:bg-transparent rounded-full text-dm-accent text-4xl w-10 h-10"
                   onClick={() => handleOpenAddDialogSetup(day.dayId!)}
                   disabled={regeneratingDayId === day.dayId}
                 >
@@ -134,14 +134,14 @@ const DayList = ({
               </div>
             </CustomizableDialog>
             <Button
-              className="px-2 py-1 bg-blue-600 text-white text-xl rounded hover:bg-blue-700 w-10 h-10"
+              className="px-2 py-1 bg-transparent hover:bg-transparent text-white text-xl rounded-full w-9 h-9"
               onClick={() => onRegenerateDay(day.dayId!)}
               disabled={regeneratingDayId === day.dayId}
             >
-              🔄
+              <img src="/assets/icons/refresh.png" alt="refresh" />
             </Button>
             <Button
-              className="px-2 py-1 bg-dm-dark text-white text-xl rounded hover:bg-blue-700 w-10 h-10"
+              className="px-2 py-1 bg-transparent hover:bg-transparent text-white text-xl rounded-full w-10 h-10"
               onClick={() => onDeleteDay(day.dayId!)}
               disabled={regeneratingDayId === day.dayId}
             >
@@ -200,7 +200,7 @@ const DayList = ({
       {/* Add Day Button */}
       <div className="flex justify-center">
         <button
-          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          className="mt-4 px-4 py-2 bg-dm-dark-3 text-white rounded hover:bg-dm-secondary"
           onClick={onAddDay}
         >
           + Add Day

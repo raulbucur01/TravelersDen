@@ -509,3 +509,36 @@ body {
 .react-select__indicator-separator {
   background-color: #659d8e !important;
 }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.animate-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 10s linear infinite;
+}
+
+.travel-logo {
+  font-family: "Playfair Display", serif;
+  font-size: 2.2rem;
+  color: #9ad5c5;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px #355b6e;
+}
+
+.travel-logo-sidebar {
+  font-family: "Playfair Display", serif;
+  font-size: 1.6rem;
+  color: #9ad5c5;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-shadow: 2px 2px #355b6e;
+}

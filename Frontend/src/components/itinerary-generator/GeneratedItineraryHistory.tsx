@@ -34,24 +34,24 @@ const GeneratedItineraryHistory = ({
         >
           <div>
             <h3 className="text-xl font-bold">{item.destination}</h3>
-            <p className="text-sm text-dm-light-2">
-              Created: {formatToRelativeDate(item.createdAt)}
+            <p className="text-md text-dm-light-2 mt-2">
+              Created {formatToRelativeDate(item.createdAt)}
             </p>
-            <ul className="mt-2 text-sm text-dm-light list-disc list-inside">
-              {item.days.slice(0, 1).map((day) => (
-                <li key={day.day}>
-                  Day {day.day}:{" "}
-                  {day.activities.map((act) => act.title).join(", ")}
-                  {item.days.length > 1 ? " ..." : ""}
-                </li>
-              ))}
-            </ul>
+            <div className="overflow-hidden whitespace-nowrap mt-2 text-md text-dm-light">
+              <div className="inline-block animate-marquee">
+                Activities:
+                <span className="ml-2" />
+                {item.days
+                  .flatMap((day) => day.activities.map((act) => `${act.title}`))
+                  .join(" · ")}
+              </div>
+            </div>
           </div>
-          <div className="mt-4 md:mt-0 space-x-2">
+          <div className="mt-2 md:mt-0 flex items-center space-x-2">
             {/* View / Edit button */}
             <button
               onClick={() => onViewEdit(item.itineraryId)}
-              className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition"
+              className="px-4 py-1 bg-dm-dark-3 text-white rounded hover:bg-dm-secondary transition"
             >
               View / Edit
             </button>

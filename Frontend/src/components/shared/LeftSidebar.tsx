@@ -29,12 +29,9 @@ const LeftSidebar = () => {
     <nav className="leftsidebar">
       <div className="flex flex-col gap-8">
         <Link to="/" className="flex gap-3 items-center">
-          <img
-            src="/assets/images/logo.svg"
-            alt="logo"
-            width={170}
-            height={20}
-          />
+          <h1 className="text-3xl travel-logo-sidebar tracking-wide text-dm-light-3 uppercase drop-shadow-md mt-1 mb-1">
+            Traveler’s Den
+          </h1>
         </Link>
 
         <Link

@@ -370,29 +370,27 @@ const ItineraryEditor = () => {
           {/* Top buttons */}
           <div className="space-y-4">
             <button
-              className="w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              className="w-[70%] px-4 py-2 bg-dm-dark-3 text-white rounded hover:bg-dm-secondary"
               onClick={handleSaveChanges}
             >
               Save Changes
             </button>
             <button
-              className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              className="w-[70%] px-4 py-2 bg-dm-dark-3 text-white rounded hover:bg-dm-secondary"
               onClick={handleRevertAllChanges}
             >
               Revert all changes
             </button>
             <button
-              className="w-full px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+              className="w-[70%] px-4 py-2 bg-dm-dark-3 text-white rounded hover:bg-dm-secondary"
               onClick={handleTurnIntoPost}
             >
               Turn Into Post
             </button>
+            <button className="w-[70%] px-4 py-2 bg-dm-red text-white rounded hover:bg-dm-red-2 mt-4">
+              Delete Itinerary
+            </button>
           </div>
-
-          {/* Bottom button */}
-          <button className="w-full px-4 py-2 bg-dm-red text-white rounded hover:bg-dm-red-2 mt-4">
-            Delete Itinerary
-          </button>
         </div>
       </div>
     </div>
