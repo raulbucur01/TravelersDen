@@ -56,7 +56,7 @@ def compute_user_similarity_scores(
 
             posts_b = users_and_their_posts[user_b]
 
-            # Accumulate similarities between each post of user A and each post of user B
+            # accumulate similarities between each post of user A and each post of user B
             sim_scores = []
             for post_a in posts_a:
                 for post_b in posts_b:

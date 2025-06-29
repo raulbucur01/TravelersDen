@@ -39,8 +39,8 @@ def periodic_post_similarity_update_task():
 
 
 # Schedule the periodic similarity update
-scheduler.add_job(periodic_post_similarity_update_task, "interval", minutes=4)
-scheduler.add_job(periodic_user_similarity_update_task, "interval", minutes=3)
+scheduler.add_job(periodic_post_similarity_update_task, "interval", minutes=6)
+scheduler.add_job(periodic_user_similarity_update_task, "interval", minutes=7)
 
 
 @asynccontextmanager

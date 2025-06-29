@@ -55,8 +55,14 @@ namespace BackendAPI.Services
                 return randomPosts;
             }
 
-            var similarPosts = await _context.Posts
+            var posts = await _context.Posts
                 .Where(p => similarPostIds.Contains(p.PostId))
+                .ToListAsync();
+
+            // preserve the order of similarPostIds (most similar first)
+            var similarPosts = similarPostIds
+                .Select(id => posts.FirstOrDefault(p => p.PostId == id))
+                .Where(p => p != null)
                 .Select(p => new SimilarPostDTO
                 {
                     PostId = p.PostId,
@@ -66,11 +72,11 @@ namespace BackendAPI.Services
                     MediaUrls = p.Media.Select(m => new SimilarPostMediaDTO { Url = m.AppwriteFileUrl, Type = m.MediaType }).ToList(),
                     Location = p.Location,
                     Tags = p.Tags,
-                    CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"), // ISO 8601 format (you can adjust the format as needed)
+                    CreatedAt = p.CreatedAt.ToLocalTime().ToString("o"),
                     LikeCount = p.LikeCount,
                     IsItinerary = p.IsItinerary,
                 })
-                .ToListAsync();
+                .ToList();
 
             return similarPosts;
         }

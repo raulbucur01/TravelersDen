@@ -1,4 +1,5 @@
 import {
+  useDeleteGeneratedItinerary,
   useGetGeneratedItineraryById,
   useRegenerateDayActivities,
   useSaveGeneratedItineraryChanges,
@@ -30,6 +31,8 @@ const ItineraryEditor = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const { mutateAsync: deleteItinerary, isPending: isDeleting } =
+    useDeleteGeneratedItinerary();
   const { data: itinerary, isPending: isGettingItinerary } =
     useGetGeneratedItineraryById(id || "");
   const {
@@ -62,8 +65,9 @@ const ItineraryEditor = () => {
     return <div className="p-4 text-red-600">Itinerary not found.</div>;
 
   // done by parent
-  const handleDeleteItinerary = () => {
-    console.log("NOT IMPLEMENTED");
+  const handleDeleteItinerary = async () => {
+    await deleteItinerary(id!);
+    navigate("/itinerary-generator-dashboard");
   };
 
   const handleSaveChanges = async () => {
@@ -387,7 +391,10 @@ const ItineraryEditor = () => {
             >
               Turn Into Post
             </button>
-            <button className="w-[70%] px-4 py-2 bg-dm-red text-white rounded hover:bg-dm-red-2 mt-4">
+            <button
+              className="w-[70%] px-4 py-2 bg-dm-red text-white rounded hover:bg-dm-red-2 mt-4"
+              onClick={handleDeleteItinerary}
+            >
               Delete Itinerary
             </button>
           </div>

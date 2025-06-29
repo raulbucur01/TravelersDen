@@ -213,6 +213,8 @@ export type ProfileGridPost = {
   postId: string;
   firstMediaUrl: string;
   isItinerary: boolean;
+  caption: string;
+  body: string;
 };
 
 export type ProfileGridPostResponse = {

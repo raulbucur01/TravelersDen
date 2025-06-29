@@ -23,6 +23,7 @@ import ProtectedRoute from "./utilities/routing/ProtectedRoute";
 import { useUserContext } from "./context/AuthContext";
 import { useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
+import RecommendationPreview from "./_root/pages/RecommendationPreview";
 
 const App = () => {
   const location = useLocation();
@@ -58,6 +59,7 @@ const App = () => {
               </ProtectedRoute>
             }
           >
+            <Route path="/recomm-prev" element={<RecommendationPreview />} />
             <Route index element={<Home />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/saved" element={<Saved />} />

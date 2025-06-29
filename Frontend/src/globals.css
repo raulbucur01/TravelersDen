@@ -510,19 +510,25 @@ body {
   background-color: #659d8e !important;
 }
 
-@keyframes marquee {
-  0% {
-    transform: translateX(100%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee-scroll 10s linear infinite;
 }
 
-.animate-marquee {
-  display: inline-block;
+.marquee-content {
+  flex-shrink: 0;
+  padding-right: 4rem;
   white-space: nowrap;
-  animation: marquee 10s linear infinite;
+}
+
+@keyframes marquee-scroll {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .travel-logo {

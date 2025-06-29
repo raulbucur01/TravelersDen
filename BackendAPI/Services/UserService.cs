@@ -184,7 +184,9 @@ namespace BackendAPI.Services
                     FirstMediaUrl = p.Media
                         .Select(m => m.AppwriteFileUrl)
                         .FirstOrDefault(),
-                    IsItinerary = p.IsItinerary
+                    IsItinerary = p.IsItinerary,
+                    Caption = p.Caption,
+                    Body = p.Body
                 })
                 .ToListAsync();
 
@@ -328,8 +330,15 @@ namespace BackendAPI.Services
             // NOTE: FastAPI backend already sends user ids that are not the current user and not already followed by the current user,
             // but we still filter them here to ensure the that if a user followed another user after the FastAPI call,
             // they won't appear in the similar users list.
-            var similarUsers = await _context.Users
+            // Fetch all matching users first (unordered)
+            var users = await _context.Users
                 .Where(u => similarUserIds.Contains(u.UserId) && u.UserId != userId && !followedUserIds.Contains(u.UserId))
+                .ToListAsync();
+
+            // Reorder and map to DTOs
+            var similarUsers = similarUserIds
+                .Select(id => users.FirstOrDefault(u => u.UserId == id))
+                .Where(u => u != null)
                 .Select(u => new SimilarUserDTO
                 {
                     UserId = u.UserId,
@@ -339,17 +348,17 @@ namespace BackendAPI.Services
                     ImageUrl = u.ImageUrl,
                     Bio = u.Bio,
                     FollowedBy = _context.Follows
-                            .Where(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
-                            .Select(f => _context.Users
-                                .Where(us => us.UserId == f.UserIdFollowing)
-                                .Select(us => us.Username)
-                                .FirstOrDefault())
-                            .FirstOrDefault(),
+                        .Where(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
+                        .Select(f => _context.Users
+                            .Where(us => us.UserId == f.UserIdFollowing)
+                            .Select(us => us.Username)
+                            .FirstOrDefault())
+                        .FirstOrDefault(),
 
                     MutualCount = _context.Follows
-                             .Count(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
+                        .Count(f => f.UserIdFollowed == u.UserId && followedUserIds.Contains(f.UserIdFollowing))
                 })
-                .ToListAsync();
+                .ToList();
 
             return similarUsers;
         }

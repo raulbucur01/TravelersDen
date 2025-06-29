@@ -153,7 +153,7 @@ const PostDetails = () => {
                       "/assets/icons/profile-placeholder.svg"
                     }
                     alt="creator"
-                    className="lg:h-12 lg:w-12 w-8 h-8 rounded-full"
+                    className="lg:h-12 lg:w-12 w-8 h-8 rounded-full object-cover aspect-square"
                   />
 
                   <div className="flex flex-col">
