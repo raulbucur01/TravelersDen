@@ -72,7 +72,7 @@ One of the standout features of Traveler’s Den is the built-in **AI itinerary 
 
 ## 🧑‍💻 Author
 
-This project was created by [Raul-Paraschiv Bucur] as part of the Bachelor’s thesis in Informatics at Transylvania University From Brasov (2025).
+This project was created by Raul-Paraschiv Bucur as part of the Bachelor’s thesis in Informatics at Transylvania University From Brasov (2025).
 
 
 
